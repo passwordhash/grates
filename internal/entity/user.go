@@ -7,3 +7,8 @@ type User struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"-" db:"password_hash"`
 }
+
+func (u *User) IsEmtpty() bool {
+	var emptyUser User
+	return emptyUser == *u
+}

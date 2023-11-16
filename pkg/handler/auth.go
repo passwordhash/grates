@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"grates/internal/entity"
 	"net/http"
@@ -14,9 +15,15 @@ func (h *Handler) signUp(c *gin.Context) {
 		return
 	}
 
-	// TODO: проверка на существование пользователя с такими данными
+	user, err := h.services.GetUserByEmail(input.Email)
 
-	id, err := h.services.Authorization.CreateUser(input)
+	if !user.IsEmtpty() {
+		msg := fmt.Sprintf("user with email %s exists", user.Email)
+		newErrorResp(c, http.StatusBadRequest, msg)
+		return
+	}
+
+	id, err := h.services.User.CreateUser(input)
 	if err != nil {
 		newErrorResp(c, http.StatusInternalServerError, err.Error())
 		return
