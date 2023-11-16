@@ -3,7 +3,6 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"grates/internal/entity"
-	"log"
 	"net/http"
 )
 
@@ -11,8 +10,7 @@ func (h *Handler) signUp(c *gin.Context) {
 	var input entity.User
 
 	if err := c.BindJSON(&input); err != nil {
-		// TODO: custom response
-		log.Fatal("Json binidng error", err.Error())
+		newErrorResp(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
@@ -20,8 +18,7 @@ func (h *Handler) signUp(c *gin.Context) {
 
 	id, err := h.services.Authorization.CreateUser(input)
 	if err != nil {
-		// TODO: custom error
-		log.Fatal(err.Error())
+		newErrorResp(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
