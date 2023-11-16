@@ -12,6 +12,16 @@ import (
 	"os"
 )
 
+// @title Grates API
+// @version 1.0
+// @description API Server for Grates social network app
+
+// @contact.name   Yaroslav Molodcov
+// @contact.email  iam@it-yaroslav.ru
+
+// @host localhost:8000
+// @basePath /
+
 func main() {
 	//logrus.SetFormatter(new(logrus.JSONFormatter))
 

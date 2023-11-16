@@ -3,6 +3,11 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"grates/pkg/service"
+	"net/http"
+
+	"github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
+	_ "grates/docs"
 )
 
 type Handler struct {
@@ -15,6 +20,11 @@ func NewHandler(services *service.Service) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
+
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.GET("/swagger/*any", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/docs/index.html")
+	})
 
 	auth := router.Group("/auth")
 	{

@@ -3,10 +3,21 @@ package handler
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	_ "grates/docs"
 	"grates/internal/entity"
 	"net/http"
 )
 
+// @Summary SignUp
+// @Tags auth
+// @Description create account
+// @ID create-account
+// @Accept  json
+// @Produce  json
+// @Param input body entity.User true "account info"
+// @Success 200 {integer} integer 1
+// @Failure 400,404 {object} errorResponse
+// @Router /auth/sign-up [post]
 func (h *Handler) signUp(c *gin.Context) {
 	var input entity.User
 
