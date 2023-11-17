@@ -7,6 +7,7 @@ import (
 
 type User interface {
 	CreateUser(user entity.User) (int, error)
+	GetUser(email string, password string) (entity.User, error)
 	GetUserByEmail(email string) (entity.User, error)
 	GetAllUsers() ([]entity.User, error)
 }

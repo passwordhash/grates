@@ -9,6 +9,7 @@ type User interface {
 	CreateUser(user entity.User) (int, error)
 	GetUserByEmail(email string) (entity.User, error)
 	GetAllUsers() ([]entity.User, error)
+	AuthenticateUser(email string, password string) (string, error)
 }
 
 type Post interface {

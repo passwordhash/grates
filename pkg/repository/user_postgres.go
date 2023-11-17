@@ -14,7 +14,7 @@ func NewUserPostgres(db *sqlx.DB) *UserPostgres {
 	return &UserPostgres{db: db}
 }
 
-// CreateUser : при успешном срабатывании, возвращает id созданного пользователя
+// CreateUser при успешном срабатывании, возвращает id созданного пользователя
 func (r *UserPostgres) CreateUser(user entity.User) (int, error) {
 	var id int
 
@@ -27,6 +27,16 @@ func (r *UserPostgres) CreateUser(user entity.User) (int, error) {
 		return 0, err
 	}
 	return id, nil
+}
+
+// GetUser возвращает entity.User, если пользователь с такой почтой и паролем сущетсвует
+func (r *UserPostgres) GetUser(email, password string) (entity.User, error) {
+	var user entity.User
+
+	query := fmt.Sprintf("SELECT * FROM %s WHERE email=$1 AND password_hash=$2", usersTable)
+	err := r.db.Get(&user, query, email, password)
+
+	return user, err
 }
 
 // GetUserByEmail : возвращет пользователя
