@@ -58,7 +58,7 @@ type signInInput struct {
 // @Produce      json
 // @Param input body signInInput true "account credentials"
 // @Success      200  {string} string "token"
-// @Failure      400,401  {object}  errorResponse
+// @Failure      400,d401  {object}  errorResponse
 // @Router       /auth/sign-in [post]
 func (h *Handler) signIn(c *gin.Context) {
 	var input signInInput

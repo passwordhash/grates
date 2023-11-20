@@ -2,9 +2,9 @@ package service
 
 import (
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/sirupsen/logrus"
 	"grates/internal/entity"
 	"grates/pkg/repository"
 	"os"
@@ -26,7 +26,6 @@ func NewUserService(repo repository.User) *UserService {
 }
 
 func (s *UserService) CreateUser(user entity.User) (int, error) {
-	logrus.Info(user.Password)
 	user.Password = generatePasswordHash(user.Password)
 	return s.repo.CreateUser(user)
 }
@@ -53,6 +52,24 @@ type tokenClaims struct {
 	jwt.RegisteredClaims
 }
 
+func (s *UserService) ParseToken(accessToken string) (entity.User, error) {
+	var user entity.User
+
+	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("invalid siging method")
+		}
+		return []byte(s.sigingKey), nil
+	})
+
+	claims, ok := token.Claims.(*tokenClaims)
+	if !ok {
+		return user, errors.New("token claims are not of type *tokenClaims")
+	}
+
+	return claims.User, err
+}
+
 func (s *UserService) generateToken(user entity.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		tokenClaims{
@@ -62,7 +79,6 @@ func (s *UserService) generateToken(user entity.User) (string, error) {
 			},
 		},
 	)
-	logrus.Info(s.sigingKey)
 	return token.SignedString([]byte(s.sigingKey))
 }
 

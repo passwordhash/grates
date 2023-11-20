@@ -10,6 +10,7 @@ type User interface {
 	GetUserByEmail(email string) (entity.User, error)
 	GetAllUsers() ([]entity.User, error)
 	AuthenticateUser(email string, password string) (string, error)
+	ParseToken(token string) (entity.User, error)
 }
 
 type Post interface {
