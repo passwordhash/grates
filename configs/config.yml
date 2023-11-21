@@ -6,3 +6,6 @@ db:
   port: "54320"
   dbname: "postgres"
   sslmode: "disable"
+
+rdb:
+  addr: "localhost:6379"

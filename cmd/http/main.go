@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
@@ -33,7 +34,8 @@ func main() {
 		logrus.Fatalf("error initializing configs: %s", err.Error())
 	}
 
-	db, err := repository.NewPostgresDB(repository.Config{
+	// PosgtgreSQL connect
+	db, err := repository.NewPostgresDB(repository.PSQLConfig{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
@@ -43,9 +45,15 @@ func main() {
 	})
 	if err != nil {
 		logrus.Fatalf("failed to initialize db: %s", err.Error())
-	} else {
-		logrus.Info("Postgres DB Connected")
 	}
+	logrus.Info("Postgres DB Connected")
+
+	// Redis connect
+	rdb := repository.NewRedisDB(repository.RedisConfig{Addr: viper.GetString("addr")})
+	if _, err := rdb.Ping(context.Background()).Result(); err != nil {
+		logrus.Fatalf("failed to initialize redis db: %s", err.Error())
+	}
+	logrus.Info("Redis DB Connected")
 
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)

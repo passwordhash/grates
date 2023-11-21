@@ -76,6 +76,9 @@ func (s *UserService) newAccessToken(user domain.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		tokenClaims{
 			user,
+			jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenTTL)),
+			},
 		},
 	)
 	return token.SignedString([]byte(s.sigingKey))
