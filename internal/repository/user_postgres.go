@@ -2,20 +2,11 @@ package repository
 
 import (
 	"fmt"
-	"github.com/jmoiron/sqlx"
 	"grates/internal/domain"
 )
 
-type UserPostgres struct {
-	db *sqlx.DB
-}
-
-func NewUserPostgres(db *sqlx.DB) *UserPostgres {
-	return &UserPostgres{db: db}
-}
-
 // CreateUser при успешном срабатывании, возвращает id созданного пользователя
-func (r *UserPostgres) CreateUser(user domain.User) (int, error) {
+func (r *UserRepository) CreateUser(user domain.User) (int, error) {
 	var id int
 
 	query := fmt.Sprintf(`INSERT INTO %s (name, surname, email, password_hash)
@@ -30,7 +21,7 @@ func (r *UserPostgres) CreateUser(user domain.User) (int, error) {
 }
 
 // GetUser возвращает domain.User, если пользователь с такой почтой и паролем сущетсвует
-func (r *UserPostgres) GetUser(email, password string) (domain.User, error) {
+func (r *UserRepository) GetUser(email, password string) (domain.User, error) {
 	var user domain.User
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE email=$1 AND password_hash=$2", usersTable)
@@ -39,8 +30,17 @@ func (r *UserPostgres) GetUser(email, password string) (domain.User, error) {
 	return user, err
 }
 
+func (r *UserRepository) GetUserById(id int) (domain.User, error) {
+	var user domain.User
+
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1;", usersTable)
+	err := r.db.Get(&user, query, id)
+
+	return user, err
+}
+
 // GetUserByEmail : возвращет пользователя
-func (r *UserPostgres) GetUserByEmail(email string) (domain.User, error) {
+func (r *UserRepository) GetUserByEmail(email string) (domain.User, error) {
 	var user domain.User
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE email=$1;", usersTable)
@@ -49,7 +49,7 @@ func (r *UserPostgres) GetUserByEmail(email string) (domain.User, error) {
 	return user, err
 }
 
-func (r *UserPostgres) GetAllUsers() ([]domain.User, error) {
+func (r *UserRepository) GetAllUsers() ([]domain.User, error) {
 	var users []domain.User
 
 	query := fmt.Sprintf("SELECT * FROM %s;",

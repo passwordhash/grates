@@ -8,23 +8,29 @@ import (
 	"grates/internal/domain"
 	"grates/internal/repository"
 	"math/rand"
-
-	"os"
 	"time"
 )
 
 const (
-	salt     = "hjqrhjqw124617ajfhajs"
-	tokenTTL = 12 * time.Hour
+	// TODO: remove!
+	salt = "hjqrhjqw124617ajfhajs"
 )
 
 type UserService struct {
 	repo      repository.User
 	sigingKey string
+
+	accessTokenTTL  time.Duration
+	refreshTokenTTL time.Duration
 }
 
-func NewUserService(repo repository.User) *UserService {
-	return &UserService{repo: repo, sigingKey: os.Getenv("JWT_SIGING_KEY")}
+func NewUserService(repo repository.User, sigingKey string, accessTokenTTL, refreshTokenTTL time.Duration) *UserService {
+	return &UserService{
+		repo:            repo,
+		sigingKey:       sigingKey,
+		accessTokenTTL:  accessTokenTTL,
+		refreshTokenTTL: refreshTokenTTL,
+	}
 }
 
 func (s *UserService) CreateUser(user domain.User) (int, error) {
@@ -32,13 +38,65 @@ func (s *UserService) CreateUser(user domain.User) (int, error) {
 	return s.repo.CreateUser(user)
 }
 
-func (s *UserService) AuthenticateUser(email string, password string) (string, error) {
+type Tokens struct {
+	Access  string
+	Refresh string
+}
+
+func (s *UserService) AuthenticateUser(email, password string) (Tokens, error) {
+	var (
+		tokens Tokens
+		err    error
+	)
+
 	user, err := s.repo.GetUser(email, generatePasswordHash(password))
 	if err != nil {
-		return "", err
+		return tokens, err
 	}
 
-	return s.newAccessToken(user)
+	return s.GenerateTokens(user)
+}
+
+func (s *UserService) GenerateTokens(user domain.User) (Tokens, error) {
+	var (
+		tokens Tokens
+		err    error
+	)
+
+	tokens.Access, err = s.newAccessToken(user)
+	if err != nil {
+		return tokens, err
+	}
+
+	tokens.Refresh, err = s.newRefreshToken()
+	if err != nil {
+		return tokens, nil
+	}
+
+	err = s.repo.SaveRefreshToken(user.Id, domain.Session{
+		RefreshToken: tokens.Refresh,
+		//ExpiresAt:    time.Now().Add(s.refreshTokenTTL),
+		TTL: s.refreshTokenTTL,
+	})
+	if err != nil {
+		return Tokens{}, err
+	}
+
+	return tokens, err
+}
+
+func (s *UserService) RefreshTokens(refreshToken string) (Tokens, error) {
+	userId, err := s.repo.GetUserIdByToken(refreshToken)
+	if err != nil {
+		return Tokens{}, err
+	}
+
+	user, err := s.repo.GetUserById(userId)
+	if err != nil {
+		return Tokens{}, err
+	}
+
+	return s.GenerateTokens(user)
 }
 
 func (s *UserService) GetUserByEmail(email string) (domain.User, error) {
@@ -55,8 +113,6 @@ type tokenClaims struct {
 }
 
 func (s *UserService) ParseToken(accessToken string) (domain.User, error) {
-	var user domain.User
-
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid siging method")
@@ -66,7 +122,7 @@ func (s *UserService) ParseToken(accessToken string) (domain.User, error) {
 
 	claims, ok := token.Claims.(*tokenClaims)
 	if !ok {
-		return user, errors.New("token claims are not of type *tokenClaims")
+		return domain.User{}, errors.New("token claims are not of type *tokenClaims")
 	}
 
 	return claims.User, err
@@ -77,7 +133,7 @@ func (s *UserService) newAccessToken(user domain.User) (string, error) {
 		tokenClaims{
 			user,
 			jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenTTL)),
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.accessTokenTTL)),
 			},
 		},
 	)

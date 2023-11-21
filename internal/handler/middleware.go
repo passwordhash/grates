@@ -34,5 +34,6 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		newResponse(c, http.StatusUnauthorized, err.Error())
 		return
 	}
+
 	c.Set(userCtx, user)
 }

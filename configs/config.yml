@@ -9,3 +9,7 @@ db:
 
 rdb:
   addr: "localhost:6379"
+
+auth:
+  accessTokenTTL: 1m
+  refreshTokenTTL: 2m

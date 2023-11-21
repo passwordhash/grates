@@ -55,8 +55,12 @@ func main() {
 	}
 	logrus.Info("Redis DB Connected")
 
-	repos := repository.NewRepository(db)
-	services := service.NewService(repos)
+	repos := repository.NewRepository(db, rdb)
+	services := service.NewService(repos, service.Deps{
+		SigingKey:       os.Getenv("JWT_SIGING_KEY"),
+		AccessTokenTTL:  viper.GetDuration("auth.accessTokenTTL"),
+		RefreshTokenTTL: viper.GetDuration("auth.refreshTokenTTL"),
+	})
 	handlers := handler.NewHandler(services)
 
 	srv := new(server.Server)
