@@ -22,7 +22,7 @@ func (h *Handler) signUp(c *gin.Context) {
 	var input domain.User
 
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResp(c, http.StatusBadRequest, "invalid input body")
+		newResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
@@ -30,13 +30,13 @@ func (h *Handler) signUp(c *gin.Context) {
 
 	if !user.IsEmtpty() {
 		msg := fmt.Sprintf("user with email %s exists", user.Email)
-		newErrorResp(c, http.StatusBadRequest, msg)
+		newResponse(c, http.StatusBadRequest, msg)
 		return
 	}
 
 	id, err := h.services.User.CreateUser(input)
 	if err != nil {
-		newErrorResp(c, http.StatusInternalServerError, err.Error())
+		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -64,13 +64,13 @@ func (h *Handler) signIn(c *gin.Context) {
 	var input signInInput
 
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResp(c, http.StatusBadRequest, fmt.Sprintf("bad auth credentials: %s", err.Error()))
+		newResponse(c, http.StatusBadRequest, fmt.Sprintf("bad auth credentials: %s", err.Error()))
 		return
 	}
 
 	token, err := h.services.AuthenticateUser(input.Email, input.Password)
 	if err != nil {
-		newErrorResp(c, http.StatusUnauthorized, fmt.Sprintf("invalid auth credentials: %s", err.Error()))
+		newResponse(c, http.StatusUnauthorized, fmt.Sprintf("invalid auth credentials: %s", err.Error()))
 		return
 	}
 

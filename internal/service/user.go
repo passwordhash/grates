@@ -7,6 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"grates/internal/domain"
 	"grates/internal/repository"
+	"math/rand"
 
 	"os"
 	"time"
@@ -37,7 +38,7 @@ func (s *UserService) AuthenticateUser(email string, password string) (string, e
 		return "", err
 	}
 
-	return s.generateToken(user)
+	return s.newAccessToken(user)
 }
 
 func (s *UserService) GetUserByEmail(email string) (domain.User, error) {
@@ -71,16 +72,26 @@ func (s *UserService) ParseToken(accessToken string) (domain.User, error) {
 	return claims.User, err
 }
 
-func (s *UserService) generateToken(user domain.User) (string, error) {
+func (s *UserService) newAccessToken(user domain.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		tokenClaims{
 			user,
-			jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenTTL)),
-			},
 		},
 	)
 	return token.SignedString([]byte(s.sigingKey))
+}
+
+func (s *UserService) newRefreshToken() (string, error) {
+	b := make([]byte, 32)
+
+	src := rand.NewSource(time.Now().Unix())
+	r := rand.New(src)
+
+	_, err := r.Read(b)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%x", b), nil
 }
 
 func generatePasswordHash(password string) string {
