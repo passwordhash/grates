@@ -5,8 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
-	"grates/internal/entity"
-	"grates/pkg/repository"
+	"grates/internal/domain"
+	"grates/internal/repository"
+
 	"os"
 	"time"
 )
@@ -25,7 +26,7 @@ func NewUserService(repo repository.User) *UserService {
 	return &UserService{repo: repo, sigingKey: os.Getenv("JWT_SIGING_KEY")}
 }
 
-func (s *UserService) CreateUser(user entity.User) (int, error) {
+func (s *UserService) CreateUser(user domain.User) (int, error) {
 	user.Password = generatePasswordHash(user.Password)
 	return s.repo.CreateUser(user)
 }
@@ -39,21 +40,21 @@ func (s *UserService) AuthenticateUser(email string, password string) (string, e
 	return s.generateToken(user)
 }
 
-func (s *UserService) GetUserByEmail(email string) (entity.User, error) {
+func (s *UserService) GetUserByEmail(email string) (domain.User, error) {
 	return s.repo.GetUserByEmail(email)
 }
 
-func (s *UserService) GetAllUsers() ([]entity.User, error) {
+func (s *UserService) GetAllUsers() ([]domain.User, error) {
 	return s.repo.GetAllUsers()
 }
 
 type tokenClaims struct {
-	User entity.User `json:"user"`
+	User domain.User `json:"user"`
 	jwt.RegisteredClaims
 }
 
-func (s *UserService) ParseToken(accessToken string) (entity.User, error) {
-	var user entity.User
+func (s *UserService) ParseToken(accessToken string) (domain.User, error) {
+	var user domain.User
 
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -70,7 +71,7 @@ func (s *UserService) ParseToken(accessToken string) (entity.User, error) {
 	return claims.User, err
 }
 
-func (s *UserService) generateToken(user entity.User) (string, error) {
+func (s *UserService) generateToken(user domain.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		tokenClaims{
 			user,

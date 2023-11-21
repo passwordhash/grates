@@ -3,7 +3,7 @@ package repository
 import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
-	"grates/internal/entity"
+	"grates/internal/domain"
 )
 
 type UserPostgres struct {
@@ -15,7 +15,7 @@ func NewUserPostgres(db *sqlx.DB) *UserPostgres {
 }
 
 // CreateUser при успешном срабатывании, возвращает id созданного пользователя
-func (r *UserPostgres) CreateUser(user entity.User) (int, error) {
+func (r *UserPostgres) CreateUser(user domain.User) (int, error) {
 	var id int
 
 	query := fmt.Sprintf(`INSERT INTO %s (name, surname, email, password_hash)
@@ -29,9 +29,9 @@ func (r *UserPostgres) CreateUser(user entity.User) (int, error) {
 	return id, nil
 }
 
-// GetUser возвращает entity.User, если пользователь с такой почтой и паролем сущетсвует
-func (r *UserPostgres) GetUser(email, password string) (entity.User, error) {
-	var user entity.User
+// GetUser возвращает domain.User, если пользователь с такой почтой и паролем сущетсвует
+func (r *UserPostgres) GetUser(email, password string) (domain.User, error) {
+	var user domain.User
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE email=$1 AND password_hash=$2", usersTable)
 	err := r.db.Get(&user, query, email, password)
@@ -40,8 +40,8 @@ func (r *UserPostgres) GetUser(email, password string) (entity.User, error) {
 }
 
 // GetUserByEmail : возвращет пользователя
-func (r *UserPostgres) GetUserByEmail(email string) (entity.User, error) {
-	var user entity.User
+func (r *UserPostgres) GetUserByEmail(email string) (domain.User, error) {
+	var user domain.User
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE email=$1;", usersTable)
 	err := r.db.Get(&user, query, email)
@@ -49,8 +49,8 @@ func (r *UserPostgres) GetUserByEmail(email string) (entity.User, error) {
 	return user, err
 }
 
-func (r *UserPostgres) GetAllUsers() ([]entity.User, error) {
-	var users []entity.User
+func (r *UserPostgres) GetAllUsers() ([]domain.User, error) {
+	var users []domain.User
 
 	query := fmt.Sprintf("SELECT * FROM %s;",
 		usersTable)

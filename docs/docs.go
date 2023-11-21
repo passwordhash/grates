@@ -86,7 +86,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.User"
+                            "$ref": "#/definitions/domain.User"
                         }
                     }
                 ],
@@ -114,7 +114,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "entity.User": {
+        "domain.User": {
             "type": "object",
             "required": [
                 "email",

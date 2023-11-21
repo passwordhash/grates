@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	_ "grates/docs"
-	"grates/internal/entity"
+	"grates/internal/domain"
 	"net/http"
 )
 
@@ -14,12 +14,12 @@ import (
 // @ID create-account
 // @Accept  json
 // @Produce  json
-// @Param input body entity.User true "account info"
+// @Param input body domain.User true "account info"
 // @Success 200 {integer} integer 1
 // @Failure 400,404 {object} errorResponse
 // @Router /auth/sign-up [post]
 func (h *Handler) signUp(c *gin.Context) {
-	var input entity.User
+	var input domain.User
 
 	if err := c.BindJSON(&input); err != nil {
 		newErrorResp(c, http.StatusBadRequest, "invalid input body")

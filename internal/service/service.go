@@ -1,16 +1,16 @@
 package service
 
 import (
-	"grates/internal/entity"
-	"grates/pkg/repository"
+	"grates/internal/domain"
+	"grates/internal/repository"
 )
 
 type User interface {
-	CreateUser(user entity.User) (int, error)
-	GetUserByEmail(email string) (entity.User, error)
-	GetAllUsers() ([]entity.User, error)
+	CreateUser(user domain.User) (int, error)
+	GetUserByEmail(email string) (domain.User, error)
+	GetAllUsers() ([]domain.User, error)
 	AuthenticateUser(email string, password string) (string, error)
-	ParseToken(token string) (entity.User, error)
+	ParseToken(token string) (domain.User, error)
 }
 
 type Post interface {

@@ -5,10 +5,10 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"grates/internal/server"
-	"grates/pkg/handler"
-	"grates/pkg/repository"
-	"grates/pkg/service"
+	"grates/internal/handler"
+	"grates/internal/repository"
+	"grates/internal/service"
+	"grates/pkg/server"
 	"os"
 )
 

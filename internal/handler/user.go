@@ -2,13 +2,13 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"grates/internal/entity"
+	"grates/internal/domain"
 	"log"
 	"net/http"
 )
 
 func (h *Handler) getAllUsers(c *gin.Context) {
-	//var users []entity.User
+	//var users []domain.User
 
 	users, err := h.services.GetAllUsers()
 	if err != nil {
@@ -16,7 +16,7 @@ func (h *Handler) getAllUsers(c *gin.Context) {
 		log.Fatal("get all users error", err.Error())
 	}
 
-	c.JSON(http.StatusOK, map[string][]entity.User{
+	c.JSON(http.StatusOK, map[string][]domain.User{
 		"users": users,
 	})
 }

@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"grates/pkg/service"
+	"grates/internal/service"
 	"net/http"
 
 	"github.com/swaggo/files"

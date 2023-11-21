@@ -2,14 +2,14 @@ package repository
 
 import (
 	"github.com/jmoiron/sqlx"
-	"grates/internal/entity"
+	"grates/internal/domain"
 )
 
 type User interface {
-	CreateUser(user entity.User) (int, error)
-	GetUser(email string, password string) (entity.User, error)
-	GetUserByEmail(email string) (entity.User, error)
-	GetAllUsers() ([]entity.User, error)
+	CreateUser(user domain.User) (int, error)
+	GetUser(email string, password string) (domain.User, error)
+	GetUserByEmail(email string) (domain.User, error)
+	GetAllUsers() ([]domain.User, error)
 }
 
 type Post interface {
