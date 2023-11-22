@@ -91,17 +91,16 @@ type refreshInput struct {
 	RefreshToken string `json:"refreshToken" binding:"required"`
 }
 
-// TODO: дописать
-// @Summary SignIn
+// @Summary RefreshTokens
 // @Tags auth
-// @Description authenticate account
-// @ID login-account
+// @Description refresh access and refresh tokens
+// @ID refresh-tokens
 // @Accept       json
 // @Produce      json
-// @Param input body signInInput true "account credentials"
+// @Param input body refreshInput true "refresh token"
 // @Success      200  {object} signInResponse "tokens"
 // @Failure      400,401  {object}  errorResponse
-// @Router       /auth/sign-in [post]
+// @Router       /auth/refresh [post]
 func (h *Handler) refreshTokens(c *gin.Context) {
 	var input refreshInput
 	if err := c.Bind(&input); err != nil {
@@ -111,7 +110,7 @@ func (h *Handler) refreshTokens(c *gin.Context) {
 
 	tokens, err := h.services.RefreshTokens(input.RefreshToken)
 	if err != nil {
-		newResponse(c, http.StatusBadRequest, err.Error())
+		newResponse(c, http.StatusBadRequest, fmt.Sprintf("refresh token in invalid: %s", err.Error()))
 		return
 	}
 

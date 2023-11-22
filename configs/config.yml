@@ -11,5 +11,5 @@ rdb:
   addr: "localhost:6379"
 
 auth:
-  accessTokenTTL: 1m
-  refreshTokenTTL: 2m
+  accessTokenTTL: 10m
+  refreshTokenTTL: 30m
