@@ -18,6 +18,9 @@ type User interface {
 }
 
 type Post interface {
+	CreatePost(post domain.Post) (int, error)
+	GetPost(postId int) (domain.Post, error)
+	GetUsersPosts(postId int) ([]domain.Post, error)
 }
 
 type Comment interface {
@@ -25,11 +28,13 @@ type Comment interface {
 
 type Repository struct {
 	User *UserRepository
+	Post *PostRepository
 }
 
 func NewRepository(db *sqlx.DB, rdb *redis.Client) *Repository {
 	return &Repository{
 		User: NewUserRepository(db, rdb),
+		Post: NewPostPostgres(db),
 	}
 }
 

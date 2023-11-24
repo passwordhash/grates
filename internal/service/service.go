@@ -17,6 +17,9 @@ type User interface {
 }
 
 type Post interface {
+	CreatePost(post domain.Post) (int, error)
+	GetPost(postId int) (domain.Post, error)
+	GetUsersPosts(userId int) ([]domain.Post, error)
 }
 
 type Comment interface {
@@ -24,6 +27,7 @@ type Comment interface {
 
 type Service struct {
 	User
+	Post
 }
 
 type Deps struct {
@@ -36,5 +40,6 @@ type Deps struct {
 func NewService(repos *repository.Repository, deps Deps) *Service {
 	return &Service{
 		User: NewUserService(repos.User, deps.SigingKey, deps.AccessTokenTTL, deps.RefreshTokenTTL),
+		Post: NewPostService(repos.Post),
 	}
 }

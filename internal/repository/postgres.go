@@ -15,6 +15,7 @@ type PSQLConfig struct {
 }
 
 const usersTable = "users"
+const postsTable = "posts"
 
 func NewPostgresDB(cfg PSQLConfig) (*sqlx.DB, error) {
 	db, err := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
