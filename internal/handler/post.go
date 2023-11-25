@@ -3,7 +3,6 @@ package handler
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"grates/internal/domain"
 	"net/http"
 	"strconv"
@@ -84,7 +83,6 @@ type usersPostsResponse struct {
 func (h *Handler) getUsersPosts(c *gin.Context) {
 	var posts []domain.Post
 	v := c.Param("userId")
-	logrus.Info(v)
 
 	userId, err := strconv.Atoi(v)
 	if err != nil {
@@ -101,4 +99,50 @@ func (h *Handler) getUsersPosts(c *gin.Context) {
 		posts,
 		len(posts),
 	})
+}
+
+type updatePostInput struct {
+	Title   string `json:"title"`
+	Content string `json:"content"`
+}
+
+// @Summary UpdatePost
+// @Param input body updatePostInput true "new post data"
+// @Router /api/posts [put]
+func (h *Handler) updatePost(c *gin.Context) {
+	var input updatePostInput
+
+	if err := c.BindJSON(&input); err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid input data")
+		return
+	}
+
+}
+
+// @Sammary DeletePost
+// @Security ApiKeyAuth
+// @Tags posts
+// @Description Delete post by id
+// @ID delete-post
+// @Accept json
+// @Produce json
+// @Param id path int true "post id"
+// @Success 200 {string} status "ok"
+// @Failure 400,500 {object} errorResponse
+// @Router /api/posts/{id} [delete]
+func (h *Handler) deletePost(c *gin.Context) {
+	v := c.Param("id")
+
+	id, err := strconv.Atoi(v)
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid path variable value")
+		return
+	}
+
+	if err := h.services.DeletePost(id); err != nil {
+		newResponse(c, http.StatusInternalServerError, "post hasn't been deleted")
+		return
+	}
+
+	c.JSON(http.StatusOK, "ok")
 }

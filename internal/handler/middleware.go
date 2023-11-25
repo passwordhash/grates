@@ -2,7 +2,6 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
 )
@@ -14,7 +13,7 @@ const (
 
 func (h *Handler) userIdentity(c *gin.Context) {
 	header := c.GetHeader(authorizationHeader)
-	logrus.Info(header)
+
 	if header == "" {
 		newResponse(c, http.StatusUnauthorized, "auth header is empty")
 		return

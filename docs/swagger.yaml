@@ -70,6 +70,13 @@ definitions:
       refreshToken:
         type: string
     type: object
+  handler.updatePostInput:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+    type: object
   handler.usersPostsResponse:
     properties:
       count:
@@ -122,6 +129,47 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: CreatePost
+      tags:
+      - posts
+    put:
+      parameters:
+      - description: new post data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handler.updatePostInput'
+      responses: {}
+      summary: UpdatePost
+  /api/posts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete post by id
+      operationId: delete-post
+      parameters:
+      - description: post id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
       tags:
       - posts
   /api/posts/{userId}:

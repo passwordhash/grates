@@ -25,3 +25,12 @@ func (p *PostService) GetPost(postId int) (domain.Post, error) {
 func (p *PostService) GetUsersPosts(userId int) ([]domain.Post, error) {
 	return p.repo.GetUsersPosts(userId)
 }
+
+func (p *PostService) UpdatePost(newPost domain.Post) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p *PostService) DeletePost(id int) error {
+	return p.repo.DeletePostById(id)
+}

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"grates/internal/domain"
@@ -38,4 +39,25 @@ func (p *PostRepository) GetUsersPosts(postId int) ([]domain.Post, error) {
 
 func NewPostPostgres(db *sqlx.DB) *PostRepository {
 	return &PostRepository{db: db}
+}
+
+func (p *PostRepository) DeletePostById(postId int) error {
+	query := fmt.Sprintf("DELETE FROM %s WHERE id=$1;", postsTable)
+	res, err := p.db.Exec(query, postId)
+	if err != nil {
+		return err
+	}
+
+	// Проверяем удалились дли строки
+	count, err := res.RowsAffected()
+	if err != nil || count == 0 {
+		return errors.New("no rows haven't been deleted")
+	}
+
+	return nil
+}
+
+func (p *PostRepository) UpdatePost(newPost domain.Post) error {
+	//TODO implement me
+	panic("implement me")
 }

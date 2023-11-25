@@ -21,6 +21,8 @@ type Post interface {
 	CreatePost(post domain.Post) (int, error)
 	GetPost(postId int) (domain.Post, error)
 	GetUsersPosts(postId int) ([]domain.Post, error)
+	UpdatePost(newPost domain.Post) error
+	DeletePostById(id int) error
 }
 
 type Comment interface {
