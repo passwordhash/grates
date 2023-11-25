@@ -43,8 +43,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		posts := api.Group("/posts")
 		{
 			posts.POST("/", h.createPost)
-			posts.GET("/:userId", h.getUsersPosts)
-			posts.PUT("/", h.getUsersPosts)
+			posts.GET("/users/:userId", h.getUsersPosts)
+			posts.PUT("/:id", h.updatePost)
 			posts.DELETE("/:id", h.deletePost)
 		}
 	}

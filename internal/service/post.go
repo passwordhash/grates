@@ -13,11 +13,11 @@ func NewPostService(repo repository.Post) *PostService {
 	return &PostService{repo: repo}
 }
 
-func (p *PostService) CreatePost(post domain.Post) (int, error) {
-	return p.repo.CreatePost(post)
+func (p *PostService) Create(post domain.Post) (int, error) {
+	return p.repo.Create(post)
 }
 
-func (p *PostService) GetPost(postId int) (domain.Post, error) {
+func (p *PostService) Get(postId int) (domain.Post, error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -26,11 +26,10 @@ func (p *PostService) GetUsersPosts(userId int) ([]domain.Post, error) {
 	return p.repo.GetUsersPosts(userId)
 }
 
-func (p *PostService) UpdatePost(newPost domain.Post) error {
-	//TODO implement me
-	panic("implement me")
+func (p *PostService) Update(id int, newPost domain.PostUpdateInput) error {
+	return p.repo.Update(id, newPost)
 }
 
-func (p *PostService) DeletePost(id int) error {
-	return p.repo.DeletePostById(id)
+func (p *PostService) Delete(id int) error {
+	return p.repo.Delete(id)
 }

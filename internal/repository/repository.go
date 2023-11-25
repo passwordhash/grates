@@ -18,11 +18,10 @@ type User interface {
 }
 
 type Post interface {
-	CreatePost(post domain.Post) (int, error)
-	GetPost(postId int) (domain.Post, error)
+	Create(post domain.Post) (int, error)
 	GetUsersPosts(postId int) ([]domain.Post, error)
-	UpdatePost(newPost domain.Post) error
-	DeletePostById(id int) error
+	Update(id int, newPost domain.PostUpdateInput) error
+	Delete(id int) error
 }
 
 type Comment interface {

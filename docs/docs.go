@@ -20,7 +20,7 @@ const docTemplate = `{
     "paths": {
         "/api/posts": {
             "put": {
-                "summary": "UpdatePost",
+                "summary": "Update",
                 "parameters": [
                     {
                         "description": "new post data",
@@ -50,7 +50,7 @@ const docTemplate = `{
                 "tags": [
                     "posts"
                 ],
-                "summary": "CreatePost",
+                "summary": "Create",
                 "operationId": "create-post",
                 "parameters": [
                     {

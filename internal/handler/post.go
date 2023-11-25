@@ -13,7 +13,7 @@ type createPostInput struct {
 	Content string `json:"content"`
 }
 
-// @Summary CreatePost
+// @Summary Create
 // @Security ApiKeyAuth
 // @Tags posts
 // @Description Create new post
@@ -48,7 +48,7 @@ func (h *Handler) createPost(c *gin.Context) {
 		UsersId: user.Id,
 	}
 
-	postId, err := h.services.CreatePost(post)
+	postId, err := h.services.Create(post)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("create post error: %s", err.Error()))
 		return
@@ -59,7 +59,7 @@ func (h *Handler) createPost(c *gin.Context) {
 	})
 }
 
-// @Summary GetPost
+// @Summary Get
 func (h *Handler) getPost(c *gin.Context) {
 
 }
@@ -79,7 +79,7 @@ type usersPostsResponse struct {
 // @Param userId path int true "user's id"
 // @Success 200 {object} usersPostsResponse "post info"
 // @Failure 400,500 {object} errorResponse
-// @Router /api/posts/{userId} [get]
+// @Router /api/posts/users/{userId} [get]
 func (h *Handler) getUsersPosts(c *gin.Context) {
 	var posts []domain.Post
 	v := c.Param("userId")
@@ -101,25 +101,44 @@ func (h *Handler) getUsersPosts(c *gin.Context) {
 	})
 }
 
-type updatePostInput struct {
-	Title   string `json:"title"`
-	Content string `json:"content"`
-}
-
-// @Summary UpdatePost
-// @Param input body updatePostInput true "new post data"
-// @Router /api/posts [put]
+// @Summary Update
+// @Security ApiKeyAuth
+// @Tags posts
+// @Description Update post body
+// @ID update-post
+// @Accept json
+// @Produce json
+// @Param input body domain.PostUpdateInput true "new post data"
+// @Param id path updatePostInput true "post id"
+// @Success 200 {object} statusResponse "ok"
+// @Failure 400,500 {object} errorResponse
+// @Router /api/posts/{id} [put]
 func (h *Handler) updatePost(c *gin.Context) {
-	var input updatePostInput
+	var input domain.PostUpdateInput
+	var postId int
+
+	v := c.Param("id")
+	postId, err := strconv.Atoi(v)
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid path variable data")
+		return
+	}
 
 	if err := c.BindJSON(&input); err != nil {
 		newResponse(c, http.StatusBadRequest, "invalid input data")
 		return
 	}
 
+	if err := h.services.Update(postId, input); err != nil {
+		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("update post error: %s", err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, statusResponse{"ok"})
+
 }
 
-// @Sammary DeletePost
+// @Sammary Delete
 // @Security ApiKeyAuth
 // @Tags posts
 // @Description Delete post by id
@@ -139,10 +158,10 @@ func (h *Handler) deletePost(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.DeletePost(id); err != nil {
-		newResponse(c, http.StatusInternalServerError, "post hasn't been deleted")
+	if err := h.services.Delete(id); err != nil {
+		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("delete post error: %s", err.Error()))
 		return
 	}
 
-	c.JSON(http.StatusOK, "ok")
+	c.JSON(http.StatusOK, statusResponse{"ok"})
 }
