@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"grates/internal/domain"
 	"net/http"
 	"strconv"
@@ -14,8 +15,16 @@ type createPostInput struct {
 }
 
 // @Summary CreatePost
+// @Security ApiKeyAuth
+// @Tags posts
+// @Description Create new post
+// @ID create-post
+// @Accept json
+// @Produce json
+// @Param input body createPostInput true "post info"
 // @Success 200 {integer} postId
 // @Failure 400,401,500 {object} errorResponse
+// @Router /api/posts [post]
 func (h *Handler) createPost(c *gin.Context) {
 	var user domain.User
 	var post domain.Post
@@ -62,10 +71,20 @@ type usersPostsResponse struct {
 }
 
 // @Summary GetUsersPosts
-// @Param userId path integer true "user's id"
+// @Security ApiKeyAuth
+// @Tags posts
+// @Description Get user's posts
+// @ID users-posts
+// @Accept json
+// @Produce json
+// @Param userId path int true "user's id"
+// @Success 200 {object} usersPostsResponse "post info"
+// @Failure 400,500 {object} errorResponse
+// @Router /api/posts/{userId} [get]
 func (h *Handler) getUsersPosts(c *gin.Context) {
 	var posts []domain.Post
 	v := c.Param("userId")
+	logrus.Info(v)
 
 	userId, err := strconv.Atoi(v)
 	if err != nil {

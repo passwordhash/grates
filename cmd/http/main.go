@@ -2,13 +2,16 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"grates/docs"
 	"grates/internal/handler"
 	"grates/internal/repository"
 	"grates/internal/service"
+	"grates/pkg/app"
 	"grates/pkg/server"
 	"os"
 )
@@ -20,8 +23,11 @@ import (
 // @contact.name   Yaroslav Molodcov
 // @contact.email  iam@it-yaroslav.ru
 
-// @host localhost:8000
 // @basePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 
 func main() {
 	//logrus.SetFormatter(new(logrus.JSONFormatter))
@@ -30,9 +36,11 @@ func main() {
 		logrus.Fatalf("error loading env vars: %s", err.Error())
 	}
 
-	if err := initConfig(); err != nil {
+	if err := app.InitConfig(); err != nil {
 		logrus.Fatalf("error initializing configs: %s", err.Error())
 	}
+
+	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%s", viper.GetString("host"), viper.GetString("port"))
 
 	// PosgtgreSQL connect
 	db, err := repository.NewPostgresDB(repository.PSQLConfig{
@@ -47,6 +55,7 @@ func main() {
 		logrus.Fatalf("failed to initialize db: %s", err.Error())
 	}
 	logrus.Info("Postgres DB Connected")
+	defer func() { db.Close() }()
 
 	// Redis connect
 	rdb := repository.NewRedisDB(repository.RedisConfig{Addr: viper.GetString("addr")})
@@ -54,6 +63,7 @@ func main() {
 		logrus.Fatalf("failed to initialize redis db: %s", err.Error())
 	}
 	logrus.Info("Redis DB Connected")
+	defer func() { rdb.Close() }()
 
 	repos := repository.NewRepository(db, rdb)
 	services := service.NewService(repos, service.Deps{
@@ -69,10 +79,4 @@ func main() {
 	}
 
 	logrus.Info("Grates Server Started")
-}
-
-func initConfig() error {
-	viper.AddConfigPath("configs")
-	viper.SetConfigName("config")
-	return viper.ReadInConfig()
 }
