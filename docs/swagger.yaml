@@ -18,6 +18,13 @@ definitions:
     - id
     - users-id
     type: object
+  domain.PostUpdateInput:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+    type: object
   domain.User:
     properties:
       email:
@@ -70,11 +77,9 @@ definitions:
       refreshToken:
         type: string
     type: object
-  handler.updatePostInput:
+  handler.statusResponse:
     properties:
-      content:
-        type: string
-      title:
+      status:
         type: string
     type: object
   handler.usersPostsResponse:
@@ -128,19 +133,9 @@ paths:
             $ref: '#/definitions/handler.errorResponse'
       security:
       - ApiKeyAuth: []
-      summary: CreatePost
+      summary: Create
       tags:
       - posts
-    put:
-      parameters:
-      - description: new post data
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/handler.updatePostInput'
-      responses: {}
-      summary: UpdatePost
   /api/posts/{id}:
     delete:
       consumes:
@@ -172,7 +167,44 @@ paths:
       - ApiKeyAuth: []
       tags:
       - posts
-  /api/posts/{userId}:
+    put:
+      consumes:
+      - application/json
+      description: Update post body
+      operationId: update-post
+      parameters:
+      - description: new post data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.PostUpdateInput'
+      - description: post id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update
+      tags:
+      - posts
+  /api/posts/users/{userId}:
     get:
       consumes:
       - application/json
