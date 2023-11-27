@@ -205,7 +205,7 @@ paths:
       tags:
       - posts
   /api/posts/users/{userId}:
-    get:
+    patch:
       consumes:
       - application/json
       description: Get user's posts

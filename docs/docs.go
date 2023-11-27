@@ -77,7 +77,7 @@ const docTemplate = `{
             }
         },
         "/api/posts/users/{userId}": {
-            "get": {
+            "patch": {
                 "security": [
                     {
                         "ApiKeyAuth": []
