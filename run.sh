@@ -52,7 +52,7 @@ else
     echo "run without go build"
 fi
 
-docker-compose build
+docker compose build
 check "docker compose build error"
 
 docker compose up db -d
