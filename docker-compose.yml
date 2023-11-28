@@ -16,19 +16,15 @@ services:
       - "6379:6379"
   migrate:
     image: migrate/migrate
-    networks:
-      - new
     volumes:
-      - .:/migrations
+      - ./schema:/migrations
     command: ["-path", "/migrations", "-database",
-              "postgres://postgres:root@localhost:54320/postgres?sslmode=disable"]
+              "postgres://postgres:root@db:5432/postgres?sslmode=disable", "up"]
     links:
       - db
     depends_on:
       - db
 
-networks:
-  new:
 #  server:
 #    build: .
 #    command: ./main

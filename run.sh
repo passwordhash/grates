@@ -47,17 +47,19 @@ swag init -g ./cmd/http/main.go
 
 # Build проекта
 if ! $is_no_build;then
-    docker-compose build
-    check "docker compose build error"
+    go build -0 ./cmd/main.go
 else
     echo "run without go build"
 fi
 
-docker-compose up -d
-check "docker compose run error"
+docker-compose build
+check "docker compose build error"
 
-migrate -path ./schema -database 'postgres://postgres:root@localhost:54320/postgres?sslmode=disable' up
-check "migration up error"
+docker compose up db -d
+sleep 3
+docker compose up rdb migrate -d
+
+# check "docker compose run error"
 
 chmod +x main
 ./main
