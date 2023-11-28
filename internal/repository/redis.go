@@ -10,6 +10,7 @@ type RedisConfig struct {
 	DB       int
 }
 
+// TODO: move to pkg
 func NewRedisDB(cfg RedisConfig) *redis.Client {
 	return redis.NewClient(&redis.Options{
 		Addr:     cfg.Addr,

@@ -79,7 +79,7 @@ type usersPostsResponse struct {
 // @Param userId path int true "user's id"
 // @Success 200 {object} usersPostsResponse "post info"
 // @Failure 400,500 {object} errorResponse
-// @Router /api/posts/users/{userId} [get]
+// @Router /api/posts/users/{userId} [patch]
 func (h *Handler) getUsersPosts(c *gin.Context) {
 	var posts []domain.Post
 	v := c.Param("userId")
@@ -109,7 +109,7 @@ func (h *Handler) getUsersPosts(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param input body domain.PostUpdateInput true "new post data"
-// @Param id path updatePostInput true "post id"
+// @Param id path int true "post id"
 // @Success 200 {object} statusResponse "ok"
 // @Failure 400,500 {object} errorResponse
 // @Router /api/posts/{id} [put]

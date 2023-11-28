@@ -17,6 +17,7 @@ type PSQLConfig struct {
 const usersTable = "users"
 const postsTable = "posts"
 
+// TODO: sql injections
 func NewPostgresDB(cfg PSQLConfig) (*sqlx.DB, error) {
 	db, err := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode))
