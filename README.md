@@ -2,9 +2,9 @@
 <!--![Logo](./assets/logo.png)-->
 <img src="./assets/logo_header_ex.png" alt="drawing" width="700"/>
 <!--<img src="./assets/DOCKER.webp" width="200" />-->
-[<img src="./assets/made-with-go.svg" alt="drawing" />](https://golang.com)
-[<img src="./assets/deploys-on-docker.svg" alt="drawing" />](https://docker.com)
-[<img src="./assets/dashboard-click.svg" alt="drawing" />](https://whimsical.com/grates-project-HUPjJLnDj5TiGTHt15ZHzm)
+<a href="https://golang.com"><img src="./assets/made-with-go.svg" alt="drawing" /></a>
+<a href="https://docker.com"><img src="./assets/deploys-on-docker.svg" alt="drawing" /></a>
+<a href="https://whimsical.com/grates-project-HUPjJLnDj5TiGTHt15ZHzm"><img src="./assets/dashboard-click.svg" alt="drawing" /></a>
 
 # Grates server
 
