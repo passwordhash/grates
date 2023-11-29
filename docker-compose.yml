@@ -5,14 +5,33 @@ services:
     image: postgres
     restart: always
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
-  server:
-    build: .
-    command: ./main
     ports:
-      - 8000:8000
-#    environment:
-#      - PORT=8080
-#      - DATABASE_URL=db
+      - "54320:5432"
+  rdb:
+    image: redis
+    restart: always
+    ports:
+      - "6379:6379"
+  migrate:
+    image: migrate/migrate
+    volumes:
+      - ./schema:/migrations
+    command: ["-path", "/migrations", "-database",
+              "postgres://postgres:root@db:5432/postgres?sslmode=disable", "up"]
+    links:
+      - db
     depends_on:
       - db
+
+#  server:
+#    build: .
+#    command: ./main
+#    ports:
+#      - 8000:8000
+##    environment:
+##      - PORT=8080
+##      - DATABASE_URL=db
+#    depends_on:
+#      - db
