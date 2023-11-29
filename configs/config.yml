@@ -1,3 +1,4 @@
+host: "localhost"
 port: "8000"
 
 db:
@@ -6,3 +7,10 @@ db:
   port: "54320"
   dbname: "postgres"
   sslmode: "disable"
+
+rdb:
+  addr: "localhost:6379"
+
+auth:
+  accessTokenTTL: 120m
+  refreshTokenTTL: 240m

@@ -1,9 +1,0 @@
-package entity
-
-type User struct {
-	Id       int    `json:"id" db:"id"`
-	Name     string `json:"name" binding:"required"`
-	Surname  string `json:"surname"`
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"-" db:"password_hash"`
-}
