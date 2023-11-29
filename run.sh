@@ -15,16 +15,18 @@ progname=$0
 usage () {
     cat <<HELP_USAGE
 
-    $progname  [--no-build] -f <file>
+    $progname  [--no-build]
 
     --no-build   Если проект уже скомпилирован, можно запустить без
                  повторной компиляции.
-#     -a           All the instances.
-#     -f           File to write all the log lines
 HELP_USAGE
     exit 0
 }
+#               -f <file>
+#     -a           All the instances.
+#     -f           File to write all the log lines
 
+#
 # Что-то наподобие конфигурации
 is_no_build=false
 is_help=false
