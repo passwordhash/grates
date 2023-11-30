@@ -25,11 +25,16 @@ type Post interface {
 }
 
 type Comment interface {
+	Create(comment domain.CommentCreateInput) (int, error)
+	GetPostComments(postId int) ([]domain.Comment, error)
+	Delete(id int) error
+	Update(id int, newComment domain.CommentCreateInput) error
 }
 
 type Service struct {
 	User
 	Post
+	Comment
 }
 
 type Deps struct {
@@ -42,7 +47,8 @@ type Deps struct {
 
 func NewService(repos *repository.Repository, deps Deps) *Service {
 	return &Service{
-		User: NewUserService(repos.User, deps.SigingKey, deps.PasswordSalt, deps.AccessTokenTTL, deps.RefreshTokenTTL),
-		Post: NewPostService(repos.Post),
+		User:    NewUserService(repos.User, deps.SigingKey, deps.PasswordSalt, deps.AccessTokenTTL, deps.RefreshTokenTTL),
+		Post:    NewPostService(repos.Post),
+		Comment: NewCommentService(repos.Comment),
 	}
 }

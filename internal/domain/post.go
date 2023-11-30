@@ -10,6 +10,8 @@ type Post struct {
 	Content string    `json:"content" db:"content" binding:"required"`
 	UsersId int       `json:"users-id" db:"users_id" binding:"required"`
 	Date    time.Time `json:"date" db:"date" binding:"required"`
+
+	Comments []Comment `json:"comments,omitempty"`
 }
 
 type PostUpdateInput struct {
@@ -30,6 +32,16 @@ type Comment struct {
 	UsersId int       `json:"users-id" db:"users_id" binding:"required"`
 	PostsId int       `json:"posts-id" db:"posts_id" binding:"required"`
 	Date    time.Time `json:"date" binding:"required"`
+}
+
+type CommentCreateInput struct {
+	Content string `json:"content"`
+	UserId  int    `json:"-"`
+	PostId  int    `json:"-"`
+}
+
+type CommentUpdateInput struct {
+	Content string `json:"content,omitempty"`
 }
 
 type Like struct {

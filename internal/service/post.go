@@ -18,8 +18,7 @@ func (p *PostService) Create(post domain.Post) (int, error) {
 }
 
 func (p *PostService) Get(postId int) (domain.Post, error) {
-	//TODO implement me
-	panic("implement me")
+	return p.repo.Get(postId)
 }
 
 func (p *PostService) GetUsersPosts(userId int) ([]domain.Post, error) {

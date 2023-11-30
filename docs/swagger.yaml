@@ -1,5 +1,15 @@
 basePath: /
 definitions:
+  domain.CommentCreateInput:
+    properties:
+      content:
+        type: string
+    type: object
+  domain.CommentUpdateInput:
+    properties:
+      content:
+        type: string
+    type: object
   domain.Post:
     properties:
       content:
@@ -136,7 +146,7 @@ paths:
       summary: Create
       tags:
       - posts
-  /api/posts/{id}:
+  /api/posts/{postId}:
     delete:
       consumes:
       - application/json

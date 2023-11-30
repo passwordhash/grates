@@ -126,7 +126,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/posts/{id}": {
+        "/api/posts/{postId}": {
             "put": {
                 "security": [
                     {
@@ -375,6 +375,22 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "domain.CommentCreateInput": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.CommentUpdateInput": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.Post": {
             "type": "object",
             "required": [

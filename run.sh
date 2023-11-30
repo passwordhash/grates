@@ -49,7 +49,8 @@ swag init -g ./cmd/http/main.go
 
 # Build проекта
 if ! $is_no_build;then
-    go build -0 ./cmd/main.go
+    echo "run with go build"
+    go build -o main cmd/http/main.go
 else
     echo "run without go build"
 fi

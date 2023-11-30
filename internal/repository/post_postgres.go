@@ -29,6 +29,25 @@ func (p *PostRepository) Create(post domain.Post) (int, error) {
 	return id, nil
 }
 
+func (p *PostRepository) Get(postId int) (domain.Post, error) {
+	var post domain.Post
+	var comments []domain.Comment
+
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1;", repository.PostsTable)
+	err := p.db.Get(&post, query, postId)
+
+	if err != nil {
+		return domain.Post{}, err
+	}
+
+	query = fmt.Sprintf("SELECT * FROM %s WHERE posts_id=$1;", repository.CommentsTable)
+	err = p.db.Select(&comments, query, postId)
+
+	post.Comments = comments
+
+	return post, err
+}
+
 func (p *PostRepository) GetUsersPosts(postId int) ([]domain.Post, error) {
 	var posts []domain.Post
 
