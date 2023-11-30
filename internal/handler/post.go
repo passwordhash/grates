@@ -13,7 +13,7 @@ type createPostInput struct {
 	Content string `json:"content"`
 }
 
-// @Summary Create
+// @Summary CreatePost
 // @Security ApiKeyAuth
 // @Tags posts
 // @Description Create new post
@@ -59,14 +59,14 @@ func (h *Handler) createPost(c *gin.Context) {
 	})
 }
 
-// @Summary Get
+// @Summary GetPost
 // @Security ApiKeyAuth
 // @Tags posts
 // @Description Get post by id
 // @ID get-post
 // @Accept json
 // @Produce json
-// @Param id path int true "post id"
+// @Param postId path int true "post id"
 // @Success 200 {object} domain.Post "post info"
 // @Failure 400,500 {object} errorResponse
 // @Router /api/posts/{postId} [get]
@@ -105,7 +105,7 @@ type usersPostsResponse struct {
 // @Param userId path int true "user's id"
 // @Success 200 {object} usersPostsResponse "post info"
 // @Failure 400,500 {object} errorResponse
-// @Router /api/posts/users/{userId} [patch]
+// @Router /api/posts/user/{userId} [get]
 func (h *Handler) getUsersPosts(c *gin.Context) {
 	var posts []domain.Post
 	v := c.Param("userId")
@@ -128,7 +128,7 @@ func (h *Handler) getUsersPosts(c *gin.Context) {
 	})
 }
 
-// @Summary Update
+// @Summary UpdatePost
 // @Security ApiKeyAuth
 // @Tags posts
 // @Description Update post body
@@ -136,10 +136,10 @@ func (h *Handler) getUsersPosts(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param input body domain.PostUpdateInput true "new post data"
-// @Param id path int true "post id"
+// @Param userId path int true "post id"
 // @Success 200 {object} statusResponse "ok"
 // @Failure 400,500 {object} errorResponse
-// @Router /api/posts/{postId} [put]
+// @Router /api/posts/{postId} [patch]
 func (h *Handler) updatePost(c *gin.Context) {
 	var input domain.PostUpdateInput
 	var postId int
@@ -165,14 +165,14 @@ func (h *Handler) updatePost(c *gin.Context) {
 
 }
 
-// @Sammary Delete
+// @Sammary DeletePost
 // @Security ApiKeyAuth
 // @Tags posts
 // @Description Delete post by id
 // @ID delete-post
 // @Accept json
 // @Produce json
-// @Param id path int true "post id"
+// @Param userId path int true "post id"
 // @Success 200 {string} status "ok"
 // @Failure 400,500 {object} errorResponse
 // @Router /api/posts/{postId} [delete]

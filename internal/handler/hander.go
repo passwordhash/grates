@@ -44,7 +44,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		{
 			posts.POST("/", h.createPost)
 			posts.GET("/:postId", h.getPost)
-			posts.GET("/users/:userId", h.getUsersPosts)
+			posts.GET("/user/:userId", h.getUsersPosts)
 			posts.PATCH("/:postId", h.updatePost)
 			posts.DELETE("/:postId", h.deletePost)
 

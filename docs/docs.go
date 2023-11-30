@@ -35,7 +35,7 @@ const docTemplate = `{
                 "tags": [
                     "posts"
                 ],
-                "summary": "Create",
+                "summary": "CreatePost",
                 "operationId": "create-post",
                 "parameters": [
                     {
@@ -76,8 +76,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/posts/users/{userId}": {
-            "patch": {
+        "/api/posts/user/{userId}": {
+            "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -143,13 +143,13 @@ const docTemplate = `{
                 "tags": [
                     "posts"
                 ],
-                "summary": "Get",
+                "summary": "GetPost",
                 "operationId": "get-post",
                 "parameters": [
                     {
                         "type": "integer",
                         "description": "post id",
-                        "name": "id",
+                        "name": "postId",
                         "in": "path",
                         "required": true
                     }
@@ -159,63 +159,6 @@ const docTemplate = `{
                         "description": "post info",
                         "schema": {
                             "$ref": "#/definitions/domain.Post"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Update post body",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "posts"
-                ],
-                "summary": "Update",
-                "operationId": "update-post",
-                "parameters": [
-                    {
-                        "description": "new post data",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.PostUpdateInput"
-                        }
-                    },
-                    {
-                        "type": "integer",
-                        "description": "post id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "ok",
-                        "schema": {
-                            "$ref": "#/definitions/handler.statusResponse"
                         }
                     },
                     "400": {
@@ -253,7 +196,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "post id",
-                        "name": "id",
+                        "name": "userId",
                         "in": "path",
                         "required": true
                     }
@@ -263,6 +206,63 @@ const docTemplate = `{
                         "description": "ok",
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update post body",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "UpdatePost",
+                "operationId": "update-post",
+                "parameters": [
+                    {
+                        "description": "new post data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.PostUpdateInput"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "post id",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/handler.statusResponse"
                         }
                     },
                     "400": {

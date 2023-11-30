@@ -175,7 +175,7 @@ paths:
             $ref: '#/definitions/handler.errorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Create
+      summary: CreatePost
       tags:
       - posts
   /api/posts/{postId}:
@@ -187,7 +187,7 @@ paths:
       parameters:
       - description: post id
         in: path
-        name: id
+        name: userId
         required: true
         type: integer
       produces:
@@ -217,7 +217,7 @@ paths:
       parameters:
       - description: post id
         in: path
-        name: id
+        name: postId
         required: true
         type: integer
       produces:
@@ -237,10 +237,10 @@ paths:
             $ref: '#/definitions/handler.errorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Get
+      summary: GetPost
       tags:
       - posts
-    put:
+    patch:
       consumes:
       - application/json
       description: Update post body
@@ -254,7 +254,7 @@ paths:
           $ref: '#/definitions/domain.PostUpdateInput'
       - description: post id
         in: path
-        name: id
+        name: userId
         required: true
         type: integer
       produces:
@@ -274,7 +274,7 @@ paths:
             $ref: '#/definitions/handler.errorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Update
+      summary: UpdatePost
       tags:
       - posts
   /api/posts/{postId}/comments:
@@ -350,8 +350,8 @@ paths:
       summary: CreateComment
       tags:
       - comments
-  /api/posts/users/{userId}:
-    patch:
+  /api/posts/user/{userId}:
+    get:
       consumes:
       - application/json
       description: Get user's posts
