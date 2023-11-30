@@ -1,5 +1,24 @@
 basePath: /
 definitions:
+  domain.Comment:
+    properties:
+      content:
+        type: string
+      date:
+        type: string
+      id:
+        type: integer
+      posts-id:
+        type: integer
+      users-id:
+        type: integer
+    required:
+    - content
+    - date
+    - id
+    - posts-id
+    - users-id
+    type: object
   domain.CommentCreateInput:
     properties:
       content:
@@ -12,6 +31,10 @@ definitions:
     type: object
   domain.Post:
     properties:
+      comments:
+        items:
+          $ref: '#/definitions/domain.Comment'
+        type: array
       content:
         type: string
       date:
@@ -63,6 +86,15 @@ definitions:
       message:
         type: string
     type: object
+  handler.postsCommentsResponse:
+    properties:
+      comments:
+        items:
+          $ref: '#/definitions/domain.Comment'
+        type: array
+      count:
+        type: integer
+    type: object
   handler.refreshInput:
     properties:
       refreshToken:
@@ -109,6 +141,79 @@ info:
   title: Grates API
   version: "1.0"
 paths:
+  /api/comments/posts/{postId}:
+    get:
+      consumes:
+      - application/json
+      description: Get post's comments
+      operationId: posts-comments
+      parameters:
+      - description: post id
+        in: path
+        name: postId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: comments info
+          schema:
+            $ref: '#/definitions/handler.postsCommentsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: GetPostsComments
+      tags:
+      - comments
+    post:
+      consumes:
+      - application/json
+      description: Create new comment
+      operationId: create-comment
+      parameters:
+      - description: comment info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CommentCreateInput'
+      - description: post id
+        in: path
+        name: postId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: CreateComment
+      tags:
+      - comments
   /api/posts:
     post:
       consumes:
@@ -175,6 +280,37 @@ paths:
             $ref: '#/definitions/handler.errorResponse'
       security:
       - ApiKeyAuth: []
+      tags:
+      - posts
+    get:
+      consumes:
+      - application/json
+      description: Get post by id
+      operationId: get-post
+      parameters:
+      - description: post id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: post info
+          schema:
+            $ref: '#/definitions/domain.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get
       tags:
       - posts
     put:
