@@ -204,7 +204,7 @@ func (h *Handler) deletePost(c *gin.Context) {
 // @Param postId path int true "post id"
 // @Success 200 {integer} commentId
 // @Failure 400,401,500 {object} errorResponse
-// @Router /api/comments/posts/{postId} [post]
+// @Router /api/posts/{postId}/comments [post]
 func (h *Handler) createComment(c *gin.Context) {
 	var commentId int
 	var postId int
@@ -260,7 +260,7 @@ type postsCommentsResponse struct {
 // @Param postId path int true "post id"
 // @Success 200 {object} postsCommentsResponse "comments info"
 // @Failure 400,500 {object} errorResponse
-// @Router /api/comments/posts/{postId} [get]
+// @Router /api/posts/{postId}/comments [get]
 func (h *Handler) getPostsComments(c *gin.Context) {
 	var comments []domain.Comment
 	var postId int
