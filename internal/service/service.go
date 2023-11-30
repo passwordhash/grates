@@ -33,7 +33,8 @@ type Service struct {
 }
 
 type Deps struct {
-	SigingKey string
+	SigingKey    string
+	PasswordSalt string
 
 	AccessTokenTTL  time.Duration
 	RefreshTokenTTL time.Duration
@@ -41,7 +42,7 @@ type Deps struct {
 
 func NewService(repos *repository.Repository, deps Deps) *Service {
 	return &Service{
-		User: NewUserService(repos.User, deps.SigingKey, deps.AccessTokenTTL, deps.RefreshTokenTTL),
+		User: NewUserService(repos.User, deps.SigingKey, deps.PasswordSalt, deps.AccessTokenTTL, deps.RefreshTokenTTL),
 		Post: NewPostService(repos.Post),
 	}
 }

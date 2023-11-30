@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"grates/internal/domain"
+	"grates/pkg/repository"
 )
 
 // CreateUser при успешном срабатывании, возвращает id созданного пользователя
@@ -11,7 +12,7 @@ func (r *UserRepository) CreateUser(user domain.User) (int, error) {
 
 	query := fmt.Sprintf(`INSERT INTO %s (name, surname, email, password_hash)
 						VALUES ($1, $2, $3, $4)
-						RETURNING id;`, usersTable)
+						RETURNING id;`, repository.UsersTable)
 	// TRY
 	row := r.db.QueryRow(query, user.Name, user.Surname, user.Email, user.Password)
 	if err := row.Scan(&id); err != nil {
@@ -24,7 +25,7 @@ func (r *UserRepository) CreateUser(user domain.User) (int, error) {
 func (r *UserRepository) GetUser(email, password string) (domain.User, error) {
 	var user domain.User
 
-	query := fmt.Sprintf("SELECT * FROM %s WHERE email=$1 AND password_hash=$2", usersTable)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE email=$1 AND password_hash=$2", repository.UsersTable)
 	err := r.db.Get(&user, query, email, password)
 
 	return user, err
@@ -33,7 +34,7 @@ func (r *UserRepository) GetUser(email, password string) (domain.User, error) {
 func (r *UserRepository) GetUserById(id int) (domain.User, error) {
 	var user domain.User
 
-	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1;", usersTable)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1;", repository.UsersTable)
 	err := r.db.Get(&user, query, id)
 
 	return user, err
@@ -43,7 +44,7 @@ func (r *UserRepository) GetUserById(id int) (domain.User, error) {
 func (r *UserRepository) GetUserByEmail(email string) (domain.User, error) {
 	var user domain.User
 
-	query := fmt.Sprintf("SELECT * FROM %s WHERE email=$1;", usersTable)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE email=$1;", repository.UsersTable)
 	err := r.db.Get(&user, query, email)
 
 	return user, err
@@ -53,7 +54,7 @@ func (r *UserRepository) GetAllUsers() ([]domain.User, error) {
 	var users []domain.User
 
 	query := fmt.Sprintf("SELECT * FROM %s;",
-		usersTable)
+		repository.UsersTable)
 	err := r.db.Select(&users, query)
 
 	return users, err

@@ -14,10 +14,9 @@ type PSQLConfig struct {
 	SSLMode  string
 }
 
-const usersTable = "users"
-const postsTable = "posts"
+const UsersTable = "users"
+const PostsTable = "posts"
 
-// TODO: sql injections
 func NewPostgresDB(cfg PSQLConfig) (*sqlx.DB, error) {
 	db, err := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode))

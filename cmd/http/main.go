@@ -12,6 +12,7 @@ import (
 	"grates/internal/repository"
 	"grates/internal/service"
 	"grates/pkg/app"
+	repository2 "grates/pkg/repository"
 	"grates/pkg/server"
 	"os"
 )
@@ -43,7 +44,7 @@ func main() {
 	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%s", viper.GetString("host"), viper.GetString("port"))
 
 	// PosgtgreSQL connect
-	db, err := repository.NewPostgresDB(repository.PSQLConfig{
+	db, err := repository2.NewPostgresDB(repository2.PSQLConfig{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
@@ -58,7 +59,7 @@ func main() {
 	defer func() { db.Close() }()
 
 	// Redis connect
-	rdb := repository.NewRedisDB(repository.RedisConfig{Addr: viper.GetString("addr")})
+	rdb := repository2.NewRedisDB(repository2.RedisConfig{Addr: viper.GetString("addr")})
 	if _, err := rdb.Ping(context.Background()).Result(); err != nil {
 		logrus.Fatalf("failed to initialize redis db: %s", err.Error())
 	}
@@ -68,6 +69,7 @@ func main() {
 	repos := repository.NewRepository(db, rdb)
 	services := service.NewService(repos, service.Deps{
 		SigingKey:       os.Getenv("JWT_SIGING_KEY"),
+		PasswordSalt:    os.Getenv("PASSWORD_SALT"),
 		AccessTokenTTL:  viper.GetDuration("auth.accessTokenTTL"),
 		RefreshTokenTTL: viper.GetDuration("auth.refreshTokenTTL"),
 	})
