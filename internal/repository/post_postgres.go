@@ -49,11 +49,22 @@ func (p *PostRepository) Get(postId int) (domain.Post, error) {
 	return post, err
 }
 
-func (p *PostRepository) GetUsersPosts(postId int) ([]domain.Post, error) {
+func (p *PostRepository) GetUsersPosts(userId int, commentsLimit int) ([]domain.Post, error) {
 	var posts []domain.Post
 
-	query := fmt.Sprintf(`SELECT * FROM %s WHERE users_id=$1;`, repository.PostsTable)
-	err := p.db.Select(&posts, query, postId)
+	query := fmt.Sprintf(`SELECT * FROM %s WHERE users_id=$1`, repository.PostsTable)
+	err := p.db.Select(&posts, query, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	for post := range posts {
+		query = fmt.Sprintf(`SELECT * FROM %s WHERE posts_id=$1 LIMIT $2`, repository.CommentsTable)
+		err = p.db.Select(&posts[post].Comments, query, posts[post].Id, commentsLimit)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	return posts, err
 }

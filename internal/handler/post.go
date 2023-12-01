@@ -95,6 +95,11 @@ type usersPostsResponse struct {
 	Count int           `json:"count"`
 }
 
+const (
+	commentsLimitQuery  = "commentsLimit"
+	commentLimitDefault = 5
+)
+
 // @Summary GetUsersPosts
 // @Security ApiKeyAuth
 // @Tags posts
@@ -103,11 +108,14 @@ type usersPostsResponse struct {
 // @Accept json
 // @Produce json
 // @Param userId path int true "user's id"
+// @Param commentsLimit query int true "limit for post's comments"
 // @Success 200 {object} usersPostsResponse "post info"
 // @Failure 400,500 {object} errorResponse
 // @Router /api/posts/user/{userId} [get]
 func (h *Handler) getUsersPosts(c *gin.Context) {
 	var posts []domain.Post
+	var commentsLimit int
+
 	v := c.Param("userId")
 
 	userId, err := strconv.Atoi(v)
@@ -116,7 +124,18 @@ func (h *Handler) getUsersPosts(c *gin.Context) {
 		return
 	}
 
-	posts, err = h.services.GetUsersPosts(userId)
+	q := c.Query(commentsLimitQuery)
+	if q != "" {
+		commentsLimit, err = strconv.Atoi(q)
+		if err != nil {
+			newResponse(c, http.StatusBadRequest, "invalid query value")
+			return
+		}
+	} else {
+		commentsLimit = commentLimitDefault
+	}
+
+	posts, err = h.services.GetUsersPosts(userId, commentsLimit)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return

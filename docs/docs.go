@@ -49,7 +49,7 @@ const docTemplate = `{
                     "200": {
                         "description": "ok",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handler.statusResponse"
                         }
                     },
                     "400": {
@@ -207,6 +207,13 @@ const docTemplate = `{
                         "description": "user's id",
                         "name": "userId",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "limit for post's comments",
+                        "name": "commentsLimit",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -701,19 +708,24 @@ const docTemplate = `{
                     }
                 },
                 "content": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Occaecat quis officia pariatur non aliquip culpa id elit amet sit occaecat ex sunt ullamco duis reprehenderit in esse. Culpa minim nulla pariatur voluptate ea proident dolor velit eu do labore ut."
                 },
                 "date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2021-01-01T00:00:00Z"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 732436
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Post title"
                 },
                 "users-id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 6296
                 }
             }
         },

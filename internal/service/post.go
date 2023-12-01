@@ -21,8 +21,8 @@ func (p *PostService) Get(postId int) (domain.Post, error) {
 	return p.repo.Get(postId)
 }
 
-func (p *PostService) GetUsersPosts(userId int) ([]domain.Post, error) {
-	return p.repo.GetUsersPosts(userId)
+func (p *PostService) GetUsersPosts(userId int, commentsLimit int) ([]domain.Post, error) {
+	return p.repo.GetUsersPosts(userId, commentsLimit)
 }
 
 func (p *PostService) Update(id int, newPost domain.PostUpdateInput) error {

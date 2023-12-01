@@ -19,7 +19,7 @@ type User interface {
 type Post interface {
 	Create(post domain.Post) (int, error)
 	Get(postId int) (domain.Post, error)
-	GetUsersPosts(userId int) ([]domain.Post, error)
+	GetUsersPosts(userId int, commentsLimit int) ([]domain.Post, error)
 	Update(id int, newPost domain.PostUpdateInput) error
 	Delete(id int) error
 }

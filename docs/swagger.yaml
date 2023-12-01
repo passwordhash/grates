@@ -36,14 +36,21 @@ definitions:
           $ref: '#/definitions/domain.Comment'
         type: array
       content:
+        example: Occaecat quis officia pariatur non aliquip culpa id elit amet sit
+          occaecat ex sunt ullamco duis reprehenderit in esse. Culpa minim nulla pariatur
+          voluptate ea proident dolor velit eu do labore ut.
         type: string
       date:
+        example: "2021-01-01T00:00:00Z"
         type: string
       id:
+        example: 732436
         type: integer
       title:
+        example: Post title
         type: string
       users-id:
+        example: 6296
         type: integer
     required:
     - content
@@ -159,7 +166,7 @@ paths:
         "200":
           description: ok
           schema:
-            type: string
+            $ref: '#/definitions/handler.statusResponse'
         "400":
           description: Bad Request
           schema:
@@ -428,6 +435,11 @@ paths:
       - description: user's id
         in: path
         name: userId
+        required: true
+        type: integer
+      - description: limit for post's comments
+        in: query
+        name: commentsLimit
         required: true
         type: integer
       produces:
