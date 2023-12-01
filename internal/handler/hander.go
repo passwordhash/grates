@@ -53,9 +53,15 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			{
 				comments.POST("/", h.createComment)
 				comments.GET("/", h.getPostsComments)
-				comments.PATCH("/:commentId", h.updateComment)
-				comments.DELETE("/:commentId", h.deleteComment)
 			}
+
+		}
+
+		// QUESTION: ?
+		comment := api.Group("/comment")
+		{
+			comment.PATCH("/:commentId", h.updateComment)
+			comment.DELETE("/:commentId", h.deleteComment)
 		}
 	}
 

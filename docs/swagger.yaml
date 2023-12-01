@@ -141,6 +141,74 @@ info:
   title: Grates API
   version: "1.0"
 paths:
+  /api/comment/{commentId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete comment by id
+      operationId: delete-comment
+      parameters:
+      - description: comment id
+        in: path
+        name: commentId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - comments
+    patch:
+      consumes:
+      - application/json
+      description: Update comment body
+      operationId: update-comment
+      parameters:
+      - description: new comment data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CommentUpdateInput'
+      - description: comment id
+        in: path
+        name: commentId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: UpdateComment
+      tags:
+      - comments
   /api/posts:
     post:
       consumes:

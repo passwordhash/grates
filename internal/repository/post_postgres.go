@@ -30,6 +30,7 @@ func (p *PostRepository) Create(post domain.Post) (int, error) {
 }
 
 func (p *PostRepository) Get(postId int) (domain.Post, error) {
+	// QUESTION: Как сделать лучше, чтобы вместе с постом возвращались комментарии?
 	var post domain.Post
 	var comments []domain.Comment
 

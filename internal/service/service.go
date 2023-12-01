@@ -27,8 +27,8 @@ type Post interface {
 type Comment interface {
 	Create(comment domain.CommentCreateInput) (int, error)
 	GetPostComments(postId int) ([]domain.Comment, error)
-	Delete(id int) error
-	Update(id int, newComment domain.CommentCreateInput) error
+	Delete(userId, commentId int) error
+	Update(userId, commentId int, newComment domain.CommentUpdateInput) error
 }
 
 type Service struct {

@@ -17,14 +17,12 @@ func (c *CommentService) GetPostComments(postId int) ([]domain.Comment, error) {
 	return c.repo.GetPostComments(postId)
 }
 
-func (c *CommentService) Delete(id int) error {
-	//TODO implement me
-	panic("implement me")
+func (c *CommentService) Delete(userId, commentId int) error {
+	return c.repo.Delete(userId, commentId)
 }
 
-func (c *CommentService) Update(id int, newComment domain.CommentCreateInput) error {
-	//TODO implement me
-	panic("implement me")
+func (c *CommentService) Update(userId, commentId int, newComment domain.CommentUpdateInput) error {
+	return c.repo.Update(userId, commentId, newComment)
 }
 
 func NewCommentService(repo repository.Comment) *CommentService {

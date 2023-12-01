@@ -35,14 +35,19 @@ func (c CommentRepository) GetPostComments(postId int) ([]domain.Comment, error)
 	return comments, err
 }
 
-func (c CommentRepository) Update(id int, newComment domain.CommentCreateInput) error {
-	//TODO implement me
-	panic("implement me")
+func (c CommentRepository) Update(userId, commentId int, newComment domain.CommentUpdateInput) error {
+	query := fmt.Sprintf(`UPDATE %s SET content=$1 WHERE id=$2 AND users_id=$3;`,
+		repository.CommentsTable)
+	_, err := c.db.Exec(query, newComment.Content, commentId, userId)
+
+	return err
 }
 
-func (c CommentRepository) Delete(id int) error {
-	//TODO implement me
-	panic("implement me")
+func (c CommentRepository) Delete(userId, commentId int) error {
+	query := fmt.Sprintf(`DELETE FROM %s WHERE id=$1 AND users_id=$2;`, repository.CommentsTable)
+	_, err := c.db.Exec(query, commentId, userId)
+
+	return err
 }
 
 func NewCommentRepository(db *sqlx.DB) *CommentRepository {

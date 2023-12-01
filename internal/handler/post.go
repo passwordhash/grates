@@ -265,6 +265,8 @@ func (h *Handler) getPostsComments(c *gin.Context) {
 	var comments []domain.Comment
 	var postId int
 
+	// QUESTION: Может добавить на группу запросов middleware, который будет
+	//           сетать в контекст postId? А то много повторяющегося кода
 	v := c.Param("postId")
 	postId, err := strconv.Atoi(v)
 	if err != nil {
@@ -292,10 +294,34 @@ func (h *Handler) getPostsComments(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param input body domain.CommentUpdateInput true "new comment data"
-// @Param id path int true "comment id"
-// TODO
+// @Param commentId path int true "comment id"
+// @Success 200 {object} statusResponse "ok"
+// @Failure 400,500 {object} errorResponse
+// @Router /api/comment/{commentId} [patch]
 func (h *Handler) updateComment(c *gin.Context) {
+	var input domain.CommentUpdateInput
+	var commentId int
 
+	// QUESTION: Можно ли как-то сократить этот код?
+	user := c.MustGet(userCtx).(domain.User)
+
+	commentId, err := strconv.Atoi(c.Param("commentId"))
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid path variable data")
+		return
+	}
+
+	if err := c.BindJSON(&input); err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid input data")
+		return
+	}
+
+	if err := h.services.Comment.Update(user.Id, commentId, input); err != nil {
+		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("update comment error: %s", err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, statusResponse{"ok"})
 }
 
 // @Sammary DeleteComment
@@ -305,8 +331,25 @@ func (h *Handler) updateComment(c *gin.Context) {
 // @ID delete-comment
 // @Accept json
 // @Produce json
-// @Param id path int true "comment id"
-// TODO
+// @Param commentId path int true "comment id"
+// @Success 200 {object} statusResponse "ok"
+// @Failure 400,500 {object} errorResponse
+// @Router /api/comment/{commentId} [delete]
 func (h *Handler) deleteComment(c *gin.Context) {
+	var commentId int
 
+	user := c.MustGet(userCtx).(domain.User)
+
+	commentId, err := strconv.Atoi(c.Param("commentId"))
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid path variable value")
+		return
+	}
+
+	if err := h.services.Comment.Delete(user.Id, commentId); err != nil {
+		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("delete comment error: %s", err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, statusResponse{"ok"})
 }
