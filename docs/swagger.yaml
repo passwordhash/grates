@@ -253,6 +253,42 @@ paths:
       summary: CreatePost
       tags:
       - posts
+  /api/posts/:
+    get:
+      consumes:
+      - application/json
+      description: Get user's posts
+      operationId: users-posts
+      parameters:
+      - description: user's id
+        in: query
+        name: userId
+        required: true
+        type: integer
+      - description: limit for post's comments
+        in: query
+        name: commentsLimit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: post info
+          schema:
+            $ref: '#/definitions/handler.usersPostsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: GetUsersPosts
+      tags:
+      - posts
   /api/posts/{postId}:
     delete:
       consumes:
@@ -425,43 +461,6 @@ paths:
       summary: CreateComment
       tags:
       - comments
-  /api/posts/user/{userId}:
-    get:
-      consumes:
-      - application/json
-      description: Get user's posts
-      operationId: users-posts
-      parameters:
-      - description: user's id
-        in: path
-        name: userId
-        required: true
-        type: integer
-      - description: limit for post's comments
-        in: query
-        name: commentsLimit
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: post info
-          schema:
-            $ref: '#/definitions/handler.usersPostsResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/handler.errorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/handler.errorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: GetUsersPosts
-      tags:
-      - posts
   /auth/refresh:
     post:
       consumes:

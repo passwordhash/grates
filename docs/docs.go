@@ -182,7 +182,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/posts/user/{userId}": {
+        "/api/posts/": {
             "get": {
                 "security": [
                     {
@@ -206,15 +206,14 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "user's id",
                         "name": "userId",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     },
                     {
                         "type": "integer",
                         "description": "limit for post's comments",
                         "name": "commentsLimit",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {

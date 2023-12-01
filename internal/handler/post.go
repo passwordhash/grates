@@ -96,6 +96,7 @@ type usersPostsResponse struct {
 }
 
 const (
+	userIdQuery         = "userId"
 	commentsLimitQuery  = "commentsLimit"
 	commentLimitDefault = 5
 )
@@ -107,28 +108,26 @@ const (
 // @ID users-posts
 // @Accept json
 // @Produce json
-// @Param userId path int true "user's id"
-// @Param commentsLimit query int true "limit for post's comments"
+// @Param userId query int true "user's id"
+// @Param commentsLimit query int false "limit for post's comments"
 // @Success 200 {object} usersPostsResponse "post info"
 // @Failure 400,500 {object} errorResponse
-// @Router /api/posts/user/{userId} [get]
+// @Router /api/posts/ [get]
 func (h *Handler) getUsersPosts(c *gin.Context) {
 	var posts []domain.Post
+	var userId int
 	var commentsLimit int
 
-	v := c.Param("userId")
-
-	userId, err := strconv.Atoi(v)
+	userId, err := strconv.Atoi(c.Query(userIdQuery))
 	if err != nil {
-		newResponse(c, http.StatusBadRequest, "invalid path variable value")
+		newResponse(c, http.StatusBadRequest, "invalid query value of user's id")
 		return
 	}
 
-	q := c.Query(commentsLimitQuery)
-	if q != "" {
+	if q := c.Query(commentsLimitQuery); q != "" {
 		commentsLimit, err = strconv.Atoi(q)
 		if err != nil {
-			newResponse(c, http.StatusBadRequest, "invalid query value")
+			newResponse(c, http.StatusBadRequest, "invalid query value of comments limit")
 			return
 		}
 	} else {
@@ -184,7 +183,7 @@ func (h *Handler) updatePost(c *gin.Context) {
 
 }
 
-// @Sammary DeletePost
+// @Summary DeletePost
 // @Security ApiKeyAuth
 // @Tags posts
 // @Description Delete post by id
@@ -343,7 +342,7 @@ func (h *Handler) updateComment(c *gin.Context) {
 	c.JSON(http.StatusOK, statusResponse{"ok"})
 }
 
-// @Sammary DeleteComment
+// @Summary DeleteComment
 // @Security ApiKeyAuth
 // @Tags comments
 // @Description Delete comment by id
