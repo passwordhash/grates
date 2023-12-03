@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"grates/internal/domain"
 	"grates/internal/repository"
 )
@@ -22,22 +21,33 @@ func (p *PostService) Create(post domain.Post) (int, error) {
 	return p.postRepo.Create(post)
 }
 
-func (p *PostService) Get(postId int) (domain.Post, error) {
+func (p *PostService) GetWithAdditions(postId int) (domain.Post, error) {
 	post, err := p.postRepo.Get(postId)
 	if err != nil {
-		return domain.Post{}, err
+		return post, err
 	}
 
 	post.Comments, err = p.commentRepo.GetPostComments(postId)
 	if err != nil {
-		return post, fmt.Errorf("error while getting comments for post %d: %s", postId, err)
+		return post, err
 	}
 
 	return post, nil
 }
 
-func (p *PostService) GetUsersPosts(userId int, commentsLimit int) ([]domain.Post, error) {
-	return p.postRepo.GetUsersPosts(userId, commentsLimit)
+func (p *PostService) GetUsersPosts(userId int) ([]domain.Post, error) {
+	posts, err := p.postRepo.GetUsersPosts(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, post := range posts {
+		posts[i].Comments, err = p.commentRepo.GetPostComments(post.Id)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return posts, nil
 }
 
 func (p *PostService) Update(id int, newPost domain.PostUpdateInput) error {

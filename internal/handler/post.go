@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"grates/internal/domain"
@@ -62,7 +63,7 @@ func (h *Handler) createPost(c *gin.Context) {
 // @Summary GetPost
 // @Security ApiKeyAuth
 // @Tags posts
-// @Description Get post by id
+// @Description GetWithAdditions post by id
 // @ID get-post
 // @Accept json
 // @Produce json
@@ -73,15 +74,13 @@ func (h *Handler) createPost(c *gin.Context) {
 func (h *Handler) getPost(c *gin.Context) {
 	var post domain.Post
 
-	v := c.Param("postId")
-
-	postId, err := strconv.Atoi(v)
+	postId, err := strconv.Atoi(c.Param("postId"))
 	if err != nil {
 		newResponse(c, http.StatusBadRequest, "invalid path variable value")
 		return
 	}
 
-	post, err = h.services.Post.Get(postId)
+	post, err = h.services.Post.GetWithAdditions(postId)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -104,7 +103,7 @@ const (
 // @Summary GetUsersPosts
 // @Security ApiKeyAuth
 // @Tags posts
-// @Description Get user's posts
+// @Description GetWithAdditions user's posts
 // @ID users-posts
 // @Accept json
 // @Produce json
@@ -116,7 +115,6 @@ const (
 func (h *Handler) getUsersPosts(c *gin.Context) {
 	var posts []domain.Post
 	var userId int
-	var commentsLimit int
 
 	userId, err := strconv.Atoi(c.Query(userIdQuery))
 	if err != nil {
@@ -124,17 +122,7 @@ func (h *Handler) getUsersPosts(c *gin.Context) {
 		return
 	}
 
-	if q := c.Query(commentsLimitQuery); q != "" {
-		commentsLimit, err = strconv.Atoi(q)
-		if err != nil {
-			newResponse(c, http.StatusBadRequest, "invalid query value of comments limit")
-			return
-		}
-	} else {
-		commentsLimit = commentLimitDefault
-	}
-
-	posts, err = h.services.GetUsersPosts(userId, commentsLimit)
+	posts, err = h.services.GetUsersPosts(userId)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -271,7 +259,7 @@ type postsCommentsResponse struct {
 // @Summary GetPostsComments
 // @Security ApiKeyAuth
 // @Tags comments
-// @Description Get post's comments
+// @Description GetWithAdditions post's comments
 // @ID posts-comments
 // @Accept json
 // @Produce json
@@ -370,4 +358,12 @@ func (h *Handler) deleteComment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, statusResponse{"ok"})
+}
+
+func getIntQueryParam(query string) (int, error) {
+	if len(query) == 0 {
+		return 0, errors.New("empty query")
+	}
+
+	return strconv.Atoi(query)
 }
