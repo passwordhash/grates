@@ -177,6 +177,7 @@ paths:
             $ref: '#/definitions/handler.errorResponse'
       security:
       - ApiKeyAuth: []
+      summary: DeleteComment
       tags:
       - comments
     patch:
@@ -257,7 +258,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get user's posts
+      description: GetWithAdditions user's posts
       operationId: users-posts
       parameters:
       - description: user's id
@@ -318,12 +319,13 @@ paths:
             $ref: '#/definitions/handler.errorResponse'
       security:
       - ApiKeyAuth: []
+      summary: DeletePost
       tags:
       - posts
     get:
       consumes:
       - application/json
-      description: Get post by id
+      description: GetWithAdditions post by id
       operationId: get-post
       parameters:
       - description: post id
@@ -392,7 +394,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get post's comments
+      description: GetWithAdditions post's comments
       operationId: posts-comments
       parameters:
       - description: post id

@@ -6,6 +6,13 @@ import (
 	"grates/internal/domain"
 )
 
+const (
+	UsersTable      = "users"
+	PostsTable      = "posts"
+	CommentsTable   = "comments"
+	LikesPostsTable = "likes_posts"
+)
+
 type User interface {
 	CreateUser(user domain.User) (int, error)
 	GetUser(email string, password string) (domain.User, error)
@@ -32,10 +39,16 @@ type Comment interface {
 	Delete(userId, commentId int) error
 }
 
+type Like interface {
+	LikePost(userId, postId int) error
+	UnlikePost(userId, postId int) error
+}
+
 type Repository struct {
 	User    *UserRepository
 	Post    *PostRepository
 	Comment *CommentRepository
+	Like    *LikeRepository
 }
 
 type UserRepository struct {
@@ -52,5 +65,6 @@ func NewRepository(db *sqlx.DB, rdb *redis.Client) *Repository {
 		User:    NewUserRepository(db, rdb),
 		Post:    NewPostPostgres(db),
 		Comment: NewCommentRepository(db),
+		Like:    NewLikeRepository(db),
 	}
 }

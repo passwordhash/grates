@@ -31,10 +31,16 @@ type Comment interface {
 	Update(userId, commentId int, newComment domain.CommentUpdateInput) error
 }
 
+type Like interface {
+	LikePost(userId, postId int) error
+	UnlikePost(userId, postId int) error
+}
+
 type Service struct {
 	User
 	Post
 	Comment
+	Like
 }
 
 type Deps struct {
@@ -50,5 +56,6 @@ func NewService(repos *repository.Repository, deps Deps) *Service {
 		User:    NewUserService(repos.User, deps.SigingKey, deps.PasswordSalt, deps.AccessTokenTTL, deps.RefreshTokenTTL),
 		Post:    NewPostService(repos.Post, repos.Comment),
 		Comment: NewCommentService(repos.Comment),
+		Like:    NewLikeService(repos.Like),
 	}
 }

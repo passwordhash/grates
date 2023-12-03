@@ -25,7 +25,7 @@ CREATE TABLE comments
     date timestamp default CURRENT_TIMESTAMP
 );
 
-CREATE TABLE likes
+CREATE TABLE likes_posts
 (
     id serial not null unique,
     users_id int references users (id) on delete cascade,

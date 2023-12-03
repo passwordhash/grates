@@ -35,6 +35,7 @@ const docTemplate = `{
                 "tags": [
                     "comments"
                 ],
+                "summary": "DeleteComment",
                 "operationId": "delete-comment",
                 "parameters": [
                     {
@@ -303,6 +304,7 @@ const docTemplate = `{
                 "tags": [
                     "posts"
                 ],
+                "summary": "DeletePost",
                 "operationId": "delete-post",
                 "parameters": [
                     {
