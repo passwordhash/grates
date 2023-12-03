@@ -32,19 +32,19 @@ func (p *PostRepository) Create(post domain.Post) (int, error) {
 func (p *PostRepository) Get(postId int) (domain.Post, error) {
 	// QUESTION: Как сделать лучше, чтобы вместе с постом возвращались комментарии?
 	var post domain.Post
-	var comments []domain.Comment
+	//var comments []domain.Comment
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1;", repository.PostsTable)
 	err := p.db.Get(&post, query, postId)
 
-	if err != nil {
-		return domain.Post{}, err
-	}
+	//if err != nil {
+	//	return domain.Post{}, err
+	//}
 
-	query = fmt.Sprintf("SELECT * FROM %s WHERE posts_id=$1;", repository.CommentsTable)
-	err = p.db.Select(&comments, query, postId)
-
-	post.Comments = comments
+	//query = fmt.Sprintf("SELECT * FROM %s WHERE posts_id=$1;", repository.CommentsTable)
+	//err = p.db.Select(&comments, query, postId)
+	//
+	//post.Comments = comments
 
 	return post, err
 }
