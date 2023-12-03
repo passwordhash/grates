@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"grates/internal/domain"
 	"grates/internal/repository"
 )
@@ -27,13 +28,10 @@ func (p *PostService) Get(postId int) (domain.Post, error) {
 		return domain.Post{}, err
 	}
 
-	// TODO: решить как осуществлять проверку ошибки
-	comments, err := p.commentRepo.GetPostComments(postId)
+	post.Comments, err = p.commentRepo.GetPostComments(postId)
 	if err != nil {
-		return domain.Post{}, err
+		return post, fmt.Errorf("error while getting comments for post %d: %s", postId, err)
 	}
-
-	post.Comments = comments
 
 	return post, nil
 }
