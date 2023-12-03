@@ -47,6 +47,7 @@ func (p *PostService) GetUsersPosts(userId int) ([]domain.Post, error) {
 			return nil, err
 		}
 	}
+
 	return posts, nil
 }
 

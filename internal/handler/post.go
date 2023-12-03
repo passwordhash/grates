@@ -9,6 +9,12 @@ import (
 	"strconv"
 )
 
+const (
+	userIdQuery         = "userId"
+	commentsLimitQuery  = "commentsLimit"
+	commentLimitDefault = 5
+)
+
 type createPostInput struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
@@ -93,12 +99,6 @@ type usersPostsResponse struct {
 	Posts []domain.Post `json:"posts"`
 	Count int           `json:"count"`
 }
-
-const (
-	userIdQuery         = "userId"
-	commentsLimitQuery  = "commentsLimit"
-	commentLimitDefault = 5
-)
 
 // @Summary GetUsersPosts
 // @Security ApiKeyAuth
@@ -271,10 +271,7 @@ func (h *Handler) getPostsComments(c *gin.Context) {
 	var comments []domain.Comment
 	var postId int
 
-	// QUESTION: Может добавить на группу запросов middleware, который будет
-	//           сетать в контекст postId? А то много повторяющегося кода
-	v := c.Param("postId")
-	postId, err := strconv.Atoi(v)
+	postId, err := strconv.Atoi(c.Param("postId"))
 	if err != nil {
 		newResponse(c, http.StatusBadRequest, "invalid path variable value")
 		return
