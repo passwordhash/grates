@@ -1,11 +1,18 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"grates/internal/domain"
 	"net/http"
 	"strconv"
+)
+
+const (
+	userIdQuery         = "userId"
+	commentsLimitQuery  = "commentsLimit"
+	commentLimitDefault = 5
 )
 
 type createPostInput struct {
@@ -62,7 +69,7 @@ func (h *Handler) createPost(c *gin.Context) {
 // @Summary GetPost
 // @Security ApiKeyAuth
 // @Tags posts
-// @Description Get post by id
+// @Description GetWithAdditions post by id
 // @ID get-post
 // @Accept json
 // @Produce json
@@ -73,15 +80,13 @@ func (h *Handler) createPost(c *gin.Context) {
 func (h *Handler) getPost(c *gin.Context) {
 	var post domain.Post
 
-	v := c.Param("postId")
-
-	postId, err := strconv.Atoi(v)
+	postId, err := strconv.Atoi(c.Param("postId"))
 	if err != nil {
 		newResponse(c, http.StatusBadRequest, "invalid path variable value")
 		return
 	}
 
-	post, err = h.services.Post.Get(postId)
+	post, err = h.services.Post.GetWithAdditions(postId)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -95,16 +100,10 @@ type usersPostsResponse struct {
 	Count int           `json:"count"`
 }
 
-const (
-	userIdQuery         = "userId"
-	commentsLimitQuery  = "commentsLimit"
-	commentLimitDefault = 5
-)
-
 // @Summary GetUsersPosts
 // @Security ApiKeyAuth
 // @Tags posts
-// @Description Get user's posts
+// @Description GetWithAdditions user's posts
 // @ID users-posts
 // @Accept json
 // @Produce json
@@ -116,7 +115,6 @@ const (
 func (h *Handler) getUsersPosts(c *gin.Context) {
 	var posts []domain.Post
 	var userId int
-	var commentsLimit int
 
 	userId, err := strconv.Atoi(c.Query(userIdQuery))
 	if err != nil {
@@ -124,17 +122,7 @@ func (h *Handler) getUsersPosts(c *gin.Context) {
 		return
 	}
 
-	if q := c.Query(commentsLimitQuery); q != "" {
-		commentsLimit, err = strconv.Atoi(q)
-		if err != nil {
-			newResponse(c, http.StatusBadRequest, "invalid query value of comments limit")
-			return
-		}
-	} else {
-		commentsLimit = commentLimitDefault
-	}
-
-	posts, err = h.services.GetUsersPosts(userId, commentsLimit)
+	posts, err = h.services.GetUsersPosts(userId)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -159,6 +147,7 @@ func (h *Handler) getUsersPosts(c *gin.Context) {
 // @Failure 400,500 {object} errorResponse
 // @Router /api/posts/{postId} [patch]
 func (h *Handler) updatePost(c *gin.Context) {
+	// TODO: проверка на владельца поста (middleware ?)
 	var input domain.PostUpdateInput
 	var postId int
 
@@ -195,6 +184,7 @@ func (h *Handler) updatePost(c *gin.Context) {
 // @Failure 400,500 {object} errorResponse
 // @Router /api/posts/{postId} [delete]
 func (h *Handler) deletePost(c *gin.Context) {
+	// TODO: проверка на владельца поста (middleware ?)
 	v := c.Param("postId")
 
 	id, err := strconv.Atoi(v)
@@ -271,7 +261,7 @@ type postsCommentsResponse struct {
 // @Summary GetPostsComments
 // @Security ApiKeyAuth
 // @Tags comments
-// @Description Get post's comments
+// @Description GetWithAdditions post's comments
 // @ID posts-comments
 // @Accept json
 // @Produce json
@@ -283,10 +273,7 @@ func (h *Handler) getPostsComments(c *gin.Context) {
 	var comments []domain.Comment
 	var postId int
 
-	// QUESTION: Может добавить на группу запросов middleware, который будет
-	//           сетать в контекст postId? А то много повторяющегося кода
-	v := c.Param("postId")
-	postId, err := strconv.Atoi(v)
+	postId, err := strconv.Atoi(c.Param("postId"))
 	if err != nil {
 		newResponse(c, http.StatusBadRequest, "invalid path variable value")
 		return
@@ -370,4 +357,72 @@ func (h *Handler) deleteComment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, statusResponse{"ok"})
+}
+
+// @Summary LikePost
+// @Security ApiKeyAuth
+// @Tags likes
+// @Description Like post
+// @ID like-post
+// @Accept json
+// @Produce json
+// @Param postId path int true "post id"
+// @Success 200 {object} statusResponse "ok"
+// @Failure 400,500 {object} errorResponse
+// @Router /api/posts/{postId}/like [post]
+func (h *Handler) likePost(c *gin.Context) {
+	var postId int
+
+	user := c.MustGet(userCtx).(domain.User)
+
+	postId, err := strconv.Atoi(c.Param("postId"))
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid path variable value")
+		return
+	}
+
+	if err := h.services.Like.LikePost(user.Id, postId); err != nil {
+		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("like post error: %s", err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, statusResponse{"ok"})
+}
+
+// @Summary DislikePost
+// @Security ApiKeyAuth
+// @Tags likes
+// @Description Dislike post
+// @ID dislike-post
+// @Accept json
+// @Produce json
+// @Param postId path int true "post id"
+// @Success 200 {object} statusResponse "ok"
+// @Failure 400,500 {object} errorResponse
+// @Router /api/posts/{postId}/dislike [post]
+func (h *Handler) unlikePost(c *gin.Context) {
+	var postId int
+
+	user := c.MustGet(userCtx).(domain.User)
+
+	postId, err := strconv.Atoi(c.Param("postId"))
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid path variable value")
+		return
+	}
+
+	if err := h.services.Like.UnlikePost(user.Id, postId); err != nil {
+		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("dislike post error: %s", err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, statusResponse{"ok"})
+}
+
+func getIntQueryParam(query string) (int, error) {
+	if len(query) == 0 {
+		return 0, errors.New("empty query")
+	}
+
+	return strconv.Atoi(query)
 }

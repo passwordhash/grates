@@ -11,7 +11,8 @@ type Post struct {
 	UsersId int       `json:"users-id" db:"users_id" binding:"required" example:"6296"`
 	Date    time.Time `json:"date" db:"date" binding:"required" example:"2021-01-01T00:00:00Z"`
 
-	Comments []Comment `json:"comments,omitempty" db:"-"`
+	Comments   []Comment `json:"comments" db:"-"`
+	LikesCount int       `json:"likes-count" db:"likes_count"`
 }
 
 type PostUpdateInput struct {

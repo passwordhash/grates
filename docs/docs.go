@@ -35,6 +35,7 @@ const docTemplate = `{
                 "tags": [
                     "comments"
                 ],
+                "summary": "DeleteComment",
                 "operationId": "delete-comment",
                 "parameters": [
                     {
@@ -189,7 +190,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get user's posts",
+                "description": "GetWithAdditions user's posts",
                 "consumes": [
                     "application/json"
                 ],
@@ -245,7 +246,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get post by id",
+                "description": "GetWithAdditions post by id",
                 "consumes": [
                     "application/json"
                 ],
@@ -303,6 +304,7 @@ const docTemplate = `{
                 "tags": [
                     "posts"
                 ],
+                "summary": "DeletePost",
                 "operationId": "delete-post",
                 "parameters": [
                     {
@@ -399,7 +401,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get post's comments",
+                "description": "GetWithAdditions post's comments",
                 "consumes": [
                     "application/json"
                 ],
@@ -492,6 +494,106 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/posts/{postId}/dislike": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Dislike post",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "likes"
+                ],
+                "summary": "DislikePost",
+                "operationId": "dislike-post",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "post id",
+                        "name": "postId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/handler.statusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/posts/{postId}/like": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Like post",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "likes"
+                ],
+                "summary": "LikePost",
+                "operationId": "like-post",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "post id",
+                        "name": "postId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/handler.statusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/handler.errorResponse"
                         }
@@ -717,6 +819,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer",
                     "example": 732436
+                },
+                "likes-count": {
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string",

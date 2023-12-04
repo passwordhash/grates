@@ -18,8 +18,8 @@ type User interface {
 
 type Post interface {
 	Create(post domain.Post) (int, error)
-	Get(postId int) (domain.Post, error)
-	GetUsersPosts(userId int, commentsLimit int) ([]domain.Post, error)
+	GetWithAdditions(postId int) (domain.Post, error)
+	GetUsersPosts(userId int) ([]domain.Post, error)
 	Update(id int, newPost domain.PostUpdateInput) error
 	Delete(id int) error
 }
@@ -31,10 +31,16 @@ type Comment interface {
 	Update(userId, commentId int, newComment domain.CommentUpdateInput) error
 }
 
+type Like interface {
+	LikePost(userId, postId int) error
+	UnlikePost(userId, postId int) error
+}
+
 type Service struct {
 	User
 	Post
 	Comment
+	Like
 }
 
 type Deps struct {
@@ -48,7 +54,8 @@ type Deps struct {
 func NewService(repos *repository.Repository, deps Deps) *Service {
 	return &Service{
 		User:    NewUserService(repos.User, deps.SigingKey, deps.PasswordSalt, deps.AccessTokenTTL, deps.RefreshTokenTTL),
-		Post:    NewPostService(repos.Post),
+		Post:    NewPostService(repos.Post, repos.Comment, repos.Like),
 		Comment: NewCommentService(repos.Comment),
+		Like:    NewLikeService(repos.Like),
 	}
 }

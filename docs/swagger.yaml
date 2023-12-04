@@ -46,6 +46,8 @@ definitions:
       id:
         example: 732436
         type: integer
+      likes-count:
+        type: integer
       title:
         example: Post title
         type: string
@@ -177,6 +179,7 @@ paths:
             $ref: '#/definitions/handler.errorResponse'
       security:
       - ApiKeyAuth: []
+      summary: DeleteComment
       tags:
       - comments
     patch:
@@ -257,7 +260,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get user's posts
+      description: GetWithAdditions user's posts
       operationId: users-posts
       parameters:
       - description: user's id
@@ -318,12 +321,13 @@ paths:
             $ref: '#/definitions/handler.errorResponse'
       security:
       - ApiKeyAuth: []
+      summary: DeletePost
       tags:
       - posts
     get:
       consumes:
       - application/json
-      description: Get post by id
+      description: GetWithAdditions post by id
       operationId: get-post
       parameters:
       - description: post id
@@ -392,7 +396,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get post's comments
+      description: GetWithAdditions post's comments
       operationId: posts-comments
       parameters:
       - description: post id
@@ -461,6 +465,70 @@ paths:
       summary: CreateComment
       tags:
       - comments
+  /api/posts/{postId}/dislike:
+    post:
+      consumes:
+      - application/json
+      description: Dislike post
+      operationId: dislike-post
+      parameters:
+      - description: post id
+        in: path
+        name: postId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: DislikePost
+      tags:
+      - likes
+  /api/posts/{postId}/like:
+    post:
+      consumes:
+      - application/json
+      description: Like post
+      operationId: like-post
+      parameters:
+      - description: post id
+        in: path
+        name: postId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: LikePost
+      tags:
+      - likes
   /auth/refresh:
     post:
       consumes:
