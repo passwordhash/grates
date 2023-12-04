@@ -40,6 +40,8 @@ type Comment interface {
 }
 
 type Like interface {
+	GetPostLikesCount(postId int) (int, error)
+	GetUsersPostLikesCount(userId, postId int) (int, error)
 	LikePost(userId, postId int) error
 	UnlikePost(userId, postId int) error
 }

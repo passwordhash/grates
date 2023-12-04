@@ -147,6 +147,7 @@ func (h *Handler) getUsersPosts(c *gin.Context) {
 // @Failure 400,500 {object} errorResponse
 // @Router /api/posts/{postId} [patch]
 func (h *Handler) updatePost(c *gin.Context) {
+	// TODO: проверка на владельца поста (middleware ?)
 	var input domain.PostUpdateInput
 	var postId int
 
@@ -183,6 +184,7 @@ func (h *Handler) updatePost(c *gin.Context) {
 // @Failure 400,500 {object} errorResponse
 // @Router /api/posts/{postId} [delete]
 func (h *Handler) deletePost(c *gin.Context) {
+	// TODO: проверка на владельца поста (middleware ?)
 	v := c.Param("postId")
 
 	id, err := strconv.Atoi(v)
