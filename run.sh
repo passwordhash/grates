@@ -19,6 +19,8 @@ usage () {
 
     --no-build   Если проект уже скомпилирован, можно запустить без
                  повторной компиляции.
+    --docs       Генерация документации API.
+                 !!! Необходимо установить swag (go get -u github.com/swaggo/swag/cmd/swag)
 HELP_USAGE
     exit 0
 }
@@ -30,6 +32,7 @@ HELP_USAGE
 # Что-то наподобие конфигурации
 is_no_build=false
 is_help=false
+is_docs=false
 for t in $@;do
     if [ $t == "--no-build" ];then
         is_no_build=true
@@ -37,19 +40,28 @@ for t in $@;do
         is_run=true
     elif [ $t == "-h" ] || [ $t == "--help" ];then
         is_help=true
+    elif [ $t == "--docs" ];then
+        is_docs=true
+    else
+        echo "unknown flag $t"
+        usage
+        exit 1
     fi
 done
 
 # Если передан соответствующий флаг, вывести usage info
 $is_help && usage
 
-
 # Генерация документации
-swag init -g ./cmd/http/main.go
+if $is_docs;then
+    echo "run with swag init"
+    swag init -g ./cmd/http/main.go
+fi
 
 # Build проекта
 if ! $is_no_build;then
-    go build -0 ./cmd/main.go
+    echo "run with go build"
+    go build -o main cmd/http/main.go
 else
     echo "run without go build"
 fi

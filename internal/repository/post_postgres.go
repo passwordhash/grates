@@ -19,7 +19,7 @@ func NewPostPostgres(db *sqlx.DB) *PostRepository {
 func (p *PostRepository) Create(post domain.Post) (int, error) {
 	var id int
 
-	query := fmt.Sprintf("INSERT INTO %s (title, content, users_id) VALUES ($1, $2, $3) RETURNING id;", postsTable)
+	query := fmt.Sprintf("INSERT INTO %s (title, content, users_id) VALUES ($1, $2, $3) RETURNING id;", PostsTable)
 	row := p.db.QueryRow(query, post.Title, post.Content, post.UsersId)
 	if err := row.Scan(&id); err != nil {
 		return 0, err
@@ -28,11 +28,23 @@ func (p *PostRepository) Create(post domain.Post) (int, error) {
 	return id, nil
 }
 
-func (p *PostRepository) GetUsersPosts(postId int) ([]domain.Post, error) {
+func (p *PostRepository) Get(postId int) (domain.Post, error) {
+	var post domain.Post
+
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1;", PostsTable)
+	err := p.db.Get(&post, query, postId)
+
+	return post, err
+}
+
+func (p *PostRepository) GetUsersPosts(userId int) ([]domain.Post, error) {
 	var posts []domain.Post
 
-	query := fmt.Sprintf(`SELECT * FROM %s WHERE users_id=$1;`, postsTable)
-	err := p.db.Select(&posts, query, postId)
+	query := fmt.Sprintf(`SELECT * FROM %s WHERE users_id=$1`, PostsTable)
+	err := p.db.Select(&posts, query, userId)
+	if err != nil {
+		return nil, err
+	}
 
 	return posts, err
 }
@@ -58,7 +70,7 @@ func (p *PostRepository) Update(postId int, input domain.PostUpdateInput) error 
 	querySet = querySet[0 : len(querySet)-2]
 	args = append(args, postId)
 
-	query := fmt.Sprintf("UPDATE %s SET %s WHERE id=$%x", postsTable, querySet, argId)
+	query := fmt.Sprintf("UPDATE %s SET %s WHERE id=$%x", PostsTable, querySet, argId)
 	res, err := p.db.Exec(query, args...)
 	if err != nil {
 		return err
@@ -74,7 +86,7 @@ func (p *PostRepository) Update(postId int, input domain.PostUpdateInput) error 
 }
 
 func (p *PostRepository) Delete(postId int) error {
-	query := fmt.Sprintf("DELETE FROM %s WHERE id=$1;", postsTable)
+	query := fmt.Sprintf("DELETE FROM %s WHERE id=$1;", PostsTable)
 	res, err := p.db.Exec(query, postId)
 	if err != nil {
 		return err

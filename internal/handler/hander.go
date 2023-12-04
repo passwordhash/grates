@@ -43,9 +43,28 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		posts := api.Group("/posts")
 		{
 			posts.POST("/", h.createPost)
-			posts.GET("/users/:userId", h.getUsersPosts)
-			posts.PATCH("/:id", h.updatePost)
-			posts.DELETE("/:id", h.deletePost)
+			posts.GET("/", h.getUsersPosts)
+			posts.GET("/:postId", h.getPost)
+			posts.PATCH("/:postId", h.updatePost)
+			posts.DELETE("/:postId", h.deletePost)
+
+			posts.POST("/:postId/like", h.likePost)
+			posts.DELETE("/:postId/like", h.unlikePost)
+
+			// LIKE: /api/posts/6947/comments
+			comments := posts.Group("/:postId/comments")
+			{
+				comments.POST("/", h.createComment)
+				comments.GET("/", h.getPostsComments)
+			}
+
+		}
+
+		// QUESTION: ?
+		comment := api.Group("/comment")
+		{
+			comment.PATCH("/:commentId", h.updateComment)
+			comment.DELETE("/:commentId", h.deleteComment)
 		}
 	}
 

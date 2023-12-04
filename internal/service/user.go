@@ -1,33 +1,30 @@
 package service
 
 import (
-	"crypto/sha1"
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"grates/internal/domain"
 	"grates/internal/repository"
+	"grates/pkg/auth"
 	"math/rand"
 	"time"
 )
 
-const (
-	// TODO: remove!
-	salt = "hjqrhjqw124617ajfhajs"
-)
-
 type UserService struct {
-	repo      repository.User
-	sigingKey string
+	repo         repository.User
+	sigingKey    string
+	passwordSalt string
 
 	accessTokenTTL  time.Duration
 	refreshTokenTTL time.Duration
 }
 
-func NewUserService(repo repository.User, sigingKey string, accessTokenTTL, refreshTokenTTL time.Duration) *UserService {
+func NewUserService(repo repository.User, sigingKey, pswrdSalt string, accessTokenTTL, refreshTokenTTL time.Duration) *UserService {
 	return &UserService{
 		repo:            repo,
 		sigingKey:       sigingKey,
+		passwordSalt:    pswrdSalt,
 		accessTokenTTL:  accessTokenTTL,
 		refreshTokenTTL: refreshTokenTTL,
 	}
@@ -36,7 +33,7 @@ func NewUserService(repo repository.User, sigingKey string, accessTokenTTL, refr
 // CreateUser генерирует хэш пароля, сохраняет пользователя в БД.
 // Возвращает int id созданного пользователя и ошибку.
 func (s *UserService) CreateUser(user domain.User) (int, error) {
-	user.Password = generatePasswordHash(user.Password)
+	user.Password = auth.GeneratePasswordHash(user.Password, s.passwordSalt)
 	return s.repo.CreateUser(user)
 }
 
@@ -54,7 +51,7 @@ func (s *UserService) AuthenticateUser(email, password string) (Tokens, error) {
 		err    error
 	)
 
-	user, err := s.repo.GetUser(email, generatePasswordHash(password))
+	user, err := s.repo.GetUser(email, auth.GeneratePasswordHash(password, s.passwordSalt))
 	if err != nil {
 		return tokens, err
 	}
@@ -167,13 +164,4 @@ func (s *UserService) newRefreshToken() (string, error) {
 		return "", err
 	}
 	return fmt.Sprintf("%x", b), nil
-}
-
-// TODO: перенести в pkg
-// generatePasswordHash генерирует hash пароля.
-func generatePasswordHash(password string) string {
-	hash := sha1.New()
-	hash.Write([]byte(password))
-
-	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
 }
