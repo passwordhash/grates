@@ -130,6 +130,9 @@ func (s *UserService) ParseToken(accessToken string) (domain.User, error) {
 		}
 		return []byte(s.sigingKey), nil
 	})
+	if err != nil {
+		return domain.User{}, err
+	}
 
 	claims, ok := token.Claims.(*tokenClaims)
 	if !ok {

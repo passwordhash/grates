@@ -108,7 +108,6 @@ type usersPostsResponse struct {
 // @Accept json
 // @Produce json
 // @Param userId query int true "user's id"
-// @Param commentsLimit query int false "limit for post's comments"
 // @Success 200 {object} usersPostsResponse "post info"
 // @Failure 400,500 {object} errorResponse
 // @Router /api/posts/ [get]

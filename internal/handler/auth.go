@@ -17,7 +17,7 @@ import (
 // @Produce  json
 // @Param input body domain.User true "account info"
 // @Success 200 {integer} integer 1
-// @Failure 400,404 {object} errorResponse
+// @Failure 400,409,500 {object} errorResponse
 // @Router /auth/sign-up [post]
 func (h *Handler) signUp(c *gin.Context) {
 	var input domain.User
@@ -31,7 +31,7 @@ func (h *Handler) signUp(c *gin.Context) {
 
 	if !user.IsEmtpty() {
 		msg := fmt.Sprintf("user with email %s exists", user.Email)
-		newResponse(c, http.StatusBadRequest, msg)
+		newResponse(c, http.StatusConflict, msg)
 		return
 	}
 

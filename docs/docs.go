@@ -209,12 +209,6 @@ const docTemplate = `{
                         "name": "userId",
                         "in": "query",
                         "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "limit for post's comments",
-                        "name": "commentsLimit",
-                        "in": "query"
                     }
                 ],
                 "responses": {

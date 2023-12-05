@@ -268,10 +268,6 @@ paths:
         name: userId
         required: true
         type: integer
-      - description: limit for post's comments
-        in: query
-        name: commentsLimit
-        type: integer
       produces:
       - application/json
       responses:
