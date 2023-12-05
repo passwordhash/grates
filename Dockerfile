@@ -6,10 +6,9 @@ ADD . /app
 
 WORKDIR /app
 
-RUN chmod +x wait-for-postgres.sh
+# RUN #go build -o main ./cmd/http/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o main cmd/http/main.go
 
-RUN go build -o main ./cmd/main.go
-
-EXPOSE 8080
+EXPOSE 8000
 
 CMD ["/app/main"]

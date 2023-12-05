@@ -12,7 +12,7 @@ import (
 	"grates/internal/repository"
 	"grates/internal/service"
 	"grates/pkg/app"
-	repository2 "grates/pkg/repository"
+	repoConf "grates/pkg/repository"
 	"grates/pkg/server"
 	"os"
 )
@@ -44,7 +44,7 @@ func main() {
 	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%s", viper.GetString("host"), viper.GetString("port"))
 
 	// PosgtgreSQL connect
-	db, err := repository2.NewPostgresDB(repository2.PSQLConfig{
+	db, err := repoConf.NewPostgresDB(repoConf.PSQLConfig{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
@@ -59,7 +59,7 @@ func main() {
 	defer func() { db.Close() }()
 
 	// Redis connect
-	rdb := repository2.NewRedisDB(repository2.RedisConfig{Addr: viper.GetString("addr")})
+	rdb := repoConf.NewRedisDB(repoConf.RedisConfig{Addr: viper.GetString("rdb.addr")})
 	if _, err := rdb.Ping(context.Background()).Result(); err != nil {
 		logrus.Fatalf("failed to initialize redis db: %s", err.Error())
 	}

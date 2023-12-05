@@ -13,7 +13,7 @@ services:
     image: redis
     restart: always
     ports:
-      - "6379:6379"
+      - "63790:6379"
   migrate:
     image: migrate/migrate
     volumes:
@@ -24,6 +24,17 @@ services:
       - db
     depends_on:
       - db
+
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - rdb
+      - migrate
+    environment:
+      - DATABASE_URL=db
 
 #  server:
 #    build: .

@@ -3,13 +3,13 @@ port: "8000"
 
 db:
   username: "postgres"
-  host: "localhost"
-  port: "54320"
+  host: "db"
+  port: "5432"
   dbname: "postgres"
   sslmode: "disable"
 
 rdb:
-  addr: "localhost:6379"
+  addr: "rdb:6379"
 
 auth:
   accessTokenTTL: 120m
