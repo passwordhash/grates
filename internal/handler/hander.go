@@ -26,14 +26,14 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		c.Redirect(http.StatusMovedPermanently, "/docs/index.html")
 	})
 
-	auth := router.Group("/auth")
+	auth := router.Group("/auth", h.CORSMiddleware)
 	{
 		auth.POST("/sign-up", h.signUp)
 		auth.POST("/sign-in", h.signIn)
 		auth.POST("/refresh", h.refreshTokens)
 	}
 
-	api := router.Group("/api", h.userIdentity)
+	api := router.Group("/api", h.userIdentity, h.CORSMiddleware)
 	{
 		users := api.Group("/users")
 		{
