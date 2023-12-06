@@ -1,13 +1,13 @@
 package handler
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"grates/internal/service"
-	"net/http"
-
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 	_ "grates/docs"
+	"grates/internal/service"
+	"net/http"
 )
 
 type Handler struct {
@@ -26,14 +26,16 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		c.Redirect(http.StatusMovedPermanently, "/docs/index.html")
 	})
 
-	auth := router.Group("/auth", h.CORSMiddleware)
+	router.Use(cors.Default())
+
+	auth := router.Group("/auth")
 	{
 		auth.POST("/sign-up", h.signUp)
 		auth.POST("/sign-in", h.signIn)
 		auth.POST("/refresh", h.refreshTokens)
 	}
 
-	api := router.Group("/api", h.userIdentity, h.CORSMiddleware)
+	api := router.Group("/api", h.userIdentity)
 	{
 		users := api.Group("/users")
 		{
