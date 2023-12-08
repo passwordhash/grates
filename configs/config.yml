@@ -1,5 +1,4 @@
-#host: "localhost"
-host: "mgtu.tech"
+host: "localhost"
 port: "8000"
 
 db:
