@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -33,11 +34,22 @@ import (
 func main() {
 	//logrus.SetFormatter(new(logrus.JSONFormatter))
 
-	if err := godotenv.Load(); err != nil {
+	configFileName := "config"
+	envFileName := ".env"
+
+	isProd := flag.Bool("prod", false, "if the project is launched for production")
+	flag.Parse()
+
+	if *isProd {
+		configFileName = "config.prod"
+		envFileName = ".prod.env"
+	}
+
+	if err := godotenv.Load(envFileName); err != nil {
 		logrus.Fatalf("error loading env vars: %s", err.Error())
 	}
 
-	if err := app.InitConfig(); err != nil {
+	if err := app.InitConfig(configFileName); err != nil {
 		logrus.Fatalf("error initializing configs: %s", err.Error())
 	}
 

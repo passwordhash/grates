@@ -1,0 +1,16 @@
+host: "mgtu.tech"
+port: "8000"
+
+db:
+  username: "postgres"
+  host: "db"
+  port: "5432"
+  dbname: "postgres"
+  sslmode: "disable"
+
+rdb:
+  addr: "rdb:6379"
+
+auth:
+  accessTokenTTL: 120m
+  refreshTokenTTL: 240m
