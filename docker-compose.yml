@@ -11,6 +11,8 @@ services:
       POSTGRES_PASSWORD: root
     ports:
       - "54320:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
 
   rdb:
     image: redis
@@ -27,7 +29,7 @@ services:
     links:
       - db
     depends_on:
-      - app
+      - db
 
   app:
     build: .
@@ -41,6 +43,8 @@ services:
       - DATABASE_URL=db
       - ENV_FILE=${ENV_FILE_NAME}
 
-#
+volumes:
+  pgdata:
+
 #https://stacktuts:
 #  com/how-to-pass-arguments-within-docker-compose:
