@@ -1,15 +1,13 @@
 
-prod: export-prod docker-build docker-up
+prod: docker-build-prod docker-up
 
-#timeout:
-#	sleep 5
-#	echo "hello"
+dev: docker-build-dev docker-up
 
-export-prod:
-	export ENV_FILE_NAME=.prod.env
+docker-build-dev:
+	ENV_FILE_NAME=.env docker compose build
 
-docker-build:
-	docker compose build
+docker-build-prod:
+	ENV_FILE_NAME=.prod.env docker compose build
 
 docker-up:
 	docker compose up -d
