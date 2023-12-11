@@ -4,16 +4,22 @@ services:
   db:
     image: postgres
     restart: always
+# TODO
+#    env_file: .env https://medium.com/@krishnaregmi/wait-for-it-docker-compose-f0bac30f3357
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
     ports:
       - "54320:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
   rdb:
     image: redis
     restart: always
     ports:
       - "63790:6379"
+
   migrate:
     image: migrate/migrate
     volumes:
@@ -29,20 +35,16 @@ services:
     build: .
     ports:
       - "8000:8000"
+    entrypoint: "./wait-for-it.sh db:5432 -- /app/main"
     depends_on:
       - db
       - rdb
-      - migrate
     environment:
       - DATABASE_URL=db
+      - ENV_FILE=${ENV_FILE_NAME}
 
-#  server:
-#    build: .
-#    command: ./main
-#    ports:
-#      - 8000:8000
-##    environment:
-##      - PORT=8080
-##      - DATABASE_URL=db
-#    depends_on:
-#      - db
+volumes:
+  pgdata:
+
+#https://stacktuts:
+#  com/how-to-pass-arguments-within-docker-compose:
