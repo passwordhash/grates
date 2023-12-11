@@ -33,17 +33,14 @@ services:
     build: .
     ports:
       - "8000:8000"
+    entrypoint: "./wait-for-it.sh db:5432 -- /app/main"
     depends_on:
       - db
       - rdb
     environment:
       - DATABASE_URL=db
+      - ENV_FILE=${ENV_FILE_NAME}
 
-  app-prod:
-    build: .
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-      - rdb
-    env_file: .prod.env
+#
+#https://stacktuts:
+#  com/how-to-pass-arguments-within-docker-compose:

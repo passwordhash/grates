@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -16,6 +15,11 @@ import (
 	repoConf "grates/pkg/repository"
 	"grates/pkg/server"
 	"os"
+)
+
+const (
+	defaultConfigName  = "config"
+	defaultEnvFileName = ".env"
 )
 
 // @title Grates API
@@ -34,26 +38,41 @@ import (
 func main() {
 	//logrus.SetFormatter(new(logrus.JSONFormatter))
 
-	configFileName := "config"
-	envFileName := ".env"
+	envFileName := defaultEnvFileName
+	configFileName := defaultConfigName
 
-	isProd := flag.Bool("prod", false, "if the project is launched for production")
-	flag.Parse()
-
-	if *isProd {
-		configFileName = "config.prod"
-		envFileName = ".prod.env"
+	envFile := os.Getenv("ENV_FILE")
+	if len(envFile) != 0 {
+		envFileName = envFile
 	}
 
 	if err := godotenv.Load(envFileName); err != nil {
-		logrus.Fatalf("error loading env vars: %s", err.Error())
+		logrus.Errorf("cannot load env file %s: %s\ntrying lo load .env", envFileName, err.Error())
+		envFileName = defaultEnvFileName
+		if err := godotenv.Load(); err != nil {
+			logrus.Fatalf("error loading env vars: %s", err.Error())
+		}
+	}
+
+	configFile := os.Getenv("CONFIG_FILE_NAME")
+	if len(configFile) != 0 {
+		configFileName = configFile
 	}
 
 	if err := app.InitConfig(configFileName); err != nil {
-		logrus.Fatalf("error initializing configs: %s", err.Error())
+		logrus.Errorf("cannot load config file %s: %s\ntrying to load %s", configFileName, err.Error(), defaultConfigName)
+		configFileName = defaultConfigName
+		if err := app.InitConfig(configFileName); err != nil {
+			logrus.Fatalf("error initializing configs: %s", err.Error())
+		}
 	}
 
+	logrus.Infof("%s env file was loaded", envFileName)
+	logrus.Infof("%s config file was loaded", configFileName)
+
 	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%s", viper.GetString("host"), viper.GetString("port"))
+
+	logrus.Info(viper.GetString("host"))
 
 	// PosgtgreSQL connect
 	db, err := repoConf.NewPostgresDB(repoConf.PSQLConfig{

@@ -1,20 +1,15 @@
 
-setup: docker-build up-dbs timeout up-prod
+prod: export-prod docker-build docker-up
 
-# Костыль
-timeout:
-	sleep 5
-	echo "hello"
+#timeout:
+#	sleep 5
+#	echo "hello"
+
+export-prod:
+	export ENV_FILE_NAME=.prod.env
 
 docker-build:
-	docker compose build db rdb migrate app
+	docker compose build
 
-docker-build-prod:
-	docker compose build db rdb migrate app-prod
-
-up-dbs:
-	docker compose up db rdb -d
-
-# TODO: решить как передать флаг в golang
-up-prod:
-	docker compose up app-prod migrate
+docker-up:
+	docker compose up -d
