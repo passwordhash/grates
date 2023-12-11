@@ -19,4 +19,4 @@ docker-up-prod:
 	ENV_FILE_NAME=.prod.env docker compose up -d
 
 docker-up:
-	docker compose up -d
+	ENV_FILE_NAME=.env docker compose up -d
