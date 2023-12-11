@@ -1,7 +1,13 @@
 
-prod: docker-build-prod docker-up-prod
+prod: docker-build-prod docker-up-prod timeout migrate-prod
 
-dev: docker-build-dev docker-up
+dev: docker-build-dev docker-up timeout migrate-prod
+
+migrate-prod:
+	docker compose up migrate
+
+timeout:
+	sleep 4
 
 docker-build-dev:
 	ENV_FILE_NAME=.env docker compose build
