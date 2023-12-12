@@ -31,6 +31,10 @@ type Comment interface {
 	Update(userId, commentId int, newComment domain.CommentUpdateInput) error
 }
 
+type Email interface {
+	SendAuthEmail(to, name string) error
+}
+
 type Like interface {
 	LikePost(userId, postId int) error
 	UnlikePost(userId, postId int) error
@@ -41,6 +45,7 @@ type Service struct {
 	Post
 	Comment
 	Like
+	Email
 }
 
 type Deps struct {
@@ -49,6 +54,16 @@ type Deps struct {
 
 	AccessTokenTTL  time.Duration
 	RefreshTokenTTL time.Duration
+
+	EmailDeps
+}
+
+type EmailDeps struct {
+	SmtpHost string
+	SmtpPort int
+
+	From     string
+	Password string
 }
 
 func NewService(repos *repository.Repository, deps Deps) *Service {
@@ -57,5 +72,6 @@ func NewService(repos *repository.Repository, deps Deps) *Service {
 		Post:    NewPostService(repos.Post, repos.Comment, repos.Like),
 		Comment: NewCommentService(repos.Comment),
 		Like:    NewLikeService(repos.Like),
+		Email:   NewEmailService(deps.EmailDeps),
 	}
 }

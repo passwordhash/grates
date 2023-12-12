@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	_ "grates/docs"
 	"grates/internal/domain"
 	"grates/internal/service"
@@ -27,22 +28,28 @@ func (h *Handler) signUp(c *gin.Context) {
 		return
 	}
 
-	user, err := h.services.GetUserByEmail(input.Email)
+	//user, err := h.services.GetUserByEmail(input.Email)
+	//
+	//if !user.IsEmtpty() {
+	//	msg := fmt.Sprintf("user with email %s exists", user.Email)
+	//	newResponse(c, http.StatusConflict, msg)
+	//	return
+	//}
+	//
+	//id, err := h.services.User.CreateUser(input)
+	//if err != nil {
+	//	newResponse(c, http.StatusInternalServerError, err.Error())
+	//	return
+	//}
 
-	if !user.IsEmtpty() {
-		msg := fmt.Sprintf("user with email %s exists", user.Email)
-		newResponse(c, http.StatusConflict, msg)
-		return
-	}
-
-	id, err := h.services.User.CreateUser(input)
+	err := h.services.Email.SendAuthEmail(input.Email, input.Name)
 	if err != nil {
-		newResponse(c, http.StatusInternalServerError, err.Error())
-		return
+		logrus.Error(err)
+		newResponse(c, http.StatusConflict, "sadfasfsadf")
 	}
 
 	c.JSON(http.StatusOK, map[string]interface{}{
-		"id": id,
+		"id": 0,
 	})
 }
 

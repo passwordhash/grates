@@ -46,10 +46,11 @@ make dev
 ## 🚀 Запуск вручную
 
 ```bash
-docker compose build 
+docker compose build db rdb migrate
 docker compose up db rdb -d
 sleep 2
-docker compose up app migrate -d
+docker compose up grate -d
+go run ./cmd/http/main.go
 ```
 
 ## 📄 Документация

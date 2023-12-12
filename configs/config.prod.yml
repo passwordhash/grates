@@ -14,3 +14,8 @@ rdb:
 auth:
   accessTokenTTL: 120m
   refreshTokenTTL: 240m
+
+email:
+  smtpHost: "smtp.yandex.ru"
+  smtpPort: "465"
+  from: "iam@it-yaroslav.ru"

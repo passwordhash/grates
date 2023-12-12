@@ -103,6 +103,12 @@ func main() {
 		PasswordSalt:    os.Getenv("PASSWORD_SALT"),
 		AccessTokenTTL:  viper.GetDuration("auth.accessTokenTTL"),
 		RefreshTokenTTL: viper.GetDuration("auth.refreshTokenTTL"),
+		EmailDeps: service.EmailDeps{
+			SmtpHost: viper.GetString("email.smtpHost"),
+			SmtpPort: viper.GetInt("email.smtpPort"),
+			From:     viper.GetString("email.from"),
+			Password: os.Getenv("SMTP_PASSWORD"),
+		},
 	})
 	handlers := handler.NewHandler(services)
 
