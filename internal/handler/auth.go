@@ -8,6 +8,7 @@ import (
 	"grates/internal/domain"
 	"grates/internal/service"
 	"net/http"
+	"time"
 )
 
 // @Summary SignUp
@@ -42,14 +43,29 @@ func (h *Handler) signUp(c *gin.Context) {
 	//	return
 	//}
 
-	err := h.services.Email.SendAuthEmail(input.Email, input.Name)
-	if err != nil {
-		logrus.Error(err)
-		newResponse(c, http.StatusConflict, "sadfasfsadf")
-	}
+	id := 1
+
+	//err = h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
+	//if err != nil {
+	//	logrus.Error(err)
+	//	newResponse(c, http.StatusConflict, "sadfasfsadf")
+	//}
+
+	//errCh := make(chan error)
+
+	// Отправляем письмо в отдельной горутине
+	go func() {
+		err := h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
+		if err != nil {
+			logrus.Errorf("error sending email: %s", err.Error())
+			// TODO: подумать над тем, чтобы отправлять письмо повторно
+			time.Sleep(5 * time.Second)
+			_ = h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
+		}
+	}()
 
 	c.JSON(http.StatusOK, map[string]interface{}{
-		"id": 0,
+		"id": id,
 	})
 }
 

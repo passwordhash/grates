@@ -4,7 +4,8 @@ CREATE TABLE users
     name varchar(100) not null,
     surname varchar(100),
     email varchar(255) not null unique,
-    password_hash varchar(255) not null
+    password_hash varchar(255) not null,
+    is_confirmed boolean default FALSE
 );
 
 CREATE TABLE posts
@@ -32,3 +33,10 @@ CREATE TABLE likes_posts
     posts_id int references posts (id) on delete cascade,
     date timestamp default CURRENT_TIMESTAMP
 );
+
+CREATE TABLE auth_emails
+(
+    id serial not null unique,
+    users_id int references users (id) on delete cascade,
+    hash varchar(100)
+)

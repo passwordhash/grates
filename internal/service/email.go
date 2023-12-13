@@ -3,17 +3,33 @@ package service
 import (
 	"crypto/tls"
 	gomail "gopkg.in/mail.v2"
+	"grates/internal/repository"
+	"grates/pkg/utils"
 )
 
 type EmailService struct {
-	D EmailDeps
+	D    EmailDeps
+	repo repository.EmailRepository
 }
 
-func NewEmailService(d EmailDeps) *EmailService {
-	return &EmailService{D: d}
+func NewEmailService(repo repository.EmailRepository, d EmailDeps) *EmailService {
+	return &EmailService{D: d, repo: repo}
 }
 
-func (e *EmailService) SendAuthEmail(to, name string) error {
+// ReplaceConfirmationEmail если email уже существует, удаляет его, создает новое письмо и отправляет
+func (e *EmailService) ReplaceConfirmationEmail(userId int, to, name string) error {
+	hash, err := utils.GenerateHash(24)
+	if err != nil {
+		hash = utils.RandStringBytesRmndr(24)
+	}
+
+	if err = e.repo.ReplaceEmail(userId, hash); err != nil {
+		return err
+	}
+
+	return e.sendAuthEmail(to, name)
+}
+func (e *EmailService) sendAuthEmail(to, name string) error {
 	m := gomail.NewMessage()
 	m.SetHeader("From", e.D.From)
 	m.SetHeader("To", to)

@@ -8,6 +8,12 @@ type User struct {
 	Password string `json:"password" db:"password_hash"`
 }
 
+type AuthEmail struct {
+	Id      int    `db:"id"`
+	UsersId int    `db:"users_id"`
+	Hash    string `db:"hash"`
+}
+
 func (u *User) IsEmtpty() bool {
 	var emptyUser User
 	return emptyUser == *u

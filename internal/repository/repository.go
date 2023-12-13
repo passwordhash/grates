@@ -11,6 +11,7 @@ const (
 	PostsTable      = "posts"
 	CommentsTable   = "comments"
 	LikesPostsTable = "likes_posts"
+	AuthEmailsTable = "auth_emails"
 )
 
 type User interface {
@@ -46,11 +47,16 @@ type Like interface {
 	UnlikePost(userId, postId int) error
 }
 
+type Email interface {
+	ReplaceEmail(userId int, hash string) error
+}
+
 type Repository struct {
 	User    *UserRepository
 	Post    *PostRepository
 	Comment *CommentRepository
 	Like    *LikeRepository
+	Email   *EmailRepository
 }
 
 type UserRepository struct {
@@ -68,5 +74,6 @@ func NewRepository(db *sqlx.DB, rdb *redis.Client) *Repository {
 		Post:    NewPostPostgres(db),
 		Comment: NewCommentRepository(db),
 		Like:    NewLikeRepository(db),
+		Email:   NewEmailRepository(db),
 	}
 }
