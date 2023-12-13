@@ -37,6 +37,10 @@ func (s *UserService) CreateUser(user domain.User) (int, error) {
 	return s.repo.CreateUser(user)
 }
 
+func (s *UserService) GetUserById(id int) (domain.User, error) {
+	return s.repo.GetUserById(id)
+}
+
 // Tokens структура по типу Double. Хранит пару access и refresh token
 type Tokens struct {
 	Access  string

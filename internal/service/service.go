@@ -8,6 +8,7 @@ import (
 
 type User interface {
 	CreateUser(user domain.User) (int, error)
+	GetUserById(id int) (domain.User, error)
 	GetUserByEmail(email string) (domain.User, error)
 	GetAllUsers() ([]domain.User, error)
 	AuthenticateUser(email string, password string) (Tokens, error)

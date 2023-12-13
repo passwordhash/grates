@@ -34,6 +34,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		auth.POST("/sign-up", h.signUp)
 		auth.POST("/sign-in", h.signIn)
 		auth.POST("/refresh", h.refreshTokens)
+		//auth.POST("/confirm", h.confirmEmail)
+		auth.POST("/resend/:userId", h.resendEmail)
 	}
 
 	api := router.Group("/api", h.userIdentity)

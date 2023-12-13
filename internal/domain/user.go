@@ -1,11 +1,12 @@
 package domain
 
 type User struct {
-	Id       int    `json:"id" db:"id"`
-	Name     string `json:"name" binding:"required"`
-	Surname  string `json:"surname"`
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"password" db:"password_hash"`
+	Id          int    `json:"id" db:"id"`
+	Name        string `json:"name" binding:"required"`
+	Surname     string `json:"surname"`
+	Email       string `json:"email" binding:"required"`
+	Password    string `json:"password" db:"password_hash"`
+	IsConfirmed bool   `json:"is_confirmed" db:"is_confirmed" default:"false"`
 }
 
 type AuthEmail struct {

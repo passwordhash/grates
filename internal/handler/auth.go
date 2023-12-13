@@ -45,15 +45,6 @@ func (h *Handler) signUp(c *gin.Context) {
 
 	id := 1
 
-	//err = h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
-	//if err != nil {
-	//	logrus.Error(err)
-	//	newResponse(c, http.StatusConflict, "sadfasfsadf")
-	//}
-
-	//errCh := make(chan error)
-
-	// Отправляем письмо в отдельной горутине
 	go func() {
 		err := h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
 		if err != nil {

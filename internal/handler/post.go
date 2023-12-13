@@ -184,9 +184,7 @@ func (h *Handler) updatePost(c *gin.Context) {
 // @Router /api/posts/{postId} [delete]
 func (h *Handler) deletePost(c *gin.Context) {
 	// TODO: проверка на владельца поста (middleware ?)
-	v := c.Param("postId")
-
-	id, err := strconv.Atoi(v)
+	id, err := strconv.Atoi(c.Param("postId"))
 	if err != nil {
 		newResponse(c, http.StatusBadRequest, "invalid path variable value")
 		return
