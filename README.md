@@ -1,6 +1,6 @@
+<img src="./assets/logo_header.png" alt="drawing" width="700"/>
 
-<!--![Logo](./assets/logo.png)-->
-<img src="./assets/logo_header_ex.png" alt="drawing" width="700"/>
+
 <!--<img src="./assets/DOCKER.webp" width="200" />-->
 <a href="https://golang.com"><img src="./assets/made-with-go.svg" alt="drawing" /></a>
 <a href="https://docker.com"><img src="./assets/deploys-on-docker.svg" alt="drawing" /></a>
