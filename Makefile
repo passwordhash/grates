@@ -3,6 +3,10 @@ prod: docker-build-prod docker-up-prod timeout migrate-up
 
 dev: docker-build-dev docker-up-dev timeout migrate-up go-run
 
+db-reload: db-down db-up
+
+# ==================================================================================================
+
 migrate-up:
 	docker compose up migrate
 
@@ -23,3 +27,9 @@ docker-up-dev:
 
 go-run:
 	go run ./cmd/http/main.go
+
+db-up:
+	migrate -path ./schema -database 'postgres://postgres:root@localhost:54320/postgres?sslmode=disable' up
+
+db-down:
+	migrate -path ./schema -database 'postgres://postgres:root@localhost:54320/postgres?sslmode=disable' down

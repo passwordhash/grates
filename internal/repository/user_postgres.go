@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"grates/internal/domain"
 )
 
@@ -23,6 +24,8 @@ func (r *UserRepository) CreateUser(user domain.User) (int, error) {
 // GetUser возвращает domain.User, если пользователь с такой почтой и паролем сущетсвует
 func (r *UserRepository) GetUser(email, password string) (domain.User, error) {
 	var user domain.User
+
+	logrus.Info(password)
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE email=$1 AND password_hash=$2", UsersTable)
 	err := r.db.Get(&user, query, email, password)

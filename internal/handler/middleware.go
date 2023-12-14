@@ -36,5 +36,11 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		return
 	}
 
+	// Проверка на подтверждение почты
+	if !user.IsConfirmed {
+		newResponse(c, http.StatusUnauthorized, "email is not confirmed")
+		return
+	}
+
 	c.Set(userCtx, user)
 }

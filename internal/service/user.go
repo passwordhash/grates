@@ -54,7 +54,6 @@ func (s *UserService) AuthenticateUser(email, password string) (Tokens, error) {
 		tokens Tokens
 		err    error
 	)
-
 	user, err := s.repo.GetUser(email, auth.GeneratePasswordHash(password, s.passwordSalt))
 	if err != nil {
 		return tokens, err

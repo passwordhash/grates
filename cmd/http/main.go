@@ -108,6 +108,7 @@ func main() {
 			SmtpPort: viper.GetInt("email.smtpPort"),
 			From:     viper.GetString("email.from"),
 			Password: os.Getenv("SMTP_PASSWORD"),
+			BaseUrl:  viper.GetString("host") + ":" + viper.GetString("port"),
 		},
 	})
 	handlers := handler.NewHandler(services)

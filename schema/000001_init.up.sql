@@ -38,5 +38,5 @@ CREATE TABLE auth_emails
 (
     id serial not null unique,
     users_id int references users (id) on delete cascade,
-    hash varchar(100)
+    hash varchar(255)
 )

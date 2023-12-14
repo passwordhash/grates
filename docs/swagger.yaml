@@ -73,6 +73,9 @@ definitions:
         type: string
       id:
         type: integer
+      is_confirmed:
+        default: false
+        type: boolean
       name:
         type: string
       password:
@@ -525,6 +528,41 @@ paths:
       summary: LikePost
       tags:
       - likes
+  /auth/confirm/:
+    get:
+      consumes:
+      - application/json
+      description: confirm email
+      operationId: sign-up
+      parameters:
+      - description: user's id
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: hash
+        in: query
+        name: hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: ConfirmEmail
+      tags:
+      - auth
   /auth/refresh:
     post:
       consumes:
@@ -554,6 +592,40 @@ paths:
           schema:
             $ref: '#/definitions/handler.errorResponse'
       summary: RefreshTokens
+      tags:
+      - auth
+  /auth/resend/{userId}:
+    post:
+      consumes:
+      - application/json
+      description: resend confirmation email
+      operationId: resend-email
+      parameters:
+      - description: user's id
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Resend email
       tags:
       - auth
   /auth/sign-in:

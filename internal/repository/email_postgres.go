@@ -32,6 +32,20 @@ func (e *EmailRepository) ReplaceEmail(userId int, hash string) error {
 	return tx.Commit()
 }
 
+func (e *EmailRepository) ConfirmEmail(hash string) error {
+	// TODO: может стоит удалять запись из таблицы auth_emails после подтверждения?
+	query := fmt.Sprintf(`
+	UPDATE %s
+	    SET is_confirmed = TRUE
+	FROM %s
+	WHERE users.id = auth_emails.users_id
+	AND auth_emails.hash = $1
+`, UsersTable, AuthEmailsTable)
+	_, err := e.db.Exec(query, hash)
+
+	return err
+}
+
 func NewEmailRepository(db *sqlx.DB) *EmailRepository {
 	return &EmailRepository{db: db}
 }

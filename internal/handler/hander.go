@@ -34,7 +34,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		auth.POST("/sign-up", h.signUp)
 		auth.POST("/sign-in", h.signIn)
 		auth.POST("/refresh", h.refreshTokens)
-		//auth.POST("/confirm", h.confirmEmail)
+		// Этот запрос должен быть POST, но есть проблема с отправкой формы из письма
+		auth.GET("/confirm/", h.confirmEmail)
 		auth.POST("/resend/:userId", h.resendEmail)
 	}
 
@@ -65,7 +66,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 		}
 
-		// QUESTION: ?
 		comment := api.Group("/comment")
 		{
 			comment.PATCH("/:commentId", h.updateComment)

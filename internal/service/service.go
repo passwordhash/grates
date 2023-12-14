@@ -34,7 +34,8 @@ type Comment interface {
 
 type Email interface {
 	ReplaceConfirmationEmail(userId int, to, name string) error
-	sendAuthEmail(to, name string) error
+	ConfirmEmail(hash string) error
+	sendAuthEmail(to, name, hash string) error
 }
 
 type Like interface {
@@ -66,6 +67,8 @@ type EmailDeps struct {
 
 	From     string
 	Password string
+
+	BaseUrl string
 }
 
 func NewService(repos *repository.Repository, deps Deps) *Service {

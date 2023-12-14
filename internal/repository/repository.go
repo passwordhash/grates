@@ -49,6 +49,7 @@ type Like interface {
 
 type Email interface {
 	ReplaceEmail(userId int, hash string) error
+	ConfirmEmail(userId int, hash string) error
 }
 
 type Repository struct {

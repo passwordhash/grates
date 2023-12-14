@@ -29,21 +29,18 @@ func (h *Handler) signUp(c *gin.Context) {
 		return
 	}
 
-	//user, err := h.services.GetUserByEmail(input.Email)
-	//
-	//if !user.IsEmtpty() {
-	//	msg := fmt.Sprintf("user with email %s exists", user.Email)
-	//	newResponse(c, http.StatusConflict, msg)
-	//	return
-	//}
-	//
-	//id, err := h.services.User.CreateUser(input)
-	//if err != nil {
-	//	newResponse(c, http.StatusInternalServerError, err.Error())
-	//	return
-	//}
+	user, err := h.services.GetUserByEmail(input.Email)
+	if !user.IsEmtpty() {
+		msg := fmt.Sprintf("user with email %s exists", user.Email)
+		newResponse(c, http.StatusConflict, msg)
+		return
+	}
 
-	id := 1
+	id, err := h.services.User.CreateUser(input)
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	go func() {
 		err := h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
@@ -51,8 +48,10 @@ func (h *Handler) signUp(c *gin.Context) {
 			logrus.Errorf("error sending email: %s", err.Error())
 			// TODO: подумать над тем, чтобы отправлять письмо повторно
 			time.Sleep(5 * time.Second)
-			_ = h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
+			h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
+			return
 		}
+		logrus.Infof("confirmation email sent to %s", input.Email)
 	}()
 
 	c.JSON(http.StatusOK, map[string]interface{}{

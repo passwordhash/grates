@@ -9,4 +9,3 @@ DROP TABLE likes_posts CASCADE;
 
 DROP TABLE auth_emails CASCADE;
 
-x
