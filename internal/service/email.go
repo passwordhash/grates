@@ -84,8 +84,7 @@ padding: 0;">
             <h1>Подтверждение Аккаунта</h1>
             <p>Привет, ` + name + ` !</p>
             <p>Спасибо за регистрацию в Grates. Пожалуйста, нажмите на кнопку ниже, чтобы подтвердить свой аккаунт.</p>
-          <form action=" ` + confirmUrl + ` " method="get">
-                <input type="submit" value="Подтвердить Аккаунт" class="button" style="cursor: pointer;
+                <a href="` + confirmUrl + `" target="_blank" class="submit button" style="cursor: pointer;
                 display: inline-block;
                 padding: 10px 20px;
                 margin-top: 20px;
@@ -94,8 +93,7 @@ padding: 0;">
                 text-decoration: none;
                 border-radius: 4px;
                 border: 0;
-                font-weight: bold;"/>
-            </form> 
+                font-weight: bold;">Подтвердить Аккаунт</a>
         <footer style="text-align: center; margin-top: 30px; font-size: 0.9em; color: #666;">
             Если у вас возникли вопросы, свяжитесь с нами по адресу ` + e.D.From + `
         </footer>
