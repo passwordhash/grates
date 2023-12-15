@@ -11,14 +11,21 @@ import (
 	"time"
 )
 
+type signUpInput struct {
+	Email    string `json:"email" binding:"required"`
+	Name     string `json:"name" binding:"required"`
+	Surname  string `json:"surname"`
+	Password string `json:"password" binding:"required"`
+}
+
 // @Summary SignUp
 // @Tags auth
 // @Description create account
 // @ID create-account
 // @Accept  json
 // @Produce  json
-// @Param input body domain.User true "account info"
-// @Success 200 {integer} integer 1
+// @Param input body signUpInput true "account info"
+// @Success 200 {object} idResponse
 // @Failure 400,409,500 {object} errorResponse
 // @Router /auth/sign-up [post]
 func (h *Handler) signUp(c *gin.Context) {

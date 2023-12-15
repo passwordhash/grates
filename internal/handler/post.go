@@ -28,7 +28,7 @@ type createPostInput struct {
 // @Accept json
 // @Produce json
 // @Param input body createPostInput true "post info"
-// @Success 200 {integer} postId
+// @Success 200 {object} idResponse
 // @Failure 400,401,500 {object} errorResponse
 // @Router /api/posts [post]
 func (h *Handler) createPost(c *gin.Context) {
@@ -61,9 +61,7 @@ func (h *Handler) createPost(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"postId": postId,
-	})
+	c.JSON(http.StatusOK, idResponse{Id: postId})
 }
 
 // @Summary GetPost
@@ -141,7 +139,7 @@ func (h *Handler) getUsersPosts(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param input body domain.PostUpdateInput true "new post data"
-// @Param userId path int true "post id"
+// @Param postId path int true "post id"
 // @Success 200 {object} statusResponse "ok"
 // @Failure 400,500 {object} errorResponse
 // @Router /api/posts/{postId} [patch]
@@ -179,7 +177,7 @@ func (h *Handler) updatePost(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param userId path int true "post id"
-// @Success 200 {string} status "ok"
+// @Success 200 {object} statusResponse
 // @Failure 400,500 {object} errorResponse
 // @Router /api/posts/{postId} [delete]
 func (h *Handler) deletePost(c *gin.Context) {
@@ -207,7 +205,7 @@ func (h *Handler) deletePost(c *gin.Context) {
 // @Produce json
 // @Param input body domain.CommentCreateInput true "comment info"
 // @Param postId path int true "post id"
-// @Success 200 {integer} commentId
+// @Success 200 {object} idResponse
 // @Failure 400,401,500 {object} errorResponse
 // @Router /api/posts/{postId}/comments [post]
 func (h *Handler) createComment(c *gin.Context) {
@@ -245,9 +243,7 @@ func (h *Handler) createComment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"id": commentId,
-	})
+	c.JSON(http.StatusOK, idResponse{Id: commentId})
 }
 
 type postsCommentsResponse struct {
@@ -350,66 +346,6 @@ func (h *Handler) deleteComment(c *gin.Context) {
 
 	if err := h.services.Comment.Delete(user.Id, commentId); err != nil {
 		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("delete comment error: %s", err.Error()))
-		return
-	}
-
-	c.JSON(http.StatusOK, statusResponse{"ok"})
-}
-
-// @Summary LikePost
-// @Security ApiKeyAuth
-// @Tags likes
-// @Description Like post
-// @ID like-post
-// @Accept json
-// @Produce json
-// @Param postId path int true "post id"
-// @Success 200 {object} statusResponse "ok"
-// @Failure 400,500 {object} errorResponse
-// @Router /api/posts/{postId}/like [post]
-func (h *Handler) likePost(c *gin.Context) {
-	var postId int
-
-	user := c.MustGet(userCtx).(domain.User)
-
-	postId, err := strconv.Atoi(c.Param("postId"))
-	if err != nil {
-		newResponse(c, http.StatusBadRequest, "invalid path variable value")
-		return
-	}
-
-	if err := h.services.Like.LikePost(user.Id, postId); err != nil {
-		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("like post error: %s", err.Error()))
-		return
-	}
-
-	c.JSON(http.StatusOK, statusResponse{"ok"})
-}
-
-// @Summary DislikePost
-// @Security ApiKeyAuth
-// @Tags likes
-// @Description Dislike post
-// @ID dislike-post
-// @Accept json
-// @Produce json
-// @Param postId path int true "post id"
-// @Success 200 {object} statusResponse "ok"
-// @Failure 400,500 {object} errorResponse
-// @Router /api/posts/{postId}/dislike [post]
-func (h *Handler) unlikePost(c *gin.Context) {
-	var postId int
-
-	user := c.MustGet(userCtx).(domain.User)
-
-	postId, err := strconv.Atoi(c.Param("postId"))
-	if err != nil {
-		newResponse(c, http.StatusBadRequest, "invalid path variable value")
-		return
-	}
-
-	if err := h.services.Like.UnlikePost(user.Id, postId); err != nil {
-		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("dislike post error: %s", err.Error()))
 		return
 	}
 

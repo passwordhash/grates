@@ -67,25 +67,6 @@ definitions:
       title:
         type: string
     type: object
-  domain.User:
-    properties:
-      email:
-        type: string
-      id:
-        type: integer
-      is_confirmed:
-        default: false
-        type: boolean
-      name:
-        type: string
-      password:
-        type: string
-      surname:
-        type: string
-    required:
-    - email
-    - name
-    type: object
   handler.createPostInput:
     properties:
       content:
@@ -97,6 +78,11 @@ definitions:
     properties:
       message:
         type: string
+    type: object
+  handler.idResponse:
+    properties:
+      id:
+        type: integer
     type: object
   handler.postsCommentsResponse:
     properties:
@@ -130,6 +116,21 @@ definitions:
         type: string
       refreshToken:
         type: string
+    type: object
+  handler.signUpInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      surname:
+        type: string
+    required:
+    - email
+    - name
+    - password
     type: object
   handler.statusResponse:
     properties:
@@ -241,7 +242,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: integer
+            $ref: '#/definitions/handler.idResponse'
         "400":
           description: Bad Request
           schema:
@@ -307,9 +308,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: ok
+          description: OK
           schema:
-            type: string
+            $ref: '#/definitions/handler.statusResponse'
         "400":
           description: Bad Request
           schema:
@@ -368,7 +369,7 @@ paths:
           $ref: '#/definitions/domain.PostUpdateInput'
       - description: post id
         in: path
-        name: userId
+        name: postId
         required: true
         type: integer
       produces:
@@ -446,7 +447,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: integer
+            $ref: '#/definitions/handler.idResponse'
         "400":
           description: Bad Request
           schema:
@@ -535,11 +536,6 @@ paths:
       description: confirm email
       operationId: sign-up
       parameters:
-      - description: user's id
-        in: path
-        name: userId
-        required: true
-        type: integer
       - description: hash
         in: query
         name: hash
@@ -552,10 +548,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/handler.statusResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/handler.errorResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -671,14 +663,14 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/domain.User'
+          $ref: '#/definitions/handler.signUpInput'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: integer
+            $ref: '#/definitions/handler.idResponse'
         "400":
           description: Bad Request
           schema:

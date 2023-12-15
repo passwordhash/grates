@@ -14,7 +14,6 @@ import (
 // @ID sign-up
 // @Accept  json
 // @Produce  json
-// @Param userId path int true "user's id"
 // @Param hash query string true "hash"
 // @Success 200 {object} statusResponse
 // @Failure 500 {object} errorResponse

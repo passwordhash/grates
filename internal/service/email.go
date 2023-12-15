@@ -60,6 +60,10 @@ func (e *EmailService) getEmailTemplate(name, hash string) string {
 <html>
 <head>
     <title>Подтверждение аккаунта</title>
+
+</head>
+<body>
+	<div>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -106,8 +110,7 @@ func (e *EmailService) getEmailTemplate(name, hash string) string {
             color: #666;
         }
     </style>
-</head>
-<body>
+	<
     <div class="container">
         <div class="header">
             Добро пожаловать в Grates!
