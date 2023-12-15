@@ -41,7 +41,12 @@ func (e *EmailRepository) ConfirmEmail(hash string) error {
 	WHERE users.id = auth_emails.users_id
 	AND auth_emails.hash = $1
 `, UsersTable, AuthEmailsTable)
-	_, err := e.db.Exec(query, hash)
+	res, err := e.db.Exec(query, hash)
+	changes, _ := res.RowsAffected()
+
+	if changes == 0 {
+		return fmt.Errorf("no changes in db")
+	}
 
 	return err
 }
