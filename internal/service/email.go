@@ -60,72 +60,45 @@ func (e *EmailService) getEmailTemplate(name, hash string) string {
 <html>
 <head>
     <title>Подтверждение аккаунта</title>
-
+    <meta charset="utf-8">
 </head>
-<body>
-	<div>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f8;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            background-color: white;
-            width: 60 % ;
-            margin: 20px auto;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-        }
-        .header {
-            background-color: #8a2be2;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-        }
-        .content {
-            padding: 20px;
-            text-align: center;
-        }
-        .button {
-			cursor: pointer;
-            display: inline-block;
-            padding: 10px 20px;
-            margin-top: 20px;
-            background-color: #8a2be2;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-      		border: 0;
-            font-weight: bold;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            font-size: 0.9em;
-            color: #666;
-        }
-    </style>
-	<
-    <div class="container">
-        <div class="header">
+<body style="font-family: Arial, sans-serif;
+background-color: #f4f4f8;
+margin: 0;
+padding: 0;">
+    <div class="container" style="background-color: white;
+    width: 60% ;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);">
+        <header style="background-color: #8a2be2;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;">
             Добро пожаловать в Grates!
-        </div>
-        <div class="content">
+        </header>
+        <div class="content" style="padding: 20px; text-align: center;">
             <h1>Подтверждение Аккаунта</h1>
-            <p>Привет, ` + name + `!</p>
+            <p>Привет, ` + name + ` !</p>
             <p>Спасибо за регистрацию в Grates. Пожалуйста, нажмите на кнопку ниже, чтобы подтвердить свой аккаунт.</p>
-          <form action="` + confirmUrl + `" method="post">
-    			<input type="submit" " value="Подтвердить Аккаунт" class="button" />
-			</form> 
-        <div class="footer">
+          <form action=" ` + confirmUrl + ` " method="get">
+                <input type="submit" value="Подтвердить Аккаунт" class="button" style="cursor: pointer;
+                display: inline-block;
+                padding: 10px 20px;
+                margin-top: 20px;
+                background-color: #8a2be2;
+                color: white;
+                text-decoration: none;
+                border-radius: 4px;
+                border: 0;
+                font-weight: bold;"/>
+            </form> 
+        <footer style="text-align: center; margin-top: 30px; font-size: 0.9em; color: #666;">
             Если у вас возникли вопросы, свяжитесь с нами по адресу ` + e.D.From + `
-        </div>
-    </div>
+        </footer>
 </body>
 </html>
 
