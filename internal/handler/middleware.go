@@ -1,8 +1,11 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"grates/internal/domain"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -43,4 +46,25 @@ func (h *Handler) userIdentity(c *gin.Context) {
 	}
 
 	c.Set(userCtx, user)
+}
+
+func (h *Handler) postAffiliation(c *gin.Context) {
+	userId := c.MustGet(userCtx).(domain.User).Id
+
+	postId, err := strconv.Atoi(c.Param("postId"))
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid path variable data")
+		return
+	}
+
+	isBelongs, err := h.services.Post.IsPostBelongsToUser(userId, postId)
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if !isBelongs {
+		newResponse(c, http.StatusForbidden, fmt.Sprintf("post %s does not belong to the user"))
+		return
+	}
 }

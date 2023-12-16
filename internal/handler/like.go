@@ -47,7 +47,7 @@ func (h *Handler) likePost(c *gin.Context) {
 // @Produce json
 // @Param postId path int true "post id"
 // @Success 200 {object} statusResponse "ok"
-// @Failure 400,500 {object} errorResponse
+// @Failure 400 {object} errorResponse
 // @Router /api/posts/{postId}/dislike [post]
 func (h *Handler) unlikePost(c *gin.Context) {
 	var postId int
@@ -61,7 +61,7 @@ func (h *Handler) unlikePost(c *gin.Context) {
 	}
 
 	if err := h.services.Like.UnlikePost(user.Id, postId); err != nil {
-		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("dislike post error: %s", err.Error()))
+		newResponse(c, http.StatusBadRequest, fmt.Sprintf("dislike post error: %s", err.Error()))
 		return
 	}
 

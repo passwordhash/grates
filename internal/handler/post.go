@@ -144,12 +144,10 @@ func (h *Handler) getUsersPosts(c *gin.Context) {
 // @Failure 400,500 {object} errorResponse
 // @Router /api/posts/{postId} [patch]
 func (h *Handler) updatePost(c *gin.Context) {
-	// TODO: проверка на владельца поста (middleware ?)
 	var input domain.PostUpdateInput
 	var postId int
 
-	v := c.Param("postId")
-	postId, err := strconv.Atoi(v)
+	postId, err := strconv.Atoi(c.Param("postId"))
 	if err != nil {
 		newResponse(c, http.StatusBadRequest, "invalid path variable data")
 		return
@@ -166,7 +164,6 @@ func (h *Handler) updatePost(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, statusResponse{"ok"})
-
 }
 
 // @Summary DeletePost
@@ -181,7 +178,6 @@ func (h *Handler) updatePost(c *gin.Context) {
 // @Failure 400,500 {object} errorResponse
 // @Router /api/posts/{postId} [delete]
 func (h *Handler) deletePost(c *gin.Context) {
-	// TODO: проверка на владельца поста (middleware ?)
 	id, err := strconv.Atoi(c.Param("postId"))
 	if err != nil {
 		newResponse(c, http.StatusBadRequest, "invalid path variable value")
@@ -300,8 +296,7 @@ func (h *Handler) updateComment(c *gin.Context) {
 	var input domain.CommentUpdateInput
 	var commentId int
 
-	// QUESTION: Можно ли как-то сократить этот код?
-	user := c.MustGet(userCtx).(domain.User)
+	userId := c.MustGet(userCtx).(domain.User).Id
 
 	commentId, err := strconv.Atoi(c.Param("commentId"))
 	if err != nil {
@@ -314,7 +309,7 @@ func (h *Handler) updateComment(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.Comment.Update(user.Id, commentId, input); err != nil {
+	if err := h.services.Comment.Update(userId, commentId, input); err != nil {
 		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("update comment error: %s", err.Error()))
 		return
 	}
@@ -336,7 +331,7 @@ func (h *Handler) updateComment(c *gin.Context) {
 func (h *Handler) deleteComment(c *gin.Context) {
 	var commentId int
 
-	user := c.MustGet(userCtx).(domain.User)
+	userId := c.MustGet(userCtx).(domain.User).Id
 
 	commentId, err := strconv.Atoi(c.Param("commentId"))
 	if err != nil {
@@ -344,7 +339,7 @@ func (h *Handler) deleteComment(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.Comment.Delete(user.Id, commentId); err != nil {
+	if err := h.services.Comment.Delete(userId, commentId); err != nil {
 		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("delete comment error: %s", err.Error()))
 		return
 	}

@@ -23,6 +23,7 @@ type Post interface {
 	GetUsersPosts(userId int) ([]domain.Post, error)
 	Update(id int, newPost domain.PostUpdateInput) error
 	Delete(id int) error
+	IsPostBelongsToUser(userId, postId int) (bool, error)
 }
 
 type Comment interface {

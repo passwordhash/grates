@@ -51,8 +51,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			posts.POST("/", h.createPost)
 			posts.GET("/", h.getUsersPosts)
 			posts.GET("/:postId", h.getPost)
-			posts.PATCH("/:postId", h.updatePost)
-			posts.DELETE("/:postId", h.deletePost)
+			posts.PATCH("/:postId", h.postAffiliation, h.updatePost)
+			posts.DELETE("/:postId", h.postAffiliation, h.deletePost)
 
 			posts.POST("/:postId/like", h.likePost)
 			posts.DELETE("/:postId/like", h.unlikePost)
@@ -63,7 +63,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				comments.POST("/", h.createComment)
 				comments.GET("/", h.getPostsComments)
 			}
-
 		}
 
 		comment := api.Group("/comment")

@@ -29,13 +29,11 @@ func (p *PostService) GetWithAdditions(postId int) (domain.Post, error) {
 		return post, err
 	}
 
-	// TODO: move to repository
 	post.Comments, err = p.commentRepo.GetPostComments(postId)
 	if err != nil {
 		return post, err
 	}
 
-	// TODO: move to repository
 	post.LikesCount, err = p.likeRepo.GetPostLikesCount(postId)
 	if err != nil {
 		return post, err
@@ -51,13 +49,11 @@ func (p *PostService) GetUsersPosts(userId int) ([]domain.Post, error) {
 	}
 
 	for i, post := range posts {
-		// TODO: move to repository
 		posts[i].Comments, err = p.commentRepo.GetPostComments(post.Id)
 		if err != nil {
 			return nil, err
 		}
 
-		// TODO: move to repository
 		posts[i].LikesCount, err = p.likeRepo.GetPostLikesCount(post.Id)
 		if err != nil {
 			return nil, err
@@ -68,11 +64,19 @@ func (p *PostService) GetUsersPosts(userId int) ([]domain.Post, error) {
 }
 
 func (p *PostService) Update(id int, newPost domain.PostUpdateInput) error {
-	// TODO: проверка на владельца поста
 	return p.postRepo.Update(id, newPost)
 }
 
 func (p *PostService) Delete(id int) error {
-	// TODO: проверка на владельца поста
 	return p.postRepo.Delete(id)
+}
+
+// IsPostBelongsToUser проверяет принадлежит ли пользователю пост
+func (p *PostService) IsPostBelongsToUser(userId, postId int) (bool, error) {
+	post, err := p.postRepo.Get(postId)
+	if err != nil {
+		return false, err
+	}
+
+	return post.UsersId == userId, nil
 }
