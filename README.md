@@ -64,5 +64,5 @@ go run ./cmd/http/main.go
 
 *студент МГТУ им Н.Э. Баумана ИУ7*
 
-**Ярослав [@prostoYaroslav](https://t.me/prostoYaroslav)**
+**Ярослав [@prostoYaroslav](http://t.me/prostoYaroslav)**
 
