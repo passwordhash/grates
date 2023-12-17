@@ -3,11 +3,20 @@ package handler
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	_ "grates/docs"
 	"grates/internal/domain"
 	"grates/internal/service"
 	"net/http"
+	"time"
 )
+
+type signUpInput struct {
+	Email    string `json:"email" binding:"required"`
+	Name     string `json:"name" binding:"required"`
+	Surname  string `json:"surname"`
+	Password string `json:"password" binding:"required"`
+}
 
 // @Summary SignUp
 // @Tags auth
@@ -15,12 +24,12 @@ import (
 // @ID create-account
 // @Accept  json
 // @Produce  json
-// @Param input body domain.User true "account info"
-// @Success 200 {integer} integer 1
-// @Failure 400,404 {object} errorResponse
+// @Param input body signUpInput true "account info"
+// @Success 200 {object} idResponse
+// @Failure 400,409,500 {object} errorResponse
 // @Router /auth/sign-up [post]
 func (h *Handler) signUp(c *gin.Context) {
-	var input domain.User
+	var input domain.UserSignUpInput
 
 	if err := c.BindJSON(&input); err != nil {
 		newResponse(c, http.StatusBadRequest, "invalid input body")
@@ -28,10 +37,9 @@ func (h *Handler) signUp(c *gin.Context) {
 	}
 
 	user, err := h.services.GetUserByEmail(input.Email)
-
 	if !user.IsEmtpty() {
 		msg := fmt.Sprintf("user with email %s exists", user.Email)
-		newResponse(c, http.StatusBadRequest, msg)
+		newResponse(c, http.StatusConflict, msg)
 		return
 	}
 
@@ -40,6 +48,18 @@ func (h *Handler) signUp(c *gin.Context) {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	go func() {
+		err := h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
+		if err != nil {
+			logrus.Errorf("error sending email: %s", err.Error())
+			// TODO: подумать над тем, чтобы отправлять письмо повторно
+			time.Sleep(5 * time.Second)
+			h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
+			return
+		}
+		logrus.Infof("confirmation email sent to %s", input.Email)
+	}()
 
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"id": id,

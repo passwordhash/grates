@@ -159,7 +159,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "integer"
+                            "$ref": "#/definitions/handler.idResponse"
                         }
                     },
                     "400": {
@@ -209,12 +209,6 @@ const docTemplate = `{
                         "name": "userId",
                         "in": "query",
                         "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "limit for post's comments",
-                        "name": "commentsLimit",
-                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -317,9 +311,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handler.statusResponse"
                         }
                     },
                     "400": {
@@ -367,7 +361,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "post id",
-                        "name": "userId",
+                        "name": "postId",
                         "in": "path",
                         "required": true
                     }
@@ -483,7 +477,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "integer"
+                            "$ref": "#/definitions/handler.idResponse"
                         }
                     },
                     "400": {
@@ -547,12 +541,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/handler.errorResponse"
                         }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
-                        }
                     }
                 }
             }
@@ -607,6 +595,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/confirm/": {
+            "get": {
+                "description": "confirm email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "ConfirmEmail",
+                "operationId": "sign-up",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "hash",
+                        "name": "hash",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.statusResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/refresh": {
             "post": {
                 "description": "refresh access and refresh tokens",
@@ -647,6 +674,57 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/resend/{userId}": {
+            "post": {
+                "description": "resend confirmation email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Resend email",
+                "operationId": "resend-email",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "user's id",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.statusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/handler.errorResponse"
                         }
@@ -722,7 +800,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.User"
+                            "$ref": "#/definitions/handler.signUpInput"
                         }
                     }
                 ],
@@ -730,7 +808,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "integer"
+                            "$ref": "#/definitions/handler.idResponse"
                         }
                     },
                     "400": {
@@ -739,10 +817,68 @@ const docTemplate = `{
                             "$ref": "#/definitions/handler.errorResponse"
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "409": {
+                        "description": "Conflict",
                         "schema": {
                             "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/profile": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "update user profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "UpdateProfile",
+                "operationId": "update-profile",
+                "parameters": [
+                    {
+                        "description": "profile update info",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.ProfileUpdateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.statusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.statusResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.statusResponse"
                         }
                     }
                 }
@@ -793,6 +929,15 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.Gnd": {
+            "type": "string",
+            "enum": [
+                "M"
+            ],
+            "x-enum-varnames": [
+                "Male"
+            ]
+        },
         "domain.Post": {
             "type": "object",
             "required": [
@@ -839,28 +984,31 @@ const docTemplate = `{
                 "content": {
                     "type": "string"
                 },
+                "repository.DBifyable": {},
                 "title": {
                     "type": "string"
                 }
             }
         },
-        "domain.User": {
+        "domain.ProfileUpdateInput": {
             "type": "object",
-            "required": [
-                "email",
-                "name"
-            ],
             "properties": {
-                "email": {
-                    "type": "string"
+                "birth_date": {
+                    "type": "string",
+                    "example": "2006-01-02"
                 },
-                "id": {
-                    "type": "integer"
+                "gender": {
+                    "default": "M",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/domain.Gnd"
+                        }
+                    ]
                 },
                 "name": {
                     "type": "string"
                 },
-                "password": {
+                "status": {
                     "type": "string"
                 },
                 "surname": {
@@ -884,6 +1032,14 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string"
+                }
+            }
+        },
+        "handler.idResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
                 }
             }
         },
@@ -934,6 +1090,28 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "refreshToken": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.signUpInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "surname": {
                     "type": "string"
                 }
             }

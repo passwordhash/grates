@@ -7,13 +7,17 @@ import (
 )
 
 type User interface {
-	CreateUser(user domain.User) (int, error)
+	CreateUser(user domain.UserSignUpInput) (int, error)
+	GetUserById(id int) (domain.User, error)
 	GetUserByEmail(email string) (domain.User, error)
 	GetAllUsers() ([]domain.User, error)
+
 	AuthenticateUser(email string, password string) (Tokens, error)
 	GenerateTokens(user domain.User) (Tokens, error)
-	ParseToken(token string) (domain.User, error)
+	ParseToken(token string) (int, error)
 	RefreshTokens(refreshToken string) (Tokens, error)
+
+	UpdateProfile(userId int, newProfile domain.ProfileUpdateInput) error
 }
 
 type Post interface {
@@ -22,6 +26,7 @@ type Post interface {
 	GetUsersPosts(userId int) ([]domain.Post, error)
 	Update(id int, newPost domain.PostUpdateInput) error
 	Delete(id int) error
+	IsPostBelongsToUser(userId, postId int) (bool, error)
 }
 
 type Comment interface {
@@ -29,6 +34,12 @@ type Comment interface {
 	GetPostComments(postId int) ([]domain.Comment, error)
 	Delete(userId, commentId int) error
 	Update(userId, commentId int, newComment domain.CommentUpdateInput) error
+}
+
+type Email interface {
+	ReplaceConfirmationEmail(userId int, to, name string) error
+	ConfirmEmail(hash string) error
+	sendAuthEmail(to, name, hash string) error
 }
 
 type Like interface {
@@ -41,6 +52,7 @@ type Service struct {
 	Post
 	Comment
 	Like
+	Email
 }
 
 type Deps struct {
@@ -49,6 +61,18 @@ type Deps struct {
 
 	AccessTokenTTL  time.Duration
 	RefreshTokenTTL time.Duration
+
+	EmailDeps
+}
+
+type EmailDeps struct {
+	SmtpHost string
+	SmtpPort int
+
+	From     string
+	Password string
+
+	BaseUrl string
 }
 
 func NewService(repos *repository.Repository, deps Deps) *Service {
@@ -57,5 +81,7 @@ func NewService(repos *repository.Repository, deps Deps) *Service {
 		Post:    NewPostService(repos.Post, repos.Comment, repos.Like),
 		Comment: NewCommentService(repos.Comment),
 		Like:    NewLikeService(repos.Like),
+		// TODO: fix (pointer)
+		Email: NewEmailService(*repos.Email, deps.EmailDeps),
 	}
 }

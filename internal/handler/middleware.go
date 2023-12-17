@@ -1,8 +1,11 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"grates/internal/domain"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -30,12 +33,44 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		return
 	}
 
-	user, err := h.services.ParseToken(headerParts[1])
-
+	userId, err := h.services.ParseToken(headerParts[1])
 	if err != nil {
 		newResponse(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
+	user, err := h.services.GetUserById(userId)
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("error getting user by id: %s", err.Error()))
+		return
+	}
+
+	// Проверка на подтверждение почты
+	if !user.IsConfirmed {
+		newResponse(c, http.StatusUnauthorized, "email is not confirmed")
+		return
+	}
+
 	c.Set(userCtx, user)
+}
+
+func (h *Handler) postAffiliation(c *gin.Context) {
+	userId := c.MustGet(userCtx).(domain.User).Id
+
+	postId, err := strconv.Atoi(c.Param("postId"))
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid path variable data")
+		return
+	}
+
+	isBelongs, err := h.services.Post.IsPostBelongsToUser(userId, postId)
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if !isBelongs {
+		newResponse(c, http.StatusForbidden, fmt.Sprintf("post %s does not belong to the user"))
+		return
+	}
 }

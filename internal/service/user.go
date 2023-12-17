@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/sirupsen/logrus"
 	"grates/internal/domain"
 	"grates/internal/repository"
 	"grates/pkg/auth"
@@ -32,9 +33,13 @@ func NewUserService(repo repository.User, sigingKey, pswrdSalt string, accessTok
 
 // CreateUser генерирует хэш пароля, сохраняет пользователя в БД.
 // Возвращает int id созданного пользователя и ошибку.
-func (s *UserService) CreateUser(user domain.User) (int, error) {
+func (s *UserService) CreateUser(user domain.UserSignUpInput) (int, error) {
 	user.Password = auth.GeneratePasswordHash(user.Password, s.passwordSalt)
 	return s.repo.CreateUser(user)
+}
+
+func (s *UserService) GetUserById(id int) (domain.User, error) {
+	return s.repo.GetUserById(id)
 }
 
 // Tokens структура по типу Double. Хранит пару access и refresh token
@@ -50,8 +55,8 @@ func (s *UserService) AuthenticateUser(email, password string) (Tokens, error) {
 		tokens Tokens
 		err    error
 	)
-
 	user, err := s.repo.GetUser(email, auth.GeneratePasswordHash(password, s.passwordSalt))
+	logrus.Info(user)
 	if err != nil {
 		return tokens, err
 	}
@@ -118,32 +123,37 @@ func (s *UserService) GetAllUsers() ([]domain.User, error) {
 
 // tokenClaims кастомный claims для access токена.
 type tokenClaims struct {
-	User domain.User `json:"user"`
+	//User domain.User `json:"user"`
+	UserId int `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
 // ParseToken распаршивает access token и возвращает пользователя из claims'ов токена.
-func (s *UserService) ParseToken(accessToken string) (domain.User, error) {
+func (s *UserService) ParseToken(accessToken string) (int, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid siging method")
 		}
 		return []byte(s.sigingKey), nil
 	})
+	if err != nil {
+		return 0, err
+	}
 
 	claims, ok := token.Claims.(*tokenClaims)
 	if !ok {
-		return domain.User{}, errors.New("token claims are not of type *tokenClaims")
+		return 0, errors.New("token claims are not of type *tokenClaims")
 	}
 
-	return claims.User, err
+	return claims.UserId, err
 }
 
 // newAccessToken генерирует новый access токен.
 func (s *UserService) newAccessToken(user domain.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		tokenClaims{
-			user,
+			user.Id,
+			//user,
 			jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.accessTokenTTL)),
 			},
@@ -164,4 +174,9 @@ func (s *UserService) newRefreshToken() (string, error) {
 		return "", err
 	}
 	return fmt.Sprintf("%x", b), nil
+}
+
+// UpdateProfile обновляет профиль пользователя.
+func (s *UserService) UpdateProfile(userId int, newProfile domain.ProfileUpdateInput) error {
+	return s.repo.UpdateProfile(userId, newProfile)
 }

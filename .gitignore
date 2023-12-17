@@ -1,4 +1,6 @@
 .idea
 .idea/
-.DS_Store/
-.env
+.DS_Store
+.vscode
+
+.prod.env

@@ -9,8 +9,13 @@ db:
   sslmode: "disable"
 
 rdb:
-  addr: "localhost:6379"
+  addr: "localhost:63790"
 
 auth:
   accessTokenTTL: 120m
   refreshTokenTTL: 240m
+
+email:
+  smtpHost: "smtp.mail.ru"
+  smtpPort: 465
+  from: "grates.social@mail.ru"

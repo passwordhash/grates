@@ -5,6 +5,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type idResponse struct {
+	Id int `json:"id"`
+}
+
 type errorResponse struct {
 	Message string `json:"message"`
 }

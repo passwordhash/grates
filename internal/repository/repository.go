@@ -11,10 +11,11 @@ const (
 	PostsTable      = "posts"
 	CommentsTable   = "comments"
 	LikesPostsTable = "likes_posts"
+	AuthEmailsTable = "auth_emails"
 )
 
 type User interface {
-	CreateUser(user domain.User) (int, error)
+	CreateUser(user domain.UserSignUpInput) (int, error)
 	GetUser(email string, password string) (domain.User, error)
 	GetUserById(id int) (domain.User, error)
 	GetUserByEmail(email string) (domain.User, error)
@@ -22,6 +23,8 @@ type User interface {
 
 	SaveRefreshToken(userId int, session domain.Session) error
 	GetUserIdByToken(refreshToken string) (int, error)
+
+	UpdateProfile(userId int, newProfile domain.ProfileUpdateInput) error
 }
 
 type Post interface {
@@ -46,11 +49,17 @@ type Like interface {
 	UnlikePost(userId, postId int) error
 }
 
+type Email interface {
+	ReplaceEmail(userId int, hash string) error
+	ConfirmEmail(userId int, hash string) error
+}
+
 type Repository struct {
 	User    *UserRepository
 	Post    *PostRepository
 	Comment *CommentRepository
 	Like    *LikeRepository
+	Email   *EmailRepository
 }
 
 type UserRepository struct {
@@ -68,5 +77,6 @@ func NewRepository(db *sqlx.DB, rdb *redis.Client) *Repository {
 		Post:    NewPostPostgres(db),
 		Comment: NewCommentRepository(db),
 		Like:    NewLikeRepository(db),
+		Email:   NewEmailRepository(db),
 	}
 }

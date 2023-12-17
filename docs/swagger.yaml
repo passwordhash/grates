@@ -29,6 +29,12 @@ definitions:
       content:
         type: string
     type: object
+  domain.Gnd:
+    enum:
+    - M
+    type: string
+    x-enum-varnames:
+    - Male
   domain.Post:
     properties:
       comments:
@@ -64,24 +70,25 @@ definitions:
     properties:
       content:
         type: string
+      repository.DBifyable: {}
       title:
         type: string
     type: object
-  domain.User:
+  domain.ProfileUpdateInput:
     properties:
-      email:
+      birth_date:
+        example: "2006-01-02"
         type: string
-      id:
-        type: integer
+      gender:
+        allOf:
+        - $ref: '#/definitions/domain.Gnd'
+        default: M
       name:
         type: string
-      password:
+      status:
         type: string
       surname:
         type: string
-    required:
-    - email
-    - name
     type: object
   handler.createPostInput:
     properties:
@@ -94,6 +101,11 @@ definitions:
     properties:
       message:
         type: string
+    type: object
+  handler.idResponse:
+    properties:
+      id:
+        type: integer
     type: object
   handler.postsCommentsResponse:
     properties:
@@ -127,6 +139,21 @@ definitions:
         type: string
       refreshToken:
         type: string
+    type: object
+  handler.signUpInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      surname:
+        type: string
+    required:
+    - email
+    - name
+    - password
     type: object
   handler.statusResponse:
     properties:
@@ -238,7 +265,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: integer
+            $ref: '#/definitions/handler.idResponse'
         "400":
           description: Bad Request
           schema:
@@ -267,10 +294,6 @@ paths:
         in: query
         name: userId
         required: true
-        type: integer
-      - description: limit for post's comments
-        in: query
-        name: commentsLimit
         type: integer
       produces:
       - application/json
@@ -308,9 +331,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: ok
+          description: OK
           schema:
-            type: string
+            $ref: '#/definitions/handler.statusResponse'
         "400":
           description: Bad Request
           schema:
@@ -369,7 +392,7 @@ paths:
           $ref: '#/definitions/domain.PostUpdateInput'
       - description: post id
         in: path
-        name: userId
+        name: postId
         required: true
         type: integer
       produces:
@@ -447,7 +470,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: integer
+            $ref: '#/definitions/handler.idResponse'
         "400":
           description: Bad Request
           schema:
@@ -488,10 +511,6 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/handler.errorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/handler.errorResponse'
       security:
       - ApiKeyAuth: []
       summary: DislikePost
@@ -529,6 +548,32 @@ paths:
       summary: LikePost
       tags:
       - likes
+  /auth/confirm/:
+    get:
+      consumes:
+      - application/json
+      description: confirm email
+      operationId: sign-up
+      parameters:
+      - description: hash
+        in: query
+        name: hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: ConfirmEmail
+      tags:
+      - auth
   /auth/refresh:
     post:
       consumes:
@@ -558,6 +603,40 @@ paths:
           schema:
             $ref: '#/definitions/handler.errorResponse'
       summary: RefreshTokens
+      tags:
+      - auth
+  /auth/resend/{userId}:
+    post:
+      consumes:
+      - application/json
+      description: resend confirmation email
+      operationId: resend-email
+      parameters:
+      - description: user's id
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Resend email
       tags:
       - auth
   /auth/sign-in:
@@ -603,25 +682,62 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/domain.User'
+          $ref: '#/definitions/handler.signUpInput'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: integer
+            $ref: '#/definitions/handler.idResponse'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/handler.errorResponse'
-        "404":
-          description: Not Found
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/handler.errorResponse'
       summary: SignUp
       tags:
       - auth
+  /user/profile:
+    patch:
+      consumes:
+      - application/json
+      description: update user profile
+      operationId: update-profile
+      parameters:
+      - description: profile update info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.ProfileUpdateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: UpdateProfile
+      tags:
+      - user
 securityDefinitions:
   ApiKeyAuth:
     in: header

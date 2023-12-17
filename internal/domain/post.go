@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"grates/pkg/repository"
 	"time"
 )
 
@@ -18,6 +19,7 @@ type Post struct {
 type PostUpdateInput struct {
 	Title   string `json:"title,omitempty"`
 	Content string `json:"content,omitempty"`
+	repository.DBifyable
 }
 
 func (p *PostUpdateInput) DBifyFields() map[string]string {
