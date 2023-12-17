@@ -977,6 +977,7 @@
                 "content": {
                     "type": "string"
                 },
+                "repository.DBifyable": {},
                 "title": {
                     "type": "string"
                 }
@@ -990,7 +991,7 @@
                     "example": "2006-01-02"
                 },
                 "gender": {
-                    "default": "N",
+                    "default": "M",
                     "allOf": [
                         {
                             "$ref": "#/definitions/domain.Gnd"

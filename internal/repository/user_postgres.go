@@ -28,6 +28,9 @@ func (r *UserRepository) GetUser(email, password string) (domain.User, error) {
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE email=$1 AND password_hash=$2", UsersTable)
 	err := r.db.Get(&user, query, email, password)
+	if err != nil {
+		return user, err
+	}
 
 	return user, err
 }
@@ -79,6 +82,7 @@ func (r *UserRepository) UpdateProfile(userId int, input domain.ProfileUpdateInp
 			argId += 1
 		}
 	}
+	
 	querySet = querySet[0 : len(querySet)-2]
 	args = append(args, userId)
 

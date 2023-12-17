@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/sirupsen/logrus"
 	"grates/internal/domain"
 	"grates/internal/repository"
 	"grates/pkg/auth"
@@ -55,6 +56,7 @@ func (s *UserService) AuthenticateUser(email, password string) (Tokens, error) {
 		err    error
 	)
 	user, err := s.repo.GetUser(email, auth.GeneratePasswordHash(password, s.passwordSalt))
+	logrus.Info(user)
 	if err != nil {
 		return tokens, err
 	}

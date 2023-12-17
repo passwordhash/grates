@@ -38,7 +38,7 @@ func (h *Handler) updateProfile(c *gin.Context) {
 }
 
 func (h *Handler) getAllUsers(c *gin.Context) {
-	//var users []domain.User
+	var usersResp []domain.UserResponse
 
 	users, err := h.services.GetAllUsers()
 	if err != nil {
@@ -46,7 +46,11 @@ func (h *Handler) getAllUsers(c *gin.Context) {
 		log.Fatal("get all users error", err.Error())
 	}
 
-	c.JSON(http.StatusOK, map[string][]domain.User{
-		"users": users,
+	for _, user := range users {
+		usersResp = append(usersResp, user.ToResponse())
+	}
+
+	c.JSON(http.StatusOK, map[string][]domain.UserResponse{
+		"users": usersResp,
 	})
 }

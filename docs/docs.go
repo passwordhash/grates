@@ -984,6 +984,7 @@ const docTemplate = `{
                 "content": {
                     "type": "string"
                 },
+                "repository.DBifyable": {},
                 "title": {
                     "type": "string"
                 }
@@ -997,7 +998,7 @@ const docTemplate = `{
                     "example": "2006-01-02"
                 },
                 "gender": {
-                    "default": "N",
+                    "default": "M",
                     "allOf": [
                         {
                             "$ref": "#/definitions/domain.Gnd"

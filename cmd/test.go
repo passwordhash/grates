@@ -7,6 +7,6 @@ import (
 )
 
 func main() {
-	date := utils.Date{Time: time.Now()}
+	date := utils.NullDate{Time: time.Now()}
 	logrus.Info(date)
 }

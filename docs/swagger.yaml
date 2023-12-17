@@ -70,6 +70,7 @@ definitions:
     properties:
       content:
         type: string
+      repository.DBifyable: {}
       title:
         type: string
     type: object
@@ -81,7 +82,7 @@ definitions:
       gender:
         allOf:
         - $ref: '#/definitions/domain.Gnd'
-        default: "N"
+        default: M
       name:
         type: string
       status:

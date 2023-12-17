@@ -1,8 +1,8 @@
 package domain
 
 import (
+	"database/sql"
 	"grates/pkg/utils"
-	"time"
 )
 
 type Gnd = string
@@ -14,20 +14,46 @@ const (
 )
 
 type User struct {
-	Id          int        `json:"id" db:"id"`
-	Name        string     `json:"name" binding:"required"`
-	Surname     string     `json:"surname"`
-	Email       string     `json:"email" binding:"required"`
-	Password    string     `json:"password" db:"password_hash"`
-	IsConfirmed bool       `json:"is_confirmed" db:"is_confirmed" default:"false"`
-	Gender      Gnd        `json:"gender" db:"gender" default:"N"`
-	BirthDate   *time.Time `json:"birth_date" db:"birth_date"`
-	Status      string     `json:"status" db:"status" default:""`
-	IsDeleted   bool       `json:"is_deleted" db:"is_deleted" default:"false"`
+	Id          int          `db:"id"`
+	Name        string       `db:"name" binding:"required"`
+	Surname     string       `db:"surname"`
+	Email       string       `db:"email" binding:"required"`
+	Password    string       `db:"password_hash"`
+	IsConfirmed bool         `db:"is_confirmed" default:"false"`
+	Gender      Gnd          `db:"gender" default:"N"`
+	BirthDate   sql.NullTime `db:"birth_date"`
+	Status      string       `db:"status" default:""`
+	IsDeleted   bool         `db:"is_deleted" default:"false"`
 }
 
-func (u *User) GetAge() int {
-	return time.Now().Year() - u.BirthDate.Year()
+func (u *User) ToResponse() UserResponse {
+	dateS := utils.Date{Time: u.BirthDate.Time}.String()
+	if !u.BirthDate.Valid {
+		dateS = ""
+	}
+	return UserResponse{
+		Id:          u.Id,
+		Name:        u.Name,
+		Surname:     u.Surname,
+		Email:       u.Email,
+		IsConfirmed: u.IsConfirmed,
+		Gender:      u.Gender,
+		BirthDate:   dateS,
+		Status:      u.Status,
+		IsDeleted:   u.IsDeleted,
+	}
+}
+
+type UserResponse struct {
+	Id          int    `json:"id"`
+	Name        string `json:"name"`
+	Surname     string `json:"surname"`
+	Email       string `json:"email"`
+	IsConfirmed bool   `json:"is_confirmed"`
+	BirthDate   string `json:"birth_date" example:"2006-01-02"`
+	Gender      Gnd    `json:"gender" default:"N" enum:"M,F,N"`
+	Status      string `json:"status"`
+	IsDeleted   bool   `json:"is_deleted"`
 }
 
 type UserSignUpInput struct {
