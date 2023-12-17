@@ -33,9 +33,15 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		return
 	}
 
-	user, err := h.services.ParseToken(headerParts[1])
+	userId, err := h.services.ParseToken(headerParts[1])
 	if err != nil {
 		newResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	user, err := h.services.GetUserById(userId)
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("error getting user by id: %s", err.Error()))
 		return
 	}
 

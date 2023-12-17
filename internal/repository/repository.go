@@ -15,7 +15,7 @@ const (
 )
 
 type User interface {
-	CreateUser(user domain.User) (int, error)
+	CreateUser(user domain.UserSignUpInput) (int, error)
 	GetUser(email string, password string) (domain.User, error)
 	GetUserById(id int) (domain.User, error)
 	GetUserByEmail(email string) (domain.User, error)
@@ -23,6 +23,8 @@ type User interface {
 
 	SaveRefreshToken(userId int, session domain.Session) error
 	GetUserIdByToken(refreshToken string) (int, error)
+
+	UpdateProfile(userId int, newProfile domain.ProfileUpdateInput) error
 }
 
 type Post interface {

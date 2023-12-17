@@ -41,6 +41,11 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	api := router.Group("/api", h.userIdentity)
 	{
+		profile := api.Group("/profile")
+		{
+			profile.PATCH("/", h.updateProfile)
+		}
+
 		users := api.Group("/users")
 		{
 			users.GET("/", h.getAllUsers)

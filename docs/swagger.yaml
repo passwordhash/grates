@@ -29,6 +29,12 @@ definitions:
       content:
         type: string
     type: object
+  domain.Gnd:
+    enum:
+    - M
+    type: string
+    x-enum-varnames:
+    - Male
   domain.Post:
     properties:
       comments:
@@ -65,6 +71,22 @@ definitions:
       content:
         type: string
       title:
+        type: string
+    type: object
+  domain.ProfileUpdateInput:
+    properties:
+      birth_date:
+        example: "2006-01-02"
+        type: string
+      gender:
+        allOf:
+        - $ref: '#/definitions/domain.Gnd'
+        default: "N"
+      name:
+        type: string
+      status:
+        type: string
+      surname:
         type: string
     type: object
   handler.createPostInput:
@@ -488,10 +510,6 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/handler.errorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/handler.errorResponse'
       security:
       - ApiKeyAuth: []
       summary: DislikePost
@@ -686,6 +704,39 @@ paths:
       summary: SignUp
       tags:
       - auth
+  /user/profile:
+    patch:
+      consumes:
+      - application/json
+      description: update user profile
+      operationId: update-profile
+      parameters:
+      - description: profile update info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.ProfileUpdateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: UpdateProfile
+      tags:
+      - user
 securityDefinitions:
   ApiKeyAuth:
     in: header

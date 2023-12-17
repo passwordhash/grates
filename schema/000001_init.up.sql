@@ -1,3 +1,5 @@
+CREATE TYPE gender AS ENUM ('M', 'F', 'N');
+
 CREATE TABLE users
 (
     id serial not null unique,
@@ -5,7 +7,11 @@ CREATE TABLE users
     surname varchar(100),
     email varchar(255) not null unique,
     password_hash varchar(255) not null,
-    is_confirmed boolean default FALSE
+    is_confirmed boolean default FALSE,
+    gender gender default 'N',
+    birth_date date,
+    status varchar(300) default '',
+    is_deleted boolean default FALSE
 );
 
 CREATE TABLE posts

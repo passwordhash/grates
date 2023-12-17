@@ -29,7 +29,7 @@ type signUpInput struct {
 // @Failure 400,409,500 {object} errorResponse
 // @Router /auth/sign-up [post]
 func (h *Handler) signUp(c *gin.Context) {
-	var input domain.User
+	var input domain.UserSignUpInput
 
 	if err := c.BindJSON(&input); err != nil {
 		newResponse(c, http.StatusBadRequest, "invalid input body")

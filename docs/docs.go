@@ -541,12 +541,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/handler.errorResponse"
                         }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
-                        }
                     }
                 }
             }
@@ -837,6 +831,58 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user/profile": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "update user profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "UpdateProfile",
+                "operationId": "update-profile",
+                "parameters": [
+                    {
+                        "description": "profile update info",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.ProfileUpdateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.statusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.statusResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.statusResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -882,6 +928,15 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "domain.Gnd": {
+            "type": "string",
+            "enum": [
+                "M"
+            ],
+            "x-enum-varnames": [
+                "Male"
+            ]
         },
         "domain.Post": {
             "type": "object",
@@ -930,6 +985,32 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.ProfileUpdateInput": {
+            "type": "object",
+            "properties": {
+                "birth_date": {
+                    "type": "string",
+                    "example": "2006-01-02"
+                },
+                "gender": {
+                    "default": "N",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/domain.Gnd"
+                        }
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "surname": {
                     "type": "string"
                 }
             }
