@@ -43,21 +43,26 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		profile := api.Group("/profile")
 		{
+			// PROFILE INFO
 			profile.PATCH("/", h.updateProfile)
-			profile.POST("/friend-request/", h.sendFriendRequest)
-			profile.PUT("/accept-request/", h.acceptFriendRequest)
-			profile.PATCH("/unfriend/", h.unfriend)
 		}
 
-		users := api.Group("/users")
+		// FRIENDS
+		friends := api.Group("/friends")
 		{
-			users.GET("/", h.getAllUsers)
+			friends.POST("/request", h.sendFriendRequest)
+			// TODO: получение всех другей
+			//friends.GET("/{userId}", h.getFriends)
+			friends.PATCH("/accept", h.acceptFriendRequest)
+			friends.PATCH("/unfriend", h.unfriend)
 		}
 
 		posts := api.Group("/posts")
 		{
 			posts.POST("/", h.createPost)
 			posts.GET("/", h.getUsersPosts)
+			// TODO: получение постов друзей
+			posts.GET("/frieds", h.getUsersPosts)
 			posts.GET("/:postId", h.getPost)
 			posts.PATCH("/:postId", h.postAffiliation, h.updatePost)
 			posts.DELETE("/:postId", h.postAffiliation, h.deletePost)

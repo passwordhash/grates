@@ -17,7 +17,7 @@ import (
 // @Param toId query string true "user id to send request"
 // @Success 200 {object} statusResponse
 // @Failure 400,500 {object} errorResponse
-// @Router /api/profile/friend-request/ [post]
+// @Router /api/friends/request [post]
 func (h *Handler) sendFriendRequest(c *gin.Context) {
 	var fromId int
 	var toId int
@@ -50,7 +50,7 @@ func (h *Handler) sendFriendRequest(c *gin.Context) {
 // @Param fromId query string true "user id to accept request"
 // @Success 200 {object} statusResponse
 // @Failure 400,500 {object} errorResponse
-// @Router /api/profile/accept-request/ [put]
+// @Router /api/friends/accept [patch]
 func (h *Handler) acceptFriendRequest(c *gin.Context) {
 	var fromId int
 	var toId int
@@ -82,6 +82,8 @@ func (h *Handler) acceptFriendRequest(c *gin.Context) {
 // @Produce  json
 // @Param friendId query string true "user id to unfriend"
 // @Success 200 {object} statusResponse
+// @Failure 400,500 {object} errorResponse
+// @Router /api/friends/unfriend [patch]
 func (h *Handler) unfriend(c *gin.Context) {
 	var friendId int
 	var userId int

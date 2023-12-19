@@ -246,6 +246,96 @@ paths:
       summary: UpdateComment
       tags:
       - comments
+  /api/friends/accept:
+    patch:
+      consumes:
+      - application/json
+      description: accept friend request
+      operationId: accept-friend-request
+      parameters:
+      - description: user id to accept request
+        in: query
+        name: fromId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: AcceptFriendRequest
+      tags:
+      - profile
+  /api/friends/request:
+    post:
+      consumes:
+      - application/json
+      description: send friend request
+      operationId: send-friend-request
+      parameters:
+      - description: user id to send request
+        in: query
+        name: toId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: SendFriendRequest
+      tags:
+      - profile
+  /api/friends/unfriend:
+    patch:
+      consumes:
+      - application/json
+      description: unfriend
+      operationId: unfriend
+      parameters:
+      - description: user id to unfriend
+        in: query
+        name: friendId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Unfriend
+      tags:
+      - profile
   /api/posts:
     post:
       consumes:
