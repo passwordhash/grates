@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	"grates/internal/domain"
 	"reflect"
+	"strconv"
 )
 
 type PostRepository struct {
@@ -37,11 +39,28 @@ func (p *PostRepository) Get(postId int) (domain.Post, error) {
 	return post, err
 }
 
-func (p *PostRepository) GetUsersPosts(userId int) ([]domain.Post, error) {
+func (p *PostRepository) UsersPosts(userId int) ([]domain.Post, error) {
 	var posts []domain.Post
 
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE users_id=$1`, PostsTable)
 	err := p.db.Select(&posts, query, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return posts, err
+}
+
+func (p *PostRepository) PostsByUserIds(usersIds []int) ([]domain.Post, error) {
+	var posts []domain.Post
+
+	ids := make([]string, len(usersIds))
+	for i, id := range usersIds {
+		ids[i] = strconv.Itoa(id)
+	}
+
+	query := fmt.Sprintf(`SELECT * FROM %s WHERE users_id = any($1)`, PostsTable)
+	err := p.db.Select(&posts, query, pq.Array(ids))
 	if err != nil {
 		return nil, err
 	}

@@ -93,12 +93,12 @@ func (h *Handler) getPost(c *gin.Context) {
 	c.JSON(http.StatusOK, post)
 }
 
-type usersPostsResponse struct {
+type postsResponse struct {
 	Posts []domain.Post `json:"posts"`
 	Count int           `json:"count"`
 }
 
-// @Summary GetUsersPosts
+// @Summary UsersPosts
 // @Security ApiKeyAuth
 // @Tags posts
 // @Description GetWithAdditions user's posts
@@ -106,7 +106,7 @@ type usersPostsResponse struct {
 // @Accept json
 // @Produce json
 // @Param userId query int true "user's id"
-// @Success 200 {object} usersPostsResponse "post info"
+// @Success 200 {object} postsResponse "post info"
 // @Failure 400,500 {object} errorResponse
 // @Router /api/posts/ [get]
 func (h *Handler) getUsersPosts(c *gin.Context) {
@@ -125,7 +125,40 @@ func (h *Handler) getUsersPosts(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, usersPostsResponse{
+	c.JSON(http.StatusOK, postsResponse{
+		posts,
+		len(posts),
+	})
+}
+
+// @Summary FriendsPosts
+// @Security ApiKeyAuth
+// @Tags posts
+// @Description GetWithAdditions friends' posts
+// @ID friends-posts
+// @Accept json
+// @Produce json
+// @Param userId path int true "user's id"
+// @Success 200 {object} postsResponse "post info"
+// @Failure 403,500 {object} errorResponse
+// @Router /api/posts/friends/{userId} [get]
+func (h *Handler) friendsPosts(c *gin.Context) {
+	var userId int
+
+	userId, err := strconv.Atoi(c.Param("userId"))
+
+	if userId != c.MustGet(userCtx).(domain.User).Id {
+		newResponse(c, http.StatusForbidden, "you can't get other user's posts")
+		return
+	}
+
+	posts, err := h.services.Post.GetFriendsPosts(userId)
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, postsResponse{
 		posts,
 		len(posts),
 	})

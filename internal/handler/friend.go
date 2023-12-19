@@ -13,6 +13,15 @@ type friendResponse struct {
 	Count   int                   `json:"count"`
 }
 
+// @Summary GetFriends
+// @Tags profile
+// @Description get friends
+// @ID get-friends
+// @Accept  json
+// @Produce  json
+// @Param userId path string true "user id"
+// @Success 200 {object} friendResponse
+// @Failure 400,500 {object} errorResponse
 // @Router /api/friends/{userId} [get]
 func (h *Handler) friends(c *gin.Context) {
 	var userId int

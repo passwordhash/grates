@@ -60,8 +60,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		{
 			posts.POST("/", h.createPost)
 			posts.GET("/", h.getUsersPosts)
-			// TODO: получение постов друзей
-			posts.GET("/frieds", h.getUsersPosts)
+			posts.GET("/friends/:userId", h.friendsPosts)
 			posts.GET("/:postId", h.getPost)
 			posts.PATCH("/:postId", h.postAffiliation, h.updatePost)
 			posts.DELETE("/:postId", h.postAffiliation, h.deletePost)

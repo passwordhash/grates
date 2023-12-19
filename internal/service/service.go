@@ -24,6 +24,7 @@ type Post interface {
 	Create(post domain.Post) (int, error)
 	GetWithAdditions(postId int) (domain.Post, error)
 	GetUsersPosts(userId int) ([]domain.Post, error)
+	GetFriendsPosts(userId int) ([]domain.Post, error)
 	Update(id int, newPost domain.PostUpdateInput) error
 	Delete(id int) error
 	IsPostBelongsToUser(userId, postId int) (bool, error)
@@ -86,7 +87,7 @@ type EmailDeps struct {
 func NewService(repos *repository.Repository, deps Deps) *Service {
 	return &Service{
 		User:    NewUserService(repos.User, deps.SigingKey, deps.PasswordSalt, deps.AccessTokenTTL, deps.RefreshTokenTTL),
-		Post:    NewPostService(repos.Post, repos.Comment, repos.Like),
+		Post:    NewPostService(repos.Post, repos.Comment, repos.Like, repos.Friend),
 		Comment: NewCommentService(repos.Comment),
 		Like:    NewLikeService(repos.Like),
 		// TODO: fix (pointer)

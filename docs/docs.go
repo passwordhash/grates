@@ -335,7 +335,7 @@ const docTemplate = `{
                 "tags": [
                     "posts"
                 ],
-                "summary": "GetUsersPosts",
+                "summary": "UsersPosts",
                 "operationId": "users-posts",
                 "parameters": [
                     {

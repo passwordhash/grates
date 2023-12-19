@@ -17,8 +17,9 @@ func NewFriendService(friendRepo repository.Friend) *FriendService {
 }
 
 func (f *FriendService) GetFriends(userId int) ([]domain.User, error) {
-	return f.friendRepo.GetFriendUsers(userId)
+	return f.friendRepo.FriendUsers(userId)
 }
+
 func (f *FriendService) SendFriendRequest(fromId, toId int) error {
 	if err := f.checkIds(fromId, toId); err != nil {
 		return err

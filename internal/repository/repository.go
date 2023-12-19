@@ -31,7 +31,8 @@ type User interface {
 type Post interface {
 	Create(post domain.Post) (int, error)
 	Get(postId int) (domain.Post, error)
-	GetUsersPosts(userId int) ([]domain.Post, error)
+	UsersPosts(userId int) ([]domain.Post, error)
+	PostsByUserIds(usersIds []int) ([]domain.Post, error)
 	Update(id int, newPost domain.PostUpdateInput) error
 	Delete(id int) error
 }
@@ -58,8 +59,8 @@ type Email interface {
 
 type Friend interface {
 	Get(id1, id2 int) (domain.Friend, error)
-	GetFriendUsers(userId int) ([]domain.User, error)
-
+	FriendUsers(userId int) ([]domain.User, error)
+	FriendUsersIds(userId int) ([]int, error)
 	// GetRequests(userId int) ([]domain.FriendRequest, error)
 
 	FriendRequest(fromId, toId int) error
