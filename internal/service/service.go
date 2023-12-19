@@ -49,7 +49,8 @@ type Like interface {
 
 type Friend interface {
 	SendFriendRequest(fromId, toId int) error
-	AcceptFriendRequest(id1, id2 int) error
+	AcceptFriendRequest(fromId, toId int) error
+	Unfriend(userId, friendId int) error
 }
 
 type Service struct {

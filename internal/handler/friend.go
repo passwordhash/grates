@@ -50,10 +50,10 @@ func (h *Handler) sendFriendRequest(c *gin.Context) {
 // @Param fromId query string true "user id to accept request"
 // @Success 200 {object} statusResponse
 // @Failure 400,500 {object} errorResponse
-// @Router /api/profile/accept-request/ [post]
+// @Router /api/profile/accept-request/ [put]
 func (h *Handler) acceptFriendRequest(c *gin.Context) {
-	var toId int
 	var fromId int
+	var toId int
 
 	toId = c.MustGet(userCtx).(domain.User).Id
 
@@ -70,6 +70,37 @@ func (h *Handler) acceptFriendRequest(c *gin.Context) {
 	}
 
 	logrus.Infof("user %d accepted friend request from user %d", toId, fromId)
+
+	c.JSON(http.StatusOK, statusResponse{Status: "ok"})
+}
+
+// @Summary Unfriend
+// @Tags profile
+// @Description unfriend
+// @ID unfriend
+// @Accept  json
+// @Produce  json
+// @Param friendId query string true "user id to unfriend"
+// @Success 200 {object} statusResponse
+func (h *Handler) unfriend(c *gin.Context) {
+	var friendId int
+	var userId int
+
+	userId = c.MustGet(userCtx).(domain.User).Id
+
+	friendId, err := strconv.Atoi(c.Query("friendId"))
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid query friendId parameter")
+		return
+	}
+
+	err = h.services.Friend.Unfriend(userId, friendId)
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	logrus.Infof("user %d unfriended user %d", userId, friendId)
 
 	c.JSON(http.StatusOK, statusResponse{Status: "ok"})
 }

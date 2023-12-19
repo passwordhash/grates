@@ -50,14 +50,19 @@ type Like interface {
 	UnlikePost(userId, postId int) error
 }
 
+// TODO: fix
 type Email interface {
 	ReplaceEmail(userId int, hash string) error
 	ConfirmEmail(userId int, hash string) error
 }
 
 type Friend interface {
+	Get(id1, id2 int) (domain.Friend, error)
+	//GetRequests(userId int) ([]domain.FriendRequest, error)
 	FriendRequest(fromId, toId int) error
-	AcceptFriendRequest(id1, id2 int) error
+	AcceptFriendRequest(fromId, toId int) error
+	Unfriend(userId, friendId int) error
+	Decline(userId, friendId int) error
 }
 
 type Repository struct {
