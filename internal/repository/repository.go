@@ -58,7 +58,10 @@ type Email interface {
 
 type Friend interface {
 	Get(id1, id2 int) (domain.Friend, error)
-	//GetRequests(userId int) ([]domain.FriendRequest, error)
+	GetFriendUsers(userId int) ([]domain.User, error)
+
+	// GetRequests(userId int) ([]domain.FriendRequest, error)
+
 	FriendRequest(fromId, toId int) error
 	AcceptFriendRequest(fromId, toId int) error
 	Unfriend(userId, friendId int) error

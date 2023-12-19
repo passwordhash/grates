@@ -8,6 +8,33 @@ import (
 	"strconv"
 )
 
+type friendResponse struct {
+	Friends []domain.UserResponse `json:"friends"`
+	Count   int                   `json:"count"`
+}
+
+// @Router /api/friends/{userId} [get]
+func (h *Handler) friends(c *gin.Context) {
+	var userId int
+
+	userId, err := strconv.Atoi(c.Param("userId"))
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid user id param")
+		return
+	}
+
+	friends, err := h.services.Friend.GetFriends(userId)
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, friendResponse{
+		Friends: domain.UserListToResponse(friends),
+		Count:   len(friends),
+	})
+}
+
 // @Summary SendFriendRequest
 // @Tags profile
 // @Description send friend request

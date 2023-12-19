@@ -48,6 +48,7 @@ type Like interface {
 }
 
 type Friend interface {
+	GetFriends(userId int) ([]domain.User, error)
 	SendFriendRequest(fromId, toId int) error
 	AcceptFriendRequest(fromId, toId int) error
 	Unfriend(userId, friendId int) error

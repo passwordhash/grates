@@ -51,8 +51,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		friends := api.Group("/friends")
 		{
 			friends.POST("/request", h.sendFriendRequest)
-			// TODO: получение всех другей
-			//friends.GET("/{userId}", h.getFriends)
+			friends.GET("/:userId", h.friends)
 			friends.PATCH("/accept", h.acceptFriendRequest)
 			friends.PATCH("/unfriend", h.unfriend)
 		}

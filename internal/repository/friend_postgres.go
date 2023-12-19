@@ -23,6 +23,22 @@ func (r *FriendRepository) Get(id1, id2 int) (domain.Friend, error) {
 	return friend, err
 }
 
+// GetFriendUsers возвращает список друзей пользователя.
+func (r *FriendRepository) GetFriendUsers(userId int) ([]domain.User, error) {
+	var friends []domain.User
+
+	query := fmt.Sprintf(`
+	SELECT * FROM users
+	WHERE %s.id IN
+		(SELECT to_id as id FROM %s WHERE from_id=$1 AND is_confirmed=true
+		UNION
+		SELECT from_id as id FROM %s WHERE to_id=$1 AND is_confirmed=true)
+	`, UsersTable, FriendsTable, FriendsTable)
+	err := r.db.Select(&friends, query, userId)
+
+	return friends, err
+}
+
 func (r *FriendRepository) FriendRequest(fromId, toId int) error {
 	var count int
 

@@ -22,6 +22,7 @@ type PostUpdateInput struct {
 	repository.DBifyable
 }
 
+// DBifyFields возвращает поля, которые нужно обновить в БД.
 func (p *PostUpdateInput) DBifyFields() map[string]string {
 	return map[string]string{
 		"Title":   "title",

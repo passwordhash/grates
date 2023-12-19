@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"grates/internal/domain"
 	"grates/internal/repository"
 )
 
@@ -15,6 +16,9 @@ func NewFriendService(friendRepo repository.Friend) *FriendService {
 	return &FriendService{friendRepo: friendRepo}
 }
 
+func (f *FriendService) GetFriends(userId int) ([]domain.User, error) {
+	return f.friendRepo.GetFriendUsers(userId)
+}
 func (f *FriendService) SendFriendRequest(fromId, toId int) error {
 	if err := f.checkIds(fromId, toId); err != nil {
 		return err
