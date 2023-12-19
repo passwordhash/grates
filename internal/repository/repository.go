@@ -12,6 +12,7 @@ const (
 	CommentsTable   = "comments"
 	LikesPostsTable = "likes_posts"
 	AuthEmailsTable = "auth_emails"
+	FriendsTable    = "friend_requests"
 )
 
 type User interface {
@@ -54,12 +55,18 @@ type Email interface {
 	ConfirmEmail(userId int, hash string) error
 }
 
+type Friend interface {
+	FriendRequest(fromId, toId int) error
+	AcceptFriendRequest(id1, id2 int) error
+}
+
 type Repository struct {
 	User    *UserRepository
 	Post    *PostRepository
 	Comment *CommentRepository
 	Like    *LikeRepository
 	Email   *EmailRepository
+	Friend  *FriendRepository
 }
 
 type UserRepository struct {
@@ -78,5 +85,6 @@ func NewRepository(db *sqlx.DB, rdb *redis.Client) *Repository {
 		Comment: NewCommentRepository(db),
 		Like:    NewLikeRepository(db),
 		Email:   NewEmailRepository(db),
+		Friend:  NewFriendRepository(db),
 	}
 }

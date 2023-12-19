@@ -47,12 +47,18 @@ type Like interface {
 	UnlikePost(userId, postId int) error
 }
 
+type Friend interface {
+	SendFriendRequest(fromId, toId int) error
+	AcceptFriendRequest(id1, id2 int) error
+}
+
 type Service struct {
 	User
 	Post
 	Comment
 	Like
 	Email
+	Friend
 }
 
 type Deps struct {
@@ -82,6 +88,7 @@ func NewService(repos *repository.Repository, deps Deps) *Service {
 		Comment: NewCommentService(repos.Comment),
 		Like:    NewLikeService(repos.Like),
 		// TODO: fix (pointer)
-		Email: NewEmailService(*repos.Email, deps.EmailDeps),
+		Email:  NewEmailService(*repos.Email, deps.EmailDeps),
+		Friend: NewFriendService(repos.Friend),
 	}
 }
