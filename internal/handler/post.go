@@ -10,9 +10,8 @@ import (
 )
 
 const (
-	userIdQuery         = "userId"
-	commentsLimitQuery  = "commentsLimit"
-	commentLimitDefault = 5
+	userIdQuery      = "userId"
+	postLimitDefault = 3
 )
 
 type createPostInput struct {
@@ -139,11 +138,15 @@ func (h *Handler) getUsersPosts(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param userId path int true "user's id"
+// @Param limit query int false "limit of posts"
+// @Param offset query int false "offset of posts"
 // @Success 200 {object} postsResponse "post info"
 // @Failure 403,500 {object} errorResponse
 // @Router /api/posts/friends/{userId} [get]
 func (h *Handler) friendsPosts(c *gin.Context) {
 	var userId int
+	var limit int
+	var offset int
 
 	userId, err := strconv.Atoi(c.Param("userId"))
 
@@ -152,7 +155,14 @@ func (h *Handler) friendsPosts(c *gin.Context) {
 		return
 	}
 
-	posts, err := h.services.Post.GetFriendsPosts(userId)
+	limit, errLimit := strconv.Atoi(c.DefaultQuery("limit", strconv.Itoa(postLimitDefault)))
+	offset, errOffset := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	if errLimit != nil || errOffset != nil {
+		newResponse(c, http.StatusBadRequest, "invalid query value of limit or offset")
+		return
+	}
+
+	posts, err := h.services.Post.GetFriendsPosts(userId, limit, offset)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return

@@ -51,7 +51,7 @@ func (p *PostRepository) UsersPosts(userId int) ([]domain.Post, error) {
 	return posts, err
 }
 
-func (p *PostRepository) PostsByUserIds(usersIds []int) ([]domain.Post, error) {
+func (p *PostRepository) PostsByUserIds(usersIds []int, params string) ([]domain.Post, error) {
 	var posts []domain.Post
 
 	ids := make([]string, len(usersIds))
@@ -59,7 +59,7 @@ func (p *PostRepository) PostsByUserIds(usersIds []int) ([]domain.Post, error) {
 		ids[i] = strconv.Itoa(id)
 	}
 
-	query := fmt.Sprintf(`SELECT * FROM %s WHERE users_id = any($1)`, PostsTable)
+	query := fmt.Sprintf(`SELECT * FROM %s WHERE users_id = any($1) %s`, PostsTable, params)
 	err := p.db.Select(&posts, query, pq.Array(ids))
 	if err != nil {
 		return nil, err

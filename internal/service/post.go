@@ -49,6 +49,7 @@ func (s *PostService) GetWithAdditions(postId int) (domain.Post, error) {
 
 // GetUsersPosts возвращает посты пользователя.
 func (s *PostService) GetUsersPosts(userId int) ([]domain.Post, error) {
+
 	posts, err := s.postRepo.UsersPosts(userId)
 	if err != nil {
 		return nil, err
@@ -65,7 +66,7 @@ func (s *PostService) GetUsersPosts(userId int) ([]domain.Post, error) {
 // GetFriendsPosts возвращает посты друзей пользователя.
 // Метод сначала получает список id друзей пользователя, затем получает посты по этим id.
 // Далее проходится по этим постам и получает комментарии и количество лайков.
-func (s *PostService) GetFriendsPosts(userId int) ([]domain.Post, error) {
+func (s *PostService) GetFriendsPosts(userId, limit, offset int) ([]domain.Post, error) {
 	var posts []domain.Post
 
 	friendsIds, err := s.frienRepo.FriendUsersIds(userId)
@@ -73,7 +74,9 @@ func (s *PostService) GetFriendsPosts(userId int) ([]domain.Post, error) {
 		return nil, err
 	}
 
-	posts, err = s.postRepo.PostsByUserIds(friendsIds)
+	paramsQuery := fmt.Sprintf("LIMIT %d OFFSET %d", limit, offset)
+
+	posts, err = s.postRepo.PostsByUserIds(friendsIds, paramsQuery)
 	if err != nil {
 		return nil, err
 	}

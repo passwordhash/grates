@@ -32,7 +32,7 @@ type Post interface {
 	Create(post domain.Post) (int, error)
 	Get(postId int) (domain.Post, error)
 	UsersPosts(userId int) ([]domain.Post, error)
-	PostsByUserIds(usersIds []int) ([]domain.Post, error)
+	PostsByUserIds(usersIds []int, params string) ([]domain.Post, error)
 	Update(id int, newPost domain.PostUpdateInput) error
 	Delete(id int) error
 }
