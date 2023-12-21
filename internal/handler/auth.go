@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -66,14 +67,14 @@ func (h *Handler) signUp(c *gin.Context) {
 	})
 }
 
-type signInResponse struct {
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken"`
-}
-
 type signInInput struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
+}
+
+type signInResponse struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
 }
 
 // @Summary SignIn
@@ -96,8 +97,16 @@ func (h *Handler) signIn(c *gin.Context) {
 	}
 
 	tokens, err := h.services.AuthenticateUser(input.Email, input.Password)
-	if err != nil {
+	if errors.As(err, &service.GenerateTokensError{}) {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if errors.Is(err, service.UserNotFoundError) {
 		newResponse(c, http.StatusUnauthorized, fmt.Sprintf("invalid auth credentials: %s", err.Error()))
+		return
+	}
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -129,8 +138,16 @@ func (h *Handler) refreshTokens(c *gin.Context) {
 	}
 
 	tokens, err := h.services.RefreshTokens(input.RefreshToken)
+	if errors.As(err, &service.GenerateTokensError{}) {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if errors.Is(err, service.UserNotFoundError) {
+		newResponse(c, http.StatusUnauthorized, fmt.Sprintf("refresh token in invalid: %s", err.Error()))
+		return
+	}
 	if err != nil {
-		newResponse(c, http.StatusBadRequest, fmt.Sprintf("refresh token in invalid: %s", err.Error()))
+		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
