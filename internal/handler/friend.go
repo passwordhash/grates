@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"grates/internal/domain"
+	"grates/internal/service"
 	"net/http"
 	"strconv"
 )
@@ -52,7 +54,7 @@ func (h *Handler) friends(c *gin.Context) {
 // @Produce  json
 // @Param toId query string true "user id to send request"
 // @Success 200 {object} statusResponse
-// @Failure 400,500 {object} errorResponse
+// @Failure 400,409,500 {object} errorResponse
 // @Router /api/friends/request [post]
 func (h *Handler) sendFriendRequest(c *gin.Context) {
 	var fromId int
@@ -62,11 +64,19 @@ func (h *Handler) sendFriendRequest(c *gin.Context) {
 
 	toId, err := strconv.Atoi(c.Query("toId"))
 	if err != nil {
-		newResponse(c, http.StatusBadRequest, err.Error())
+		newResponse(c, http.StatusBadRequest, "invalid query toId parameter")
 		return
 	}
 
 	err = h.services.Friend.SendFriendRequest(fromId, toId)
+	if errors.Is(err, service.SelfFriendRequestErr) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if errors.Is(err, service.AleadySendErr) {
+		newResponse(c, http.StatusConflict, err.Error())
+		return
+	}
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -100,6 +110,10 @@ func (h *Handler) acceptFriendRequest(c *gin.Context) {
 	}
 
 	err = h.services.Friend.AcceptFriendRequest(fromId, toId)
+	if err != nil && !errors.As(err, &service.InternalErr{}) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -133,6 +147,10 @@ func (h *Handler) unfriend(c *gin.Context) {
 	}
 
 	err = h.services.Friend.Unfriend(userId, friendId)
+	if errors.Is(err, service.SelfFriendRequestErr) || errors.As(err, &service.NotFoundErr{}) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return

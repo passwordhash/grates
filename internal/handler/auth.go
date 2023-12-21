@@ -39,8 +39,7 @@ func (h *Handler) signUp(c *gin.Context) {
 
 	user, err := h.services.GetUserByEmail(input.Email)
 	if !user.IsEmtpty() {
-		msg := fmt.Sprintf("user with email %s exists", user.Email)
-		newResponse(c, http.StatusConflict, msg)
+		newResponse(c, http.StatusConflict, fmt.Sprintf("user with email %s exists", user.Email))
 		return
 	}
 

@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"grates/internal/domain"
+	"grates/internal/service"
 	"net/http"
 	"strconv"
 )
@@ -30,7 +32,12 @@ func (h *Handler) likePost(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.Like.LikePost(user.Id, postId); err != nil {
+	err = h.services.Like.LikePost(user.Id, postId)
+	if errors.As(err, &service.UserLikePostErr{}) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err != nil {
 		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("like post error: %s", err.Error()))
 		return
 	}
@@ -60,8 +67,13 @@ func (h *Handler) unlikePost(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.Like.UnlikePost(user.Id, postId); err != nil {
-		newResponse(c, http.StatusBadRequest, fmt.Sprintf("dislike post error: %s", err.Error()))
+	err = h.services.Like.UnlikePost(user.Id, postId)
+	if errors.As(err, &service.UserLikePostErr{}) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("unlike post error: %s", err.Error()))
 		return
 	}
 

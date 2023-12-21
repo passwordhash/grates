@@ -1,10 +1,32 @@
 package service
 
 import (
+	"errors"
+	"fmt"
 	"grates/internal/domain"
 	"grates/internal/repository"
 	"time"
 )
+
+var NoChangesErr = errors.New("no changes in db")
+
+type InternalErr struct {
+	error
+	msg string
+}
+
+func (i InternalErr) Error() string {
+	return fmt.Sprintf("internal error: %s", i.msg)
+}
+
+type NotFoundErr struct {
+	error
+	subject string
+}
+
+func (n NotFoundErr) Error() string {
+	return fmt.Sprintf("can't find %s", n.subject)
+}
 
 type User interface {
 	CreateUser(user domain.UserSignUpInput) (int, error)

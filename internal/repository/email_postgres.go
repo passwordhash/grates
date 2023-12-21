@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
+	"grates/internal/service"
 )
 
 type EmailRepository struct {
@@ -45,7 +46,7 @@ func (e *EmailRepository) ConfirmEmail(hash string) error {
 	changes, _ := res.RowsAffected()
 
 	if changes == 0 {
-		return fmt.Errorf("no changes in db")
+		return service.NoChangesErr
 	}
 
 	return err

@@ -61,9 +61,9 @@ type Friend interface {
 	Get(id1, id2 int) (domain.Friend, error)
 	FriendUsers(userId int) ([]domain.User, error)
 	FriendUsersIds(userId int) ([]int, error)
-	// GetRequests(userId int) ([]domain.FriendRequest, error)
+	// GetRequests(userId int) ([]domain.CreateFriendRequest, error)
 
-	FriendRequest(fromId, toId int) error
+	CreateFriendRequest(fromId, toId int) error
 	AcceptFriendRequest(fromId, toId int) error
 	Unfriend(userId, friendId int) error
 	Decline(userId, friendId int) error

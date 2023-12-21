@@ -8,6 +8,9 @@ import (
 	"grates/internal/repository"
 )
 
+var SelfFriendRequestErr = errors.New("you can't send friend request to yourself")
+var AleadySendErr = errors.New("users are already friends")
+
 type FriendService struct {
 	friendRepo repository.Friend
 }
@@ -25,7 +28,7 @@ func (f *FriendService) SendFriendRequest(fromId, toId int) error {
 		return err
 	}
 
-	return f.friendRepo.FriendRequest(fromId, toId)
+	return f.friendRepo.CreateFriendRequest(fromId, toId)
 }
 
 func (f *FriendService) AcceptFriendRequest(fromId, toId int) error {
@@ -46,7 +49,11 @@ func (f *FriendService) AcceptFriendRequest(fromId, toId int) error {
 		return errors.New("you can't accept friend request, because you are not recipient")
 	}
 
-	return f.friendRepo.AcceptFriendRequest(fromId, toId)
+	if err := f.friendRepo.AcceptFriendRequest(fromId, toId); err != nil {
+		return InternalErr{msg: err.Error()}
+	}
+
+	return nil
 }
 
 func (f *FriendService) Unfriend(userId, friendId int) error {
@@ -56,7 +63,7 @@ func (f *FriendService) Unfriend(userId, friendId int) error {
 
 	request, err := f.friendRepo.Get(userId, friendId)
 	if err != nil {
-		return fmt.Errorf("can't get friend request: %w", err)
+		return NotFoundErr{subject: "cat't get friend request"}
 	}
 
 	// Если заявка подтверждена (т. е. пользователи являются друзьями),
@@ -85,7 +92,7 @@ func (f *FriendService) Unfriend(userId, friendId int) error {
 
 func (f *FriendService) checkIds(id1, id2 int) error {
 	if id1 == id2 {
-		return errors.New("you can't send friend request to yourself")
+		return SelfFriendRequestErr
 	}
 
 	return nil

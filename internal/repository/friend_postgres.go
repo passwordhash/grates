@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"grates/internal/domain"
+	"grates/internal/service"
 )
 
 type FriendRepository struct {
@@ -54,7 +55,7 @@ func (r *FriendRepository) FriendUsersIds(userId int) ([]int, error) {
 	return friends, err
 }
 
-func (r *FriendRepository) FriendRequest(fromId, toId int) error {
+func (r *FriendRepository) CreateFriendRequest(fromId, toId int) error {
 	var count int
 
 	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE (from_id=$1 AND to_id=$2) OR (from_id=$2 AND to_id=$1)", FriendsTable)
@@ -64,7 +65,7 @@ func (r *FriendRepository) FriendRequest(fromId, toId int) error {
 	}
 
 	if count > 0 {
-		return fmt.Errorf("friend request already sent")
+		return service.AleadySendErr
 	}
 
 	query = fmt.Sprintf("INSERT INTO %s (from_id, to_id) VALUES ($1, $2)", FriendsTable)
