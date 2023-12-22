@@ -127,6 +127,11 @@ const docTemplate = `{
         },
         "/api/friends/accept": {
             "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "accept friend request",
                 "consumes": [
                     "application/json"
@@ -135,7 +140,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "friends"
                 ],
                 "summary": "AcceptFriendRequest",
                 "operationId": "accept-friend-request",
@@ -172,6 +177,11 @@ const docTemplate = `{
         },
         "/api/friends/request": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "send friend request",
                 "consumes": [
                     "application/json"
@@ -180,7 +190,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "friends"
                 ],
                 "summary": "SendFriendRequest",
                 "operationId": "send-friend-request",
@@ -223,6 +233,11 @@ const docTemplate = `{
         },
         "/api/friends/unfriend": {
             "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "unfriend",
                 "consumes": [
                     "application/json"
@@ -231,7 +246,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "friends"
                 ],
                 "summary": "Unfriend",
                 "operationId": "unfriend",
@@ -268,6 +283,11 @@ const docTemplate = `{
         },
         "/api/friends/{userId}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get friends",
                 "consumes": [
                     "application/json"
@@ -276,7 +296,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "friends"
                 ],
                 "summary": "GetFriends",
                 "operationId": "get-friends",
@@ -552,7 +572,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "post id",
-                        "name": "userId",
+                        "name": "postId",
                         "in": "path",
                         "required": true
                     }
@@ -750,7 +770,7 @@ const docTemplate = `{
             }
         },
         "/api/posts/{postId}/dislike": {
-            "post": {
+            "delete": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -786,6 +806,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/handler.errorResponse"
                         }
@@ -1238,7 +1264,6 @@ const docTemplate = `{
                 "content": {
                     "type": "string"
                 },
-                "repository.DBifyable": {},
                 "title": {
                     "type": "string"
                 }
@@ -1262,7 +1287,6 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "repository.DBifyable": {},
                 "status": {
                     "type": "string"
                 },

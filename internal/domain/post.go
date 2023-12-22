@@ -17,9 +17,9 @@ type Post struct {
 }
 
 type PostUpdateInput struct {
-	Title   string `json:"title,omitempty"`
-	Content string `json:"content,omitempty"`
-	repository.DBifyable
+	Title                string `json:"title,omitempty"`
+	Content              string `json:"content,omitempty"`
+	repository.DBifyable `json:"-"`
 }
 
 // DBifyFields возвращает поля, которые нужно обновить в БД.

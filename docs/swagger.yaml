@@ -70,7 +70,6 @@ definitions:
     properties:
       content:
         type: string
-      repository.DBifyable: {}
       title:
         type: string
     type: object
@@ -85,7 +84,6 @@ definitions:
         default: M
       name:
         type: string
-      repository.DBifyable: {}
       status:
         type: string
       surname:
@@ -307,9 +305,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: GetFriends
       tags:
-      - profile
+      - friends
   /api/friends/accept:
     patch:
       consumes:
@@ -337,9 +337,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: AcceptFriendRequest
       tags:
-      - profile
+      - friends
   /api/friends/request:
     post:
       consumes:
@@ -371,9 +373,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: SendFriendRequest
       tags:
-      - profile
+      - friends
   /api/friends/unfriend:
     patch:
       consumes:
@@ -401,9 +405,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Unfriend
       tags:
-      - profile
+      - friends
   /api/posts:
     post:
       consumes:
@@ -482,7 +488,7 @@ paths:
       parameters:
       - description: post id
         in: path
-        name: userId
+        name: postId
         required: true
         type: integer
       produces:
@@ -647,7 +653,7 @@ paths:
       tags:
       - comments
   /api/posts/{postId}/dislike:
-    post:
+    delete:
       consumes:
       - application/json
       description: Dislike post
@@ -667,6 +673,10 @@ paths:
             $ref: '#/definitions/handler.statusResponse'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/handler.errorResponse'
       security:

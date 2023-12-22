@@ -54,8 +54,8 @@ func (h *Handler) likePost(c *gin.Context) {
 // @Produce json
 // @Param postId path int true "post id"
 // @Success 200 {object} statusResponse "ok"
-// @Failure 400 {object} errorResponse
-// @Router /api/posts/{postId}/dislike [post]
+// @Failure 400,500 {object} errorResponse
+// @Router /api/posts/{postId}/dislike [delete]
 func (h *Handler) unlikePost(c *gin.Context) {
 	var postId int
 

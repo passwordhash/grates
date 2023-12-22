@@ -223,7 +223,7 @@ func (h *Handler) updatePost(c *gin.Context) {
 // @ID delete-post
 // @Accept json
 // @Produce json
-// @Param userId path int true "post id"
+// @Param postId path int true "post id"
 // @Success 200 {object} statusResponse
 // @Failure 400,500 {object} errorResponse
 // @Router /api/posts/{postId} [delete]

@@ -1,5 +1,8 @@
 host: "grates.mgtu.tech"
-port: "8000"
+port: ""
+
+server:
+  port: "8000"
 
 db:
   username: "postgres"

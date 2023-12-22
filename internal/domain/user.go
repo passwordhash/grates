@@ -70,12 +70,12 @@ type UserSignUpInput struct {
 
 // ProfileUpdateInput представляет собой данные, необходимые для обновления профиля пользователя.
 type ProfileUpdateInput struct {
-	Name      string     `json:"name"`
-	Surname   string     `json:"surname"`
-	Gender    Gnd        `json:"gender" db:"gender" default:"M" enum:"M,F,N"`
-	BirthDate utils.Date `json:"birth_date" db:"birth_date" time_format:"2006-01-02" swaggertype:"string" example:"2006-01-02"`
-	Status    string     `json:"status" db:"status" default:""`
-	repository.DBifyable
+	Name                 string     `json:"name"`
+	Surname              string     `json:"surname"`
+	Gender               Gnd        `json:"gender" db:"gender" default:"M" enum:"M,F,N"`
+	BirthDate            utils.Date `json:"birth_date" db:"birth_date" time_format:"2006-01-02" swaggertype:"string" example:"2006-01-02"`
+	Status               string     `json:"status" db:"status" default:""`
+	repository.DBifyable `json:"-"`
 }
 
 // DBifyFields возращает соответствие полей структуры и полей в БД в виде отображения

@@ -66,7 +66,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			posts.DELETE("/:postId", h.postAffiliation, h.deletePost)
 
 			posts.POST("/:postId/like", h.likePost)
-			posts.DELETE("/:postId/like", h.unlikePost)
+			posts.DELETE("/:postId/dislike", h.unlikePost)
 
 			// LIKE: /api/posts/6947/comments
 			comments := posts.Group("/:postId/comments")

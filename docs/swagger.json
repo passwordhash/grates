@@ -120,6 +120,11 @@
         },
         "/api/friends/accept": {
             "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "accept friend request",
                 "consumes": [
                     "application/json"
@@ -128,7 +133,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "friends"
                 ],
                 "summary": "AcceptFriendRequest",
                 "operationId": "accept-friend-request",
@@ -165,6 +170,11 @@
         },
         "/api/friends/request": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "send friend request",
                 "consumes": [
                     "application/json"
@@ -173,7 +183,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "friends"
                 ],
                 "summary": "SendFriendRequest",
                 "operationId": "send-friend-request",
@@ -216,6 +226,11 @@
         },
         "/api/friends/unfriend": {
             "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "unfriend",
                 "consumes": [
                     "application/json"
@@ -224,7 +239,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "friends"
                 ],
                 "summary": "Unfriend",
                 "operationId": "unfriend",
@@ -261,6 +276,11 @@
         },
         "/api/friends/{userId}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get friends",
                 "consumes": [
                     "application/json"
@@ -269,7 +289,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "friends"
                 ],
                 "summary": "GetFriends",
                 "operationId": "get-friends",
@@ -545,7 +565,7 @@
                     {
                         "type": "integer",
                         "description": "post id",
-                        "name": "userId",
+                        "name": "postId",
                         "in": "path",
                         "required": true
                     }
@@ -743,7 +763,7 @@
             }
         },
         "/api/posts/{postId}/dislike": {
-            "post": {
+            "delete": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -779,6 +799,12 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/handler.errorResponse"
                         }
@@ -1231,7 +1257,6 @@
                 "content": {
                     "type": "string"
                 },
-                "repository.DBifyable": {},
                 "title": {
                     "type": "string"
                 }
@@ -1255,7 +1280,6 @@
                 "name": {
                     "type": "string"
                 },
-                "repository.DBifyable": {},
                 "status": {
                     "type": "string"
                 },
