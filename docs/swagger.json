@@ -128,7 +128,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "friends"
                 ],
                 "summary": "AcceptFriendRequest",
                 "operationId": "accept-friend-request",
@@ -173,7 +173,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "friends"
                 ],
                 "summary": "SendFriendRequest",
                 "operationId": "send-friend-request",
@@ -224,7 +224,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "friends"
                 ],
                 "summary": "Unfriend",
                 "operationId": "unfriend",
@@ -269,7 +269,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "friends"
                 ],
                 "summary": "GetFriends",
                 "operationId": "get-friends",

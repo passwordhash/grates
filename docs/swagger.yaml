@@ -309,7 +309,7 @@ paths:
             $ref: '#/definitions/handler.errorResponse'
       summary: GetFriends
       tags:
-      - profile
+      - friends
   /api/friends/accept:
     patch:
       consumes:
@@ -339,7 +339,7 @@ paths:
             $ref: '#/definitions/handler.errorResponse'
       summary: AcceptFriendRequest
       tags:
-      - profile
+      - friends
   /api/friends/request:
     post:
       consumes:
@@ -373,7 +373,7 @@ paths:
             $ref: '#/definitions/handler.errorResponse'
       summary: SendFriendRequest
       tags:
-      - profile
+      - friends
   /api/friends/unfriend:
     patch:
       consumes:
@@ -403,7 +403,7 @@ paths:
             $ref: '#/definitions/handler.errorResponse'
       summary: Unfriend
       tags:
-      - profile
+      - friends
   /api/posts:
     post:
       consumes:
