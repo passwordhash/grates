@@ -17,7 +17,8 @@ type friendResponse struct {
 }
 
 // @Summary GetFriends
-// @Tags profile
+// @Security ApiKeyAuth
+// @Tags friends
 // @Description get friends
 // @ID get-friends
 // @Accept  json
@@ -48,7 +49,8 @@ func (h *Handler) friends(c *gin.Context) {
 }
 
 // @Summary SendFriendRequest
-// @Tags profile
+// @Security ApiKeyAuth
+// @Tags friends
 // @Description send friend request
 // @ID send-friend-request
 // @Accept  json
@@ -89,7 +91,8 @@ func (h *Handler) sendFriendRequest(c *gin.Context) {
 }
 
 // @Summary AcceptFriendRequest
-// @Tags profile
+// @Security ApiKeyAuth
+// @Tags friends
 // @Description accept friend request
 // @ID accept-friend-request
 // @Accept  json
@@ -126,7 +129,8 @@ func (h *Handler) acceptFriendRequest(c *gin.Context) {
 }
 
 // @Summary Unfriend
-// @Tags profile
+// @Security ApiKeyAuth
+// @Tags friends
 // @Description unfriend
 // @ID unfriend
 // @Accept  json

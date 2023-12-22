@@ -307,9 +307,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: GetFriends
       tags:
-      - profile
+      - friends
   /api/friends/accept:
     patch:
       consumes:
@@ -337,9 +339,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: AcceptFriendRequest
       tags:
-      - profile
+      - friends
   /api/friends/request:
     post:
       consumes:
@@ -371,9 +375,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: SendFriendRequest
       tags:
-      - profile
+      - friends
   /api/friends/unfriend:
     patch:
       consumes:
@@ -401,9 +407,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Unfriend
       tags:
-      - profile
+      - friends
   /api/posts:
     post:
       consumes:
@@ -778,7 +786,7 @@ paths:
       - ApiKeyAuth: []
       summary: UpdateProfile
       tags:
-      - user
+      - profile
   /auth/confirm/:
     get:
       consumes:

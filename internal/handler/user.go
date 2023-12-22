@@ -9,7 +9,7 @@ import (
 
 // @Summary UpdateProfile
 // @Security ApiKeyAuth
-// @Tags user
+// @Tags profile
 // @Description update user profile
 // @ID update-profile
 // @Accept  json

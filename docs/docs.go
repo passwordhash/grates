@@ -127,6 +127,11 @@ const docTemplate = `{
         },
         "/api/friends/accept": {
             "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "accept friend request",
                 "consumes": [
                     "application/json"
@@ -135,7 +140,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "friends"
                 ],
                 "summary": "AcceptFriendRequest",
                 "operationId": "accept-friend-request",
@@ -172,6 +177,11 @@ const docTemplate = `{
         },
         "/api/friends/request": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "send friend request",
                 "consumes": [
                     "application/json"
@@ -180,7 +190,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "friends"
                 ],
                 "summary": "SendFriendRequest",
                 "operationId": "send-friend-request",
@@ -223,6 +233,11 @@ const docTemplate = `{
         },
         "/api/friends/unfriend": {
             "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "unfriend",
                 "consumes": [
                     "application/json"
@@ -231,7 +246,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "friends"
                 ],
                 "summary": "Unfriend",
                 "operationId": "unfriend",
@@ -268,6 +283,11 @@ const docTemplate = `{
         },
         "/api/friends/{userId}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get friends",
                 "consumes": [
                     "application/json"
@@ -276,7 +296,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "friends"
                 ],
                 "summary": "GetFriends",
                 "operationId": "get-friends",
@@ -858,7 +878,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "profile"
                 ],
                 "summary": "UpdateProfile",
                 "operationId": "update-profile",
