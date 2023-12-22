@@ -72,15 +72,11 @@ func main() {
 	logrus.Infof("%s env file was loaded", envFileName)
 	logrus.Infof("%s config file was loaded", configFileName)
 
-<<<<<<< HEAD
 	config = Config{
 		Host:       viper.GetString("host"),
 		Port:       viper.GetString("port"),
 		ServerPort: viper.GetString("server.port"),
 	}
-=======
-	docs.SwaggerInfo.Host = fmt.Sprintf("%s%s", viper.GetString("swagger.host"), viper.GetString("swagger.port"))
->>>>>>> a43cf7103df32c9c2c6ce18e711da363b938467a
 
 	//docs.SwaggerInfo.Host = fmt.Sprintf("%s:%s", config.Host, config.Port)
 	docs.SwaggerInfo.Host = fmt.Sprintf("%s%s", config.Host, config.Port)
@@ -121,11 +117,7 @@ func main() {
 			SmtpPort: viper.GetInt("email.smtpPort"),
 			From:     viper.GetString("email.from"),
 			Password: os.Getenv("SMTP_PASSWORD"),
-<<<<<<< HEAD
 			BaseUrl:  config.Host + config.Port,
-=======
-			BaseUrl:  viper.GetString("host") + viper.GetString("port"),
->>>>>>> a43cf7103df32c9c2c6ce18e711da363b938467a
 		},
 	})
 	handlers := handler.NewHandler(services)
