@@ -85,6 +85,31 @@ definitions:
         default: M
       name:
         type: string
+      repository.DBifyable: {}
+      status:
+        type: string
+      surname:
+        type: string
+    type: object
+  domain.UserResponse:
+    properties:
+      birth_date:
+        example: "2006-01-02"
+        type: string
+      email:
+        type: string
+      gender:
+        allOf:
+        - $ref: '#/definitions/domain.Gnd'
+        default: "N"
+      id:
+        type: integer
+      is_confirmed:
+        type: boolean
+      is_deleted:
+        type: boolean
+      name:
+        type: string
       status:
         type: string
       surname:
@@ -102,6 +127,15 @@ definitions:
       message:
         type: string
     type: object
+  handler.friendResponse:
+    properties:
+      count:
+        type: integer
+      friends:
+        items:
+          $ref: '#/definitions/domain.UserResponse'
+        type: array
+    type: object
   handler.idResponse:
     properties:
       id:
@@ -115,6 +149,15 @@ definitions:
         type: array
       count:
         type: integer
+    type: object
+  handler.postsResponse:
+    properties:
+      count:
+        type: integer
+      posts:
+        items:
+          $ref: '#/definitions/domain.Post'
+        type: array
     type: object
   handler.refreshInput:
     properties:
@@ -159,15 +202,6 @@ definitions:
     properties:
       status:
         type: string
-    type: object
-  handler.usersPostsResponse:
-    properties:
-      count:
-        type: integer
-      posts:
-        items:
-          $ref: '#/definitions/domain.Post'
-        type: array
     type: object
 info:
   contact:
@@ -246,6 +280,130 @@ paths:
       summary: UpdateComment
       tags:
       - comments
+  /api/friends/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: get friends
+      operationId: get-friends
+      parameters:
+      - description: user id
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.friendResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: GetFriends
+      tags:
+      - profile
+  /api/friends/accept:
+    patch:
+      consumes:
+      - application/json
+      description: accept friend request
+      operationId: accept-friend-request
+      parameters:
+      - description: user id to accept request
+        in: query
+        name: fromId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: AcceptFriendRequest
+      tags:
+      - profile
+  /api/friends/request:
+    post:
+      consumes:
+      - application/json
+      description: send friend request
+      operationId: send-friend-request
+      parameters:
+      - description: user id to send request
+        in: query
+        name: toId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: SendFriendRequest
+      tags:
+      - profile
+  /api/friends/unfriend:
+    patch:
+      consumes:
+      - application/json
+      description: unfriend
+      operationId: unfriend
+      parameters:
+      - description: user id to unfriend
+        in: query
+        name: friendId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Unfriend
+      tags:
+      - profile
   /api/posts:
     post:
       consumes:
@@ -301,7 +459,7 @@ paths:
         "200":
           description: post info
           schema:
-            $ref: '#/definitions/handler.usersPostsResponse'
+            $ref: '#/definitions/handler.postsResponse'
         "400":
           description: Bad Request
           schema:
@@ -312,7 +470,7 @@ paths:
             $ref: '#/definitions/handler.errorResponse'
       security:
       - ApiKeyAuth: []
-      summary: GetUsersPosts
+      summary: UsersPosts
       tags:
       - posts
   /api/posts/{postId}:
@@ -548,6 +706,79 @@ paths:
       summary: LikePost
       tags:
       - likes
+  /api/posts/friends/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: GetWithAdditions friends' posts
+      operationId: friends-posts
+      parameters:
+      - description: user's id
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: limit of posts
+        in: query
+        name: limit
+        type: integer
+      - description: offset of posts
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: post info
+          schema:
+            $ref: '#/definitions/handler.postsResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: FriendsPosts
+      tags:
+      - posts
+  /api/profile:
+    patch:
+      consumes:
+      - application/json
+      description: update user profile
+      operationId: update-profile
+      parameters:
+      - description: profile update info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.ProfileUpdateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: UpdateProfile
+      tags:
+      - user
   /auth/confirm/:
     get:
       consumes:
@@ -567,6 +798,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -705,39 +940,6 @@ paths:
       summary: SignUp
       tags:
       - auth
-  /user/profile:
-    patch:
-      consumes:
-      - application/json
-      description: update user profile
-      operationId: update-profile
-      parameters:
-      - description: profile update info
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/domain.ProfileUpdateInput'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/handler.statusResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/handler.statusResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/handler.statusResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: UpdateProfile
-      tags:
-      - user
 securityDefinitions:
   ApiKeyAuth:
     in: header

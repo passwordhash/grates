@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"grates/internal/repository"
 	"net/http"
 	"strconv"
 )
@@ -16,13 +18,17 @@ import (
 // @Produce  json
 // @Param hash query string true "hash"
 // @Success 200 {object} statusResponse
-// @Failure 500 {object} errorResponse
+// @Failure 400,500 {object} errorResponse
 // @Router /auth/confirm/ [get]
 func (h *Handler) confirmEmail(c *gin.Context) {
 	// TODO: может стоит в запросе передавать еще id пользователя ?
 	hash := c.Query("hash")
 
 	err := h.services.Email.ConfirmEmail(hash)
+	if errors.Is(err, repository.NoChangesErr) {
+		newResponse(c, http.StatusBadRequest, fmt.Sprintf("invalid hash: %s", hash))
+		return
+	}
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("error confirming email: %s", err.Error()))
 		return

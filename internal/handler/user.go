@@ -18,7 +18,7 @@ import (
 // @Success 200 {object} statusResponse
 // @Failure 400 {object} statusResponse
 // @Failure 500 {object} statusResponse
-// @Router /user/profile [patch]
+// @Router /api/profile [patch]
 func (h *Handler) updateProfile(c *gin.Context) {
 	var input domain.ProfileUpdateInput
 

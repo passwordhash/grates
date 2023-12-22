@@ -14,11 +14,12 @@ func (r *UserRepository) CreateUser(user domain.UserSignUpInput) (int, error) {
 	query := fmt.Sprintf(`INSERT INTO %s (name, surname, email, password_hash)
 						VALUES ($1, $2, $3, $4)
 						RETURNING id;`, UsersTable)
-	// TRY
+
 	row := r.db.QueryRow(query, user.Name, user.Surname, user.Email, user.Password)
 	if err := row.Scan(&id); err != nil {
 		return 0, err
 	}
+
 	return id, nil
 }
 
@@ -28,10 +29,7 @@ func (r *UserRepository) GetUser(email, password string) (domain.User, error) {
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE email=$1 AND password_hash=$2", UsersTable)
 	err := r.db.Get(&user, query, email, password)
-	if err != nil {
-		return user, err
-	}
-
+	
 	return user, err
 }
 
@@ -82,7 +80,7 @@ func (r *UserRepository) UpdateProfile(userId int, input domain.ProfileUpdateInp
 			argId += 1
 		}
 	}
-	
+
 	querySet = querySet[0 : len(querySet)-2]
 	args = append(args, userId)
 

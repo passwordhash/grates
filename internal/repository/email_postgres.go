@@ -45,7 +45,7 @@ func (e *EmailRepository) ConfirmEmail(hash string) error {
 	changes, _ := res.RowsAffected()
 
 	if changes == 0 {
-		return fmt.Errorf("no changes in db")
+		return NoChangesErr
 	}
 
 	return err

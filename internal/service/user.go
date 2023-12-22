@@ -4,13 +4,23 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/sirupsen/logrus"
 	"grates/internal/domain"
 	"grates/internal/repository"
 	"grates/pkg/auth"
 	"math/rand"
 	"time"
 )
+
+var UserNotFoundError = errors.New("user not found")
+
+type GenerateTokensError struct {
+	error
+	errorType string
+}
+
+func (g GenerateTokensError) Error() string {
+	return fmt.Sprintf("error while generating tokens: %s", g.errorType)
+}
 
 type UserService struct {
 	repo         repository.User
@@ -49,16 +59,16 @@ type Tokens struct {
 }
 
 // AuthenticateUser получает пользователя из БД по заданным параметрам,
-// возвращает сгенерированную пару токенов Tokens/
+// возвращает сгенерированную пару токенов Tokens.
 func (s *UserService) AuthenticateUser(email, password string) (Tokens, error) {
 	var (
 		tokens Tokens
 		err    error
 	)
+
 	user, err := s.repo.GetUser(email, auth.GeneratePasswordHash(password, s.passwordSalt))
-	logrus.Info(user)
 	if err != nil {
-		return tokens, err
+		return tokens, UserNotFoundError
 	}
 
 	return s.GenerateTokens(user)
@@ -67,6 +77,7 @@ func (s *UserService) AuthenticateUser(email, password string) (Tokens, error) {
 // GenerateTokens , получая в качестве параметра domain.User, создает access и
 // refresh токены, записывает соответствующий пользователю refresh token в БД.
 // Возвращает пару access и refresh токеном Tokens.
+// Если полностью не получилось сгенерировать токены, возвращает GenerateTokensError.
 func (s *UserService) GenerateTokens(user domain.User) (Tokens, error) {
 	var (
 		tokens Tokens
@@ -75,12 +86,12 @@ func (s *UserService) GenerateTokens(user domain.User) (Tokens, error) {
 
 	tokens.Access, err = s.newAccessToken(user)
 	if err != nil {
-		return tokens, err
+		return tokens, GenerateTokensError{errorType: "access token"}
 	}
 
 	tokens.Refresh, err = s.newRefreshToken()
 	if err != nil {
-		return tokens, nil
+		return tokens, GenerateTokensError{errorType: "refresh token"}
 	}
 
 	err = s.repo.SaveRefreshToken(user.Id, domain.Session{
@@ -89,10 +100,10 @@ func (s *UserService) GenerateTokens(user domain.User) (Tokens, error) {
 		TTL: s.refreshTokenTTL,
 	})
 	if err != nil {
-		return Tokens{}, err
+		return Tokens{}, GenerateTokensError{errorType: "save refresh token"}
 	}
 
-	return tokens, err
+	return tokens, nil
 }
 
 // RefreshTokens ищет id пользователя по refresh токену, находит самого пользователя,
@@ -105,7 +116,7 @@ func (s *UserService) RefreshTokens(refreshToken string) (Tokens, error) {
 
 	user, err := s.repo.GetUserById(userId)
 	if err != nil {
-		return Tokens{}, err
+		return Tokens{}, UserNotFoundError
 	}
 
 	return s.GenerateTokens(user)
