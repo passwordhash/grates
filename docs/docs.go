@@ -135,7 +135,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "friends"
+                    "profile"
                 ],
                 "summary": "AcceptFriendRequest",
                 "operationId": "accept-friend-request",
@@ -180,7 +180,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "friends"
+                    "profile"
                 ],
                 "summary": "SendFriendRequest",
                 "operationId": "send-friend-request",
@@ -231,7 +231,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "friends"
+                    "profile"
                 ],
                 "summary": "Unfriend",
                 "operationId": "unfriend",
@@ -276,7 +276,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "friends"
+                    "profile"
                 ],
                 "summary": "GetFriends",
                 "operationId": "get-friends",
