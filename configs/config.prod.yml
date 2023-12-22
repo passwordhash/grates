@@ -4,6 +4,10 @@ port: ""
 server:
   port: "8000"
 
+swagger:
+  host: "grates.mgtu.tech"
+  port: ""
+
 db:
   username: "postgres"
   host: "db"
