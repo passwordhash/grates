@@ -1,5 +1,9 @@
 host: "localhost"
-port: ":8000"
+port: "8000"
+
+swagger:
+  host: "localhost"
+  port: ":8000"
 
 db:
   username: "postgres"
