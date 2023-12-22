@@ -70,7 +70,7 @@ func main() {
 	logrus.Infof("%s env file was loaded", envFileName)
 	logrus.Infof("%s config file was loaded", configFileName)
 
-	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%s", viper.GetString("host"), viper.GetString("port"))
+	docs.SwaggerInfo.Host = fmt.Sprintf("%s%s", viper.GetString("swagger.host"), viper.GetString("swagger.port"))
 
 	logrus.Info(viper.GetString("host"))
 
