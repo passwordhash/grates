@@ -746,6 +746,39 @@ paths:
       summary: FriendsPosts
       tags:
       - posts
+  /api/profile:
+    patch:
+      consumes:
+      - application/json
+      description: update user profile
+      operationId: update-profile
+      parameters:
+      - description: profile update info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.ProfileUpdateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: UpdateProfile
+      tags:
+      - user
   /auth/confirm/:
     get:
       consumes:
@@ -907,39 +940,6 @@ paths:
       summary: SignUp
       tags:
       - auth
-  /user/profile:
-    patch:
-      consumes:
-      - application/json
-      description: update user profile
-      operationId: update-profile
-      parameters:
-      - description: profile update info
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/domain.ProfileUpdateInput'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/handler.statusResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/handler.statusResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/handler.statusResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: UpdateProfile
-      tags:
-      - user
 securityDefinitions:
   ApiKeyAuth:
     in: header

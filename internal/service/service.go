@@ -1,14 +1,11 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 	"grates/internal/domain"
 	"grates/internal/repository"
 	"time"
 )
-
-var NoChangesErr = errors.New("no changes in db")
 
 type InternalErr struct {
 	error

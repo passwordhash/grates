@@ -9,7 +9,6 @@ import (
 )
 
 var SelfFriendRequestErr = errors.New("you can't send friend request to yourself")
-var AleadySendErr = errors.New("users are already friends")
 
 type FriendService struct {
 	friendRepo repository.Friend

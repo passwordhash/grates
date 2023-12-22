@@ -31,7 +31,7 @@ func (s *PostService) Create(post domain.Post) (int, error) {
 func (s *PostService) GetWithAdditions(postId int) (domain.Post, error) {
 	post, err := s.postRepo.Get(postId)
 	if err != nil {
-		return post, err
+		return post, NotFoundErr{subject: fmt.Sprintf("post with id %d", postId)}
 	}
 
 	post.Comments, err = s.commentRepo.GetPostComments(postId)
@@ -52,7 +52,7 @@ func (s *PostService) GetUsersPosts(userId int) ([]domain.Post, error) {
 
 	posts, err := s.postRepo.UsersPosts(userId)
 	if err != nil {
-		return nil, err
+		return nil, NotFoundErr{subject: fmt.Sprintf("posts of user with id %d", userId)}
 	}
 
 	err = s.fillPostsWithAdditions(&posts)

@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"grates/internal/domain"
+	"grates/internal/repository"
 	"grates/internal/service"
 	"net/http"
 	"strconv"
@@ -73,7 +74,7 @@ func (h *Handler) sendFriendRequest(c *gin.Context) {
 		newResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	if errors.Is(err, service.AleadySendErr) {
+	if errors.As(err, &repository.CantChangeErr{}) {
 		newResponse(c, http.StatusConflict, err.Error())
 		return
 	}

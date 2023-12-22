@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"github.com/jmoiron/sqlx"
 	"github.com/redis/go-redis/v9"
 	"grates/internal/domain"
@@ -14,6 +15,16 @@ const (
 	AuthEmailsTable = "auth_emails"
 	FriendsTable    = "friend_requests"
 )
+
+type CantChangeErr struct {
+	msg string
+}
+
+func (e CantChangeErr) Error() string {
+	return e.msg
+}
+
+var NoChangesErr = errors.New("no changes in db")
 
 type User interface {
 	CreateUser(user domain.UserSignUpInput) (int, error)

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"grates/internal/service"
+	"grates/internal/repository"
 	"net/http"
 	"strconv"
 )
@@ -25,7 +25,7 @@ func (h *Handler) confirmEmail(c *gin.Context) {
 	hash := c.Query("hash")
 
 	err := h.services.Email.ConfirmEmail(hash)
-	if errors.Is(err, service.NoChangesErr) {
+	if errors.Is(err, repository.NoChangesErr) {
 		newResponse(c, http.StatusBadRequest, fmt.Sprintf("invalid hash: %s", hash))
 		return
 	}

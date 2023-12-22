@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"grates/internal/domain"
+	"grates/internal/service"
 	"net/http"
 	"strconv"
 )
@@ -31,17 +33,12 @@ type createPostInput struct {
 // @Failure 400,401,500 {object} errorResponse
 // @Router /api/posts [post]
 func (h *Handler) createPost(c *gin.Context) {
-	var user domain.User
+	var userId int
 	var post domain.Post
 
 	var input createPostInput
 
-	v, exists := c.Get(userCtx)
-	user, ok := v.(domain.User)
-	if !ok || !exists {
-		newResponse(c, http.StatusUnauthorized, "user unauthorized")
-		return
-	}
+	userId = c.MustGet(userCtx).(domain.User).Id
 
 	if err := c.BindJSON(&input); err != nil {
 		newResponse(c, http.StatusBadRequest, "invalid input")
@@ -51,7 +48,7 @@ func (h *Handler) createPost(c *gin.Context) {
 	post = domain.Post{
 		Title:   input.Title,
 		Content: input.Content,
-		UsersId: user.Id,
+		UsersId: userId,
 	}
 
 	postId, err := h.services.Post.Create(post)
@@ -59,6 +56,8 @@ func (h *Handler) createPost(c *gin.Context) {
 		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("create post error: %s", err.Error()))
 		return
 	}
+
+	logrus.Infof("user %d created post %d", userId, postId)
 
 	c.JSON(http.StatusOK, idResponse{Id: postId})
 }
@@ -84,6 +83,10 @@ func (h *Handler) getPost(c *gin.Context) {
 	}
 
 	post, err = h.services.Post.GetWithAdditions(postId)
+	if errors.As(err, &service.NotFoundErr{}) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -119,6 +122,10 @@ func (h *Handler) getUsersPosts(c *gin.Context) {
 	}
 
 	posts, err = h.services.GetUsersPosts(userId)
+	if errors.As(err, &service.NotFoundErr{}) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
