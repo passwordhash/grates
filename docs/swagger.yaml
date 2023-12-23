@@ -125,6 +125,15 @@ definitions:
       message:
         type: string
     type: object
+  handler.firiendRequestResponse:
+    properties:
+      count:
+        type: integer
+      requests:
+        items:
+          $ref: '#/definitions/domain.UserResponse'
+        type: array
+    type: object
   handler.friendResponse:
     properties:
       count:
@@ -282,10 +291,10 @@ paths:
     get:
       consumes:
       - application/json
-      description: get friends
+      description: getting user's friends by his id
       operationId: get-friends
       parameters:
-      - description: user id
+      - description: id of user to get friends
         in: path
         name: userId
         required: true
@@ -310,7 +319,7 @@ paths:
       summary: GetFriends
       tags:
       - friends
-  /api/friends/accept:
+  /api/friends/{userId}/accept:
     patch:
       consumes:
       - application/json
@@ -318,8 +327,8 @@ paths:
       operationId: accept-friend-request
       parameters:
       - description: user id to accept request
-        in: query
-        name: fromId
+        in: path
+        name: userId
         required: true
         type: string
       produces:
@@ -342,7 +351,43 @@ paths:
       summary: AcceptFriendRequest
       tags:
       - friends
-  /api/friends/request:
+  /api/friends/{userId}/requests:
+    get:
+      consumes:
+      - application/json
+      description: getting user's friend requests by his id
+      operationId: get-friend-requests
+      parameters:
+      - description: id of user to get friend requests
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.firiendRequestResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: GetFriendRequests
+      tags:
+      - friends
+  /api/friends/{userId}/send-request:
     post:
       consumes:
       - application/json
@@ -350,8 +395,8 @@ paths:
       operationId: send-friend-request
       parameters:
       - description: user id to send request
-        in: query
-        name: toId
+        in: path
+        name: userId
         required: true
         type: string
       produces:
@@ -378,16 +423,16 @@ paths:
       summary: SendFriendRequest
       tags:
       - friends
-  /api/friends/unfriend:
+  /api/friends/{userId}/unfriend/:
     patch:
       consumes:
       - application/json
-      description: unfriend
+      description: unfriend user by his id
       operationId: unfriend
       parameters:
       - description: user id to unfriend
-        in: query
-        name: friendId
+        in: path
+        name: userId
         required: true
         type: string
       produces:

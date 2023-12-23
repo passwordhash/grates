@@ -125,7 +125,57 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/friends/accept": {
+        "/api/friends/{userId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "getting user's friends by his id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friends"
+                ],
+                "summary": "GetFriends",
+                "operationId": "get-friends",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id of user to get friends",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.friendResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/friends/{userId}/accept": {
             "patch": {
                 "security": [
                     {
@@ -148,8 +198,8 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "user id to accept request",
-                        "name": "fromId",
-                        "in": "query",
+                        "name": "userId",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -175,7 +225,63 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/friends/request": {
+        "/api/friends/{userId}/requests": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "getting user's friend requests by his id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friends"
+                ],
+                "summary": "GetFriendRequests",
+                "operationId": "get-friend-requests",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id of user to get friend requests",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.firiendRequestResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/friends/{userId}/send-request": {
             "post": {
                 "security": [
                     {
@@ -198,8 +304,8 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "user id to send request",
-                        "name": "toId",
-                        "in": "query",
+                        "name": "userId",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -231,14 +337,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/friends/unfriend": {
+        "/api/friends/{userId}/unfriend/": {
             "patch": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "unfriend",
+                "description": "unfriend user by his id",
                 "consumes": [
                     "application/json"
                 ],
@@ -254,56 +360,6 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "user id to unfriend",
-                        "name": "friendId",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/handler.statusResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/friends/{userId}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "get friends",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "friends"
-                ],
-                "summary": "GetFriends",
-                "operationId": "get-friends",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "user id",
                         "name": "userId",
                         "in": "path",
                         "required": true
@@ -313,7 +369,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.friendResponse"
+                            "$ref": "#/definitions/handler.statusResponse"
                         }
                     },
                     "400": {
@@ -1349,6 +1405,20 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string"
+                }
+            }
+        },
+        "handler.firiendRequestResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "requests": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.UserResponse"
+                    }
                 }
             }
         },

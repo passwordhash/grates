@@ -19,11 +19,11 @@ type friendResponse struct {
 // @Summary GetFriends
 // @Security ApiKeyAuth
 // @Tags friends
-// @Description get friends
+// @Description getting user's friends by his id
 // @ID get-friends
 // @Accept  json
 // @Produce  json
-// @Param userId path string true "user id"
+// @Param userId path string true "id of user to get friends"
 // @Success 200 {object} friendResponse
 // @Failure 400,500 {object} errorResponse
 // @Router /api/friends/{userId} [get]
@@ -48,6 +48,48 @@ func (h *Handler) friends(c *gin.Context) {
 	})
 }
 
+type firiendRequestResponse struct {
+	Requests []domain.UserResponse `json:"requests"`
+	Count    int                   `json:"count"`
+}
+
+// @Summary GetFriendRequests
+// @Security ApiKeyAuth
+// @Tags friends
+// @Description getting user's friend requests by his id
+// @ID get-friend-requests
+// @Accept  json
+// @Produce  json
+// @Param userId path string true "id of user to get friend requests"
+// @Success 200 {object} firiendRequestResponse
+// @Failure 400,409,500 {object} errorResponse
+// @Router /api/friends/{userId}/requests [get]
+func (h *Handler) friendRequests(c *gin.Context) {
+	var userId int
+
+	userId, err := strconv.Atoi(c.Param("userId"))
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid user id param")
+		return
+	}
+
+	if userId != c.MustGet(userCtx).(domain.User).Id {
+		newResponse(c, http.StatusForbidden, "you can't get friend requests of another user")
+		return
+	}
+
+	friends, err := h.services.Friend.FriendRequests(userId)
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, firiendRequestResponse{
+		Requests: domain.UserListToResponse(friends),
+		Count:    len(friends),
+	})
+}
+
 // @Summary SendFriendRequest
 // @Security ApiKeyAuth
 // @Tags friends
@@ -55,17 +97,17 @@ func (h *Handler) friends(c *gin.Context) {
 // @ID send-friend-request
 // @Accept  json
 // @Produce  json
-// @Param toId query string true "user id to send request"
+// @Param userId path string true "user id to send request"
 // @Success 200 {object} statusResponse
 // @Failure 400,409,500 {object} errorResponse
-// @Router /api/friends/request [post]
+// @Router /api/friends/{userId}/send-request [post]
 func (h *Handler) sendFriendRequest(c *gin.Context) {
 	var fromId int
 	var toId int
 
 	fromId = c.MustGet(userCtx).(domain.User).Id
 
-	toId, err := strconv.Atoi(c.Query("toId"))
+	toId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
 		newResponse(c, http.StatusBadRequest, "invalid query toId parameter")
 		return
@@ -97,17 +139,18 @@ func (h *Handler) sendFriendRequest(c *gin.Context) {
 // @ID accept-friend-request
 // @Accept  json
 // @Produce  json
-// @Param fromId query string true "user id to accept request"
+// @Param userId path string true "user id to accept request"
 // @Success 200 {object} statusResponse
 // @Failure 400,500 {object} errorResponse
-// @Router /api/friends/accept [patch]
+// @Router /api/friends/{userId}/accept [patch]
 func (h *Handler) acceptFriendRequest(c *gin.Context) {
 	var fromId int
 	var toId int
 
 	toId = c.MustGet(userCtx).(domain.User).Id
 
-	fromId, err := strconv.Atoi(c.Query("fromId"))
+	fromId, err := strconv.Atoi(c.Param("userId"))
+	logrus.Infof(strconv.Itoa(fromId) + " asdfasdf")
 	if err != nil {
 		newResponse(c, http.StatusBadRequest, "invalid query fromId parameter")
 		return
@@ -131,21 +174,21 @@ func (h *Handler) acceptFriendRequest(c *gin.Context) {
 // @Summary Unfriend
 // @Security ApiKeyAuth
 // @Tags friends
-// @Description unfriend
+// @Description unfriend user by his id
 // @ID unfriend
 // @Accept  json
 // @Produce  json
-// @Param friendId query string true "user id to unfriend"
+// @Param userId path string true "user id to unfriend"
 // @Success 200 {object} statusResponse
 // @Failure 400,500 {object} errorResponse
-// @Router /api/friends/unfriend [patch]
+// @Router /api/friends/{userId}/unfriend/ [patch]
 func (h *Handler) unfriend(c *gin.Context) {
 	var friendId int
 	var userId int
 
 	userId = c.MustGet(userCtx).(domain.User).Id
 
-	friendId, err := strconv.Atoi(c.Query("friendId"))
+	friendId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
 		newResponse(c, http.StatusBadRequest, "invalid query friendId parameter")
 		return

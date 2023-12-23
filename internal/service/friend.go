@@ -22,6 +22,10 @@ func (f *FriendService) GetFriends(userId int) ([]domain.User, error) {
 	return f.friendRepo.FriendUsers(userId)
 }
 
+func (F *FriendService) FriendRequests(userId int) ([]domain.User, error) {
+	return F.friendRepo.FriendRequests(userId)
+}
+
 func (f *FriendService) SendFriendRequest(fromId, toId int) error {
 	if err := f.checkIds(fromId, toId); err != nil {
 		return err
