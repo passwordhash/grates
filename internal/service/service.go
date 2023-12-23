@@ -57,7 +57,7 @@ type Comment interface {
 }
 
 type Email interface {
-	ReplaceConfirmationEmail(userId int, to, name string) error
+	ReplaceConfirmationEmail(userId int, to, name string) (string, error)
 	ConfirmEmail(hash string) error
 	sendAuthEmail(to, name, hash string) error
 }

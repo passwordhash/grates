@@ -8,6 +8,8 @@ import (
 	"grates/pkg/utils"
 )
 
+var AlreadyConfirmedErr = fmt.Errorf("email already confirmed")
+
 type EmailService struct {
 	D    EmailDeps
 	repo repository.EmailRepository
@@ -18,21 +20,25 @@ func NewEmailService(repo repository.EmailRepository, d EmailDeps) *EmailService
 }
 
 // ReplaceConfirmationEmail если письмо уже существует, удаляет его, создает новое и отправляет
-func (e *EmailService) ReplaceConfirmationEmail(userId int, to, name string) error {
+func (e *EmailService) ReplaceConfirmationEmail(userId int, to, name string) (string, error) {
 	hash, err := utils.GenerateHash(32)
 	if err != nil {
 		hash = utils.RandStringBytesRmndr(32)
 	}
 
 	if err = e.repo.ReplaceEmail(userId, hash); err != nil {
-		return err
+		return "", err
 	}
 
-	return e.sendAuthEmail(to, name, hash)
+	return hash, e.sendAuthEmail(to, name, hash)
 }
 
 // ConfirmEmail по переданному hash'у подтверждает аккаунт
 func (e *EmailService) ConfirmEmail(hash string) error {
+	if isConirmed, _ := e.repo.IsConfirmed(hash); isConirmed {
+		return AlreadyConfirmedErr
+	}
+
 	return e.repo.ConfirmEmail(hash)
 }
 

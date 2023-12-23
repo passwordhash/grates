@@ -173,6 +173,11 @@ definitions:
     required:
     - refreshToken
     type: object
+  handler.resendEmailResponse:
+    properties:
+      hash:
+        type: string
+    type: object
   handler.signInInput:
     properties:
       email:
@@ -857,6 +862,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/handler.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -913,7 +922,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.statusResponse'
+            $ref: '#/definitions/handler.resendEmailResponse'
         "400":
           description: Bad Request
           schema:

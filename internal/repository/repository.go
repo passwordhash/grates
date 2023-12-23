@@ -66,6 +66,7 @@ type Like interface {
 type Email interface {
 	ReplaceEmail(userId int, hash string) error
 	ConfirmEmail(userId int, hash string) error
+	IsConfirmed(hash string) (bool, error)
 }
 
 type Friend interface {

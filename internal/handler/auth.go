@@ -50,7 +50,7 @@ func (h *Handler) signUp(c *gin.Context) {
 	}
 
 	go func() {
-		err := h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
+		_, err := h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
 		if err != nil {
 			logrus.Errorf("error sending email: %s", err.Error())
 			// TODO: подумать над тем, чтобы отправлять письмо повторно
@@ -150,5 +150,8 @@ func (h *Handler) refreshTokens(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, tokens)
+	c.JSON(http.StatusOK, signInResponse{
+		AccessToken:  tokens.Access,
+		RefreshToken: tokens.Refresh,
+	})
 }

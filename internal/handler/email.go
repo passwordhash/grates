@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"grates/internal/repository"
+	"grates/internal/service"
 	"net/http"
 	"strconv"
 )
@@ -18,13 +19,18 @@ import (
 // @Produce  json
 // @Param hash query string true "hash"
 // @Success 200 {object} statusResponse
-// @Failure 400,500 {object} errorResponse
+// @Failure 400,409,500 {object} errorResponse
 // @Router /auth/confirm/ [get]
 func (h *Handler) confirmEmail(c *gin.Context) {
+	// TODO: при уже подверждееном email возвращать ошибку
 	// TODO: может стоит в запросе передавать еще id пользователя ?
 	hash := c.Query("hash")
 
 	err := h.services.Email.ConfirmEmail(hash)
+	if errors.Is(err, service.AlreadyConfirmedErr) {
+		newResponse(c, http.StatusConflict, fmt.Sprint("email already confirmed"))
+		return
+	}
 	if errors.Is(err, repository.NoChangesErr) {
 		newResponse(c, http.StatusBadRequest, fmt.Sprintf("invalid hash: %s", hash))
 		return
@@ -39,6 +45,10 @@ func (h *Handler) confirmEmail(c *gin.Context) {
 	c.JSON(http.StatusOK, statusResponse{Status: "ok"})
 }
 
+type resendEmailResponse struct {
+	Hash string `json:"hash"`
+}
+
 // @Summary Resend email
 // @Tags auth
 // @Description resend confirmation email
@@ -46,7 +56,7 @@ func (h *Handler) confirmEmail(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param userId path int true "user's id"
-// @Success 200 {object} statusResponse
+// @Success 200 {object} resendEmailResponse
 // @Failure 400,404,500 {object} errorResponse
 // @Router /auth/resend/{userId} [post]
 func (h *Handler) resendEmail(c *gin.Context) {
@@ -67,7 +77,7 @@ func (h *Handler) resendEmail(c *gin.Context) {
 		return
 	}
 
-	err = h.services.Email.ReplaceConfirmationEmail(id, user.Email, user.Name)
+	hash, err := h.services.Email.ReplaceConfirmationEmail(id, user.Email, user.Name)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("error sending email: %s", err.Error()))
 		return
@@ -75,5 +85,5 @@ func (h *Handler) resendEmail(c *gin.Context) {
 
 	logrus.Infof("confirmation email was sent to %s", user.Email)
 
-	c.JSON(http.StatusOK, statusResponse{Status: "ok"})
+	c.JSON(http.StatusOK, resendEmailResponse{Hash: hash})
 }
