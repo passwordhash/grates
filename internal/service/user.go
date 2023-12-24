@@ -11,19 +11,14 @@ import (
 	"time"
 )
 
+var UserWithEmailExistsError = errors.New("user with this email already exists")
 var UserNotFoundError = errors.New("user not found")
 
-type GenerateTokensError struct {
-	error
-	errorType string
-}
-
-func (g GenerateTokensError) Error() string {
-	return fmt.Sprintf("error while generating tokens: %s", g.errorType)
-}
+var GenerateTokensError = errors.New("error generating tokens")
 
 type UserService struct {
 	repo         repository.User
+	emailRepo    repository.Email
 	sigingKey    string
 	passwordSalt string
 
@@ -31,9 +26,10 @@ type UserService struct {
 	refreshTokenTTL time.Duration
 }
 
-func NewUserService(repo repository.User, sigingKey, pswrdSalt string, accessTokenTTL, refreshTokenTTL time.Duration) *UserService {
+func NewUserService(repo repository.User, emailRepo repository.Email, sigingKey, pswrdSalt string, accessTokenTTL, refreshTokenTTL time.Duration) *UserService {
 	return &UserService{
 		repo:            repo,
+		emailRepo:       emailRepo,
 		sigingKey:       sigingKey,
 		passwordSalt:    pswrdSalt,
 		accessTokenTTL:  accessTokenTTL,
@@ -44,8 +40,30 @@ func NewUserService(repo repository.User, sigingKey, pswrdSalt string, accessTok
 // CreateUser генерирует хэш пароля, сохраняет пользователя в БД.
 // Возвращает int id созданного пользователя и ошибку.
 func (s *UserService) CreateUser(user domain.UserSignUpInput) (int, error) {
+	potUser, _ := s.repo.GetUserByEmail(user.Email)
+	if potUser.IsEmtpty() {
+		return 0, UserWithEmailExistsError
+	}
+
 	user.Password = auth.GeneratePasswordHash(user.Password, s.passwordSalt)
-	return s.repo.CreateUser(user)
+	userId, err := s.repo.CreateUser(user)
+	if err != nil {
+		return 0, err
+	}
+
+	return userId, nil
+
+	//go func() {
+	//	_, err := s.Ema.ReplaceConfirmationEmail(id, input.Email, input.Name)
+	//	if err != nil {
+	//		logrus.Errorf("error sending email: %s", err.Error())
+	//		TODO: подумать над тем, чтобы отправлять письмо повторно
+	//time.Sleep(5 * time.Second)
+	//h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
+	//return
+	//}
+	//logrus.Infof("confirmation email sent to %s", input.Email)
+	//}()
 }
 
 func (s *UserService) GetUserById(id int) (domain.User, error) {
@@ -86,12 +104,12 @@ func (s *UserService) GenerateTokens(user domain.User) (Tokens, error) {
 
 	tokens.Access, err = s.newAccessToken(user)
 	if err != nil {
-		return tokens, GenerateTokensError{errorType: "access token"}
+		return tokens, GenerateTokensError
 	}
 
 	tokens.Refresh, err = s.newRefreshToken()
 	if err != nil {
-		return tokens, GenerateTokensError{errorType: "refresh token"}
+		return tokens, GenerateTokensError
 	}
 
 	err = s.repo.SaveRefreshToken(user.Id, domain.Session{
@@ -100,7 +118,7 @@ func (s *UserService) GenerateTokens(user domain.User) (Tokens, error) {
 		TTL: s.refreshTokenTTL,
 	})
 	if err != nil {
-		return Tokens{}, GenerateTokensError{errorType: "save refresh token"}
+		return Tokens{}, GenerateTokensError
 	}
 
 	return tokens, nil

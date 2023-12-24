@@ -45,9 +45,9 @@ func (h *Handler) confirmEmail(c *gin.Context) {
 	c.JSON(http.StatusOK, statusResponse{Status: "ok"})
 }
 
-type resendEmailResponse struct {
-	Hash string `json:"hash"`
-}
+//type resendEmailResponse struct {
+//	Hash string `json:"hash"`
+//}
 
 // @Summary Resend email
 // @Tags auth
@@ -56,7 +56,7 @@ type resendEmailResponse struct {
 // @Accept  json
 // @Produce  json
 // @Param userId path int true "user's id"
-// @Success 200 {object} resendEmailResponse
+// @Success 200 {object} statusResponse
 // @Failure 400,404,500 {object} errorResponse
 // @Router /auth/resend/{userId} [post]
 func (h *Handler) resendEmail(c *gin.Context) {
@@ -77,7 +77,7 @@ func (h *Handler) resendEmail(c *gin.Context) {
 		return
 	}
 
-	hash, err := h.services.Email.ReplaceConfirmationEmail(id, user.Email, user.Name)
+	err = h.services.Email.ReplaceConfirmationEmail(id, user.Email, user.Name)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("error sending email: %s", err.Error()))
 		return
@@ -85,5 +85,5 @@ func (h *Handler) resendEmail(c *gin.Context) {
 
 	logrus.Infof("confirmation email was sent to %s", user.Email)
 
-	c.JSON(http.StatusOK, resendEmailResponse{Hash: hash})
+	c.JSON(http.StatusOK, statusResponse{Status: "ok"})
 }

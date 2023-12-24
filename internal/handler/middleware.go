@@ -70,7 +70,7 @@ func (h *Handler) postAffiliation(c *gin.Context) {
 	}
 
 	if !isBelongs {
-		newResponse(c, http.StatusForbidden, fmt.Sprintf("post %s does not belong to the user"))
+		newResponse(c, http.StatusForbidden, fmt.Sprintf("post %x does not belong to the user", postId))
 		return
 	}
 }

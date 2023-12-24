@@ -12,20 +12,13 @@ import (
 	"time"
 )
 
-type signUpInput struct {
-	Email    string `json:"email" binding:"required"`
-	Name     string `json:"name" binding:"required"`
-	Surname  string `json:"surname"`
-	Password string `json:"password" binding:"required"`
-}
-
 // @Summary SignUp
 // @Tags auth
 // @Description create account
 // @ID create-account
 // @Accept  json
 // @Produce  json
-// @Param input body signUpInput true "account info"
+// @Param input body SignInInput true "account info"
 // @Success 200 {object} idResponse
 // @Failure 400,409,500 {object} errorResponse
 // @Router /auth/sign-up [post]
@@ -37,28 +30,25 @@ func (h *Handler) signUp(c *gin.Context) {
 		return
 	}
 
-	user, err := h.services.GetUserByEmail(input.Email)
-	if !user.IsEmtpty() {
-		newResponse(c, http.StatusConflict, fmt.Sprintf("user with email %s exists", user.Email))
+	id, err := h.services.User.CreateUser(input)
+	if errors.Is(err, service.UserWithEmailExistsError) {
+		newResponse(c, http.StatusConflict, err.Error())
 		return
 	}
-
-	id, err := h.services.User.CreateUser(input)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	go func() {
-		_, err := h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
+		err := h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
 		if err != nil {
 			logrus.Errorf("error sending email: %s", err.Error())
-			// TODO: подумать над тем, чтобы отправлять письмо повторно
+			//TODO: подумать над тем, чтобы отправлять письмо повторно
 			time.Sleep(5 * time.Second)
 			h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
 			return
 		}
-		logrus.Infof("confirmation email sent to %s", input.Email)
 	}()
 
 	c.JSON(http.StatusOK, map[string]interface{}{
@@ -91,17 +81,17 @@ func (h *Handler) signIn(c *gin.Context) {
 	var tokens service.Tokens
 
 	if err := c.BindJSON(&input); err != nil {
-		newResponse(c, http.StatusBadRequest, fmt.Sprintf("bad auth credentials: %s", err.Error()))
+		newResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
 	tokens, err := h.services.AuthenticateUser(input.Email, input.Password)
-	if errors.As(err, &service.GenerateTokensError{}) {
+	if errors.Is(err, service.GenerateTokensError) {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	if errors.Is(err, service.UserNotFoundError) {
-		newResponse(c, http.StatusUnauthorized, fmt.Sprintf("invalid auth credentials: %s", err.Error()))
+		newResponse(c, http.StatusUnauthorized, fmt.Sprint("invalid auth credentials"))
 		return
 	}
 	if err != nil {
@@ -137,7 +127,7 @@ func (h *Handler) refreshTokens(c *gin.Context) {
 	}
 
 	tokens, err := h.services.RefreshTokens(input.RefreshToken)
-	if errors.As(err, &service.GenerateTokensError{}) {
+	if errors.Is(err, service.GenerateTokensError) {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}

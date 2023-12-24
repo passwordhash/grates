@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
+
 type InternalErr struct {
 	error
 	msg string
@@ -57,9 +59,9 @@ type Comment interface {
 }
 
 type Email interface {
-	ReplaceConfirmationEmail(userId int, to, name string) (string, error)
+	ReplaceConfirmationEmail(userId int, to, name string) error
 	ConfirmEmail(hash string) error
-	sendAuthEmail(to, name, hash string) error
+	SendAuthEmail(to, name, hash string) error
 }
 
 type Like interface {
@@ -106,7 +108,7 @@ type EmailDeps struct {
 
 func NewService(repos *repository.Repository, deps Deps) *Service {
 	return &Service{
-		User:    NewUserService(repos.User, deps.SigingKey, deps.PasswordSalt, deps.AccessTokenTTL, deps.RefreshTokenTTL),
+		User:    NewUserService(repos.User, repos.Email, deps.SigingKey, deps.PasswordSalt, deps.AccessTokenTTL, deps.RefreshTokenTTL),
 		Post:    NewPostService(repos.Post, repos.Comment, repos.Like, repos.Friend),
 		Comment: NewCommentService(repos.Comment),
 		Like:    NewLikeService(repos.Like),

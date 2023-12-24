@@ -68,6 +68,14 @@ type UserSignUpInput struct {
 	Password string `json:"password" binding:"required"`
 }
 
+// SignInInput представляет собой данные, необходимые для аутентификации пользователя.
+type SignInInput struct {
+	Email    string `json:"email" binding:"required"`
+	Name     string `json:"name" binding:"required"`
+	Surname  string `json:"surname"`
+	Password string `json:"password" binding:"required"`
+}
+
 // ProfileUpdateInput представляет собой данные, необходимые для обновления профиля пользователя.
 type ProfileUpdateInput struct {
 	Name                 string     `json:"name"`

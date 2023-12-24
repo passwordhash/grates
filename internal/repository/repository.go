@@ -65,7 +65,7 @@ type Like interface {
 // TODO: fix
 type Email interface {
 	ReplaceEmail(userId int, hash string) error
-	ConfirmEmail(userId int, hash string) error
+	ConfirmEmail(hash string) error
 	IsConfirmed(hash string) (bool, error)
 }
 
