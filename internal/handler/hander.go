@@ -35,7 +35,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		auth.POST("/sign-in", h.signIn)
 		auth.POST("/refresh", h.refreshTokens)
 		// Этот запрос должен быть POST, но есть проблема с отправкой формы из письма
-		auth.GET("/confirm/", h.confirmEmail)
+		auth.GET("/confirm", h.confirmEmail)
+		auth.GET("/check/:email", h.checkEmail)
 		auth.POST("/resend/:userId", h.resendEmail)
 	}
 
@@ -43,6 +44,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		profile := api.Group("/profile")
 		{
+			profile.GET("/:userId", h.getProfile)
 			// PROFILE INFO
 			profile.PATCH("/", h.updateProfile)
 		}

@@ -45,6 +45,7 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		return
 	}
 
+	// TODO move to another middleware
 	// Проверка на подтверждение почты
 	if !user.IsConfirmed {
 		newResponse(c, http.StatusUnauthorized, "email is not confirmed")

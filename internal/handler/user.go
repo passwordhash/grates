@@ -1,11 +1,46 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"grates/internal/domain"
 	"log"
 	"net/http"
+	"strconv"
 )
+
+type profileResponse struct {
+	Profile domain.UserResponse `json:"profile"`
+}
+
+// @Summary GetProfile
+// @Security ApiKeyAuth
+// @Tags profile
+// @Description get user profile
+// @ID get-profile
+// @Accept  json
+// @Produce  json
+// @Param userId path string true "user id"
+// @Success 200 {object} profileResponse
+// @Failure 400 {object} statusResponse
+// @Router /api/profile/{userId} [get]
+func (h *Handler) getProfile(c *gin.Context) {
+	userId, err := strconv.Atoi(c.Param("userId"))
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	profile, err := h.services.GetUserById(userId)
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, fmt.Sprintf("can't get user by id: %s", err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, profileResponse{
+		Profile: domain.UserListToResponse([]domain.User{profile})[0],
+	})
+}
 
 // @Summary UpdateProfile
 // @Security ApiKeyAuth

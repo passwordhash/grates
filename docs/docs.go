@@ -977,6 +977,89 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/profile/{userId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "get user profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "GetProfile",
+                "operationId": "get-profile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user id",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.profileResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.statusResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/check/{email}": {
+            "get": {
+                "description": "check if user was confirmed by his email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "CheckEmail",
+                "operationId": "check-email",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "email",
+                        "name": "email",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.checkEmailResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/confirm/": {
             "get": {
                 "description": "confirm email",
@@ -1395,6 +1478,15 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.checkEmailResponse": {
+            "type": "object",
+            "properties": {
+                "is_confirmed": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "handler.createPostInput": {
             "type": "object",
             "properties": {
@@ -1475,6 +1567,14 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/domain.Post"
                     }
+                }
+            }
+        },
+        "handler.profileResponse": {
+            "type": "object",
+            "properties": {
+                "profile": {
+                    "$ref": "#/definitions/domain.UserResponse"
                 }
             }
         },

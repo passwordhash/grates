@@ -45,6 +45,32 @@ func (h *Handler) confirmEmail(c *gin.Context) {
 	c.JSON(http.StatusOK, statusResponse{Status: "ok"})
 }
 
+type checkEmailResponse struct {
+	IsConfirmed bool `json:"is_confirmed" example:"true"`
+}
+
+// @Summary CheckEmail
+// @Tags auth
+// @Description check if user was confirmed by his email
+// @ID check-email
+// @Accept  json
+// @Produce  json
+// @Param email path string true "email"
+// @Success 200 {object} checkEmailResponse
+// @Failure 400 {object} errorResponse
+// @Router /auth/check/{email} [get]
+func (h *Handler) checkEmail(c *gin.Context) {
+	email := c.Param("email")
+
+	user, err := h.services.GetUserByEmail(email)
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, fmt.Sprintf("user with email %s not found", email))
+		return
+	}
+
+	c.JSON(http.StatusOK, checkEmailResponse{IsConfirmed: user.IsConfirmed})
+}
+
 type resendEmailResponse struct {
 	Hash string `json:"hash"`
 }

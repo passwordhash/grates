@@ -113,6 +113,12 @@ definitions:
       surname:
         type: string
     type: object
+  handler.checkEmailResponse:
+    properties:
+      is_confirmed:
+        example: true
+        type: boolean
+    type: object
   handler.createPostInput:
     properties:
       content:
@@ -165,6 +171,11 @@ definitions:
         items:
           $ref: '#/definitions/domain.Post'
         type: array
+    type: object
+  handler.profileResponse:
+    properties:
+      profile:
+        $ref: '#/definitions/domain.UserResponse'
     type: object
   handler.refreshInput:
     properties:
@@ -839,6 +850,60 @@ paths:
       summary: UpdateProfile
       tags:
       - profile
+  /api/profile/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: get user profile
+      operationId: get-profile
+      parameters:
+      - description: user id
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.profileResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: GetProfile
+      tags:
+      - profile
+  /auth/check/{email}:
+    get:
+      consumes:
+      - application/json
+      description: check if user was confirmed by his email
+      operationId: check-email
+      parameters:
+      - description: email
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.checkEmailResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: CheckEmail
+      tags:
+      - auth
   /auth/confirm/:
     get:
       consumes:
