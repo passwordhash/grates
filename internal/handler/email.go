@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"grates/internal/repository"
 	"grates/internal/service"
 	"net/http"
 	"strconv"
@@ -25,18 +24,22 @@ func (h *Handler) confirmEmail(c *gin.Context) {
 	// TODO: при уже подверждееном email возвращать ошибку
 	// TODO: может стоит в запросе передавать еще id пользователя ?
 	hash := c.Query("hash")
+	if hash == "" {
+		newResponse(c, http.StatusBadRequest, "invalid input body")
+		return
+	}
 
 	err := h.services.Email.ConfirmEmail(hash)
 	if errors.Is(err, service.AlreadyConfirmedErr) {
-		newResponse(c, http.StatusConflict, fmt.Sprint("email already confirmed"))
+		newResponse(c, http.StatusConflict, "email already confirmed")
 		return
 	}
-	if errors.Is(err, repository.NoChangesErr) {
-		newResponse(c, http.StatusBadRequest, fmt.Sprintf("invalid hash: %s", hash))
+	if errors.Is(err, service.HashNotFoundErr) {
+		newResponse(c, http.StatusBadRequest, "hash not found")
 		return
 	}
 	if err != nil {
-		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("error confirming email: %s", err.Error()))
+		newResponse(c, http.StatusInternalServerError, "internal error confirming email")
 		return
 	}
 
@@ -82,7 +85,7 @@ type resendEmailResponse struct {
 // @Accept  json
 // @Produce  json
 // @Param userId path int true "user's id"
-// @Success 200 {object} resendEmailResponse
+// @Success 200 {object} statusResponse
 // @Failure 400,404,500 {object} errorResponse
 // @Router /auth/resend/{userId} [post]
 func (h *Handler) resendEmail(c *gin.Context) {
@@ -92,24 +95,21 @@ func (h *Handler) resendEmail(c *gin.Context) {
 		return
 	}
 
-	user, err := h.services.GetUserById(id)
+	err = h.services.Email.ReplaceConfirmationEmail(id)
+	if errors.Is(err, service.UserNotFoundError) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if errors.Is(err, service.AlreadyConfirmedErr) {
+		newResponse(c, http.StatusConflict, err.Error())
+		return
+	}
 	if err != nil {
-		newResponse(c, http.StatusNotFound, fmt.Sprintf("user with id %d not found", id))
+		newResponse(c, http.StatusInternalServerError, "internal error sending email")
 		return
 	}
 
-	if user.IsConfirmed {
-		newResponse(c, http.StatusBadRequest, "email already confirmed")
-		return
-	}
+	logrus.Infof("confirmation email was sent to %d", id)
 
-	hash, err := h.services.Email.ReplaceConfirmationEmail(id, user.Email, user.Name)
-	if err != nil {
-		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("error sending email: %s", err.Error()))
-		return
-	}
-
-	logrus.Infof("confirmation email was sent to %s", user.Email)
-
-	c.JSON(http.StatusOK, resendEmailResponse{Hash: hash})
+	c.JSON(http.StatusOK, statusResponse{Status: "ok"})
 }
