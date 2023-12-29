@@ -34,7 +34,7 @@ func TestHandler_signUp(t *testing.T) {
 			},
 			mockBehavior: func(userR *mock_service.MockUser, emailR *mock_service.MockEmail, user domain.UserSignUpInput) {
 				userR.EXPECT().CreateUser(user).Return(1417, nil).AnyTimes()
-				emailR.EXPECT().ReplaceConfirmationEmail(1417, user.Email, user.Name).Return(nil).AnyTimes()
+				emailR.EXPECT().ReplaceConfirmationEmail(1417).Return(nil).AnyTimes()
 			},
 			expectedStatusCode:   200,
 			expectedResponseBody: `{"id":1417}`,

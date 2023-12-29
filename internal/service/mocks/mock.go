@@ -414,17 +414,17 @@ func (mr *MockEmailMockRecorder) ConfirmEmail(hash interface{}) *gomock.Call {
 }
 
 // ReplaceConfirmationEmail mocks base method.
-func (m *MockEmail) ReplaceConfirmationEmail(userId int, to, name string) error {
+func (m *MockEmail) ReplaceConfirmationEmail(userId int) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ReplaceConfirmationEmail", userId, to, name)
+	ret := m.ctrl.Call(m, "ReplaceConfirmationEmail", userId)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // ReplaceConfirmationEmail indicates an expected call of ReplaceConfirmationEmail.
-func (mr *MockEmailMockRecorder) ReplaceConfirmationEmail(userId, to, name interface{}) *gomock.Call {
+func (mr *MockEmailMockRecorder) ReplaceConfirmationEmail(userId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplaceConfirmationEmail", reflect.TypeOf((*MockEmail)(nil).ReplaceConfirmationEmail), userId, to, name)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplaceConfirmationEmail", reflect.TypeOf((*MockEmail)(nil).ReplaceConfirmationEmail), userId)
 }
 
 // SendAuthEmail mocks base method.

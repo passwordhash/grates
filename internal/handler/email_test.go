@@ -99,3 +99,92 @@ func TestHandler_confirm(t *testing.T) {
 		})
 	}
 }
+
+func TestHandler_resend(t *testing.T) {
+	type mockBehavior func(r *mock_service.MockEmail, input int)
+
+	tests := []struct {
+		name                 string
+		queryPath            string
+		inputId              int
+		mockBehavior         mockBehavior
+		expectedStatusCode   int
+		expectedResponseBody string
+	}{
+		{
+			name:      "Valid",
+			queryPath: "1",
+			inputId:   1,
+			mockBehavior: func(r *mock_service.MockEmail, input int) {
+				r.EXPECT().ReplaceConfirmationEmail(input).Return(nil)
+			},
+			expectedStatusCode:   200,
+			expectedResponseBody: `{"status":"ok"}`,
+		},
+		{
+			name:      "Invalid path var",
+			queryPath: "asdg",
+			inputId:   1,
+			mockBehavior: func(r *mock_service.MockEmail, input int) {
+			},
+			expectedStatusCode:   400,
+			expectedResponseBody: `{"message":"invalid path variable value"}`,
+		},
+		{
+			name:      "Bad user id",
+			queryPath: "1",
+			inputId:   1,
+			mockBehavior: func(r *mock_service.MockEmail, input int) {
+				r.EXPECT().ReplaceConfirmationEmail(input).Return(service.UserNotFoundError)
+			},
+			expectedStatusCode:   400,
+			expectedResponseBody: `{"message":"user not found"}`,
+		},
+		{
+			name:      "Email already confirmed",
+			queryPath: "1",
+			inputId:   1,
+			mockBehavior: func(r *mock_service.MockEmail, input int) {
+				r.EXPECT().ReplaceConfirmationEmail(input).Return(service.AlreadyConfirmedErr)
+			},
+			expectedStatusCode:   409,
+			expectedResponseBody: `{"message":"email already confirmed"}`,
+		},
+		{
+			name:      "Interanl error",
+			queryPath: "1",
+			inputId:   1,
+			mockBehavior: func(r *mock_service.MockEmail, input int) {
+				r.EXPECT().ReplaceConfirmationEmail(input).Return(errors.New("internal error"))
+			},
+			expectedStatusCode:   500,
+			expectedResponseBody: `{"message":"internal error sending email"}`,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			emailRepo := mock_service.NewMockEmail(c)
+			test.mockBehavior(emailRepo, test.inputId)
+
+			services := &service.Service{
+				Email: emailRepo,
+			}
+			handler := NewHandler(services)
+
+			r := gin.New()
+			r.POST("/resend/:userId", handler.resendEmail)
+
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest("POST", fmt.Sprintf("/resend/%s", test.queryPath), nil)
+
+			r.ServeHTTP(w, req)
+
+			assert.Equal(t, test.expectedStatusCode, w.Code)
+			assert.Equal(t, test.expectedResponseBody, w.Body.String())
+		})
+	}
+}

@@ -13,16 +13,25 @@ var AlreadyConfirmedErr = fmt.Errorf("email already confirmed")
 var HashNotFoundErr = fmt.Errorf("hash not found")
 
 type EmailService struct {
-	D    EmailDeps
-	repo repository.EmailRepository
+	D        EmailDeps
+	repo     repository.EmailRepository
+	userRepo repository.UserRepository
 }
 
-func NewEmailService(repo repository.EmailRepository, d EmailDeps) *EmailService {
-	return &EmailService{D: d, repo: repo}
+func NewEmailService(repo repository.EmailRepository, userRepo repository.UserRepository, d EmailDeps) *EmailService {
+	return &EmailService{D: d, repo: repo, userRepo: userRepo}
 }
 
 // ReplaceConfirmationEmail если письмо уже существует, удаляет его, создает новое и отправляет
-func (e *EmailService) ReplaceConfirmationEmail(userId int, to, name string) error {
+func (e *EmailService) ReplaceConfirmationEmail(userId int) error {
+	user, err := e.userRepo.GetUserById(userId)
+	if err != nil || user.IsNil() {
+		return UserNotFoundError
+	}
+	if user.IsConfirmed {
+		return AlreadyConfirmedErr
+	}
+
 	hash, err := utils.GenerateHash(32)
 	if err != nil {
 		hash = utils.RandStringBytesRmndr(32)
@@ -32,7 +41,7 @@ func (e *EmailService) ReplaceConfirmationEmail(userId int, to, name string) err
 		return err
 	}
 
-	return e.SendAuthEmail(to, name, hash)
+	return e.SendAuthEmail(user.Email, user.Name, hash)
 }
 
 // ConfirmEmail по переданному hash'у подтверждает аккаунт

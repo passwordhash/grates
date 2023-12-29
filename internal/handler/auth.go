@@ -41,12 +41,12 @@ func (h *Handler) signUp(c *gin.Context) {
 	}
 
 	go func() {
-		err := h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
+		err := h.services.Email.ReplaceConfirmationEmail(id)
 		if err != nil {
 			logrus.Errorf("error sending email: %s", err.Error())
 			//TODO: подумать над тем, чтобы отправлять письмо повторно
 			time.Sleep(5 * time.Second)
-			h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
+			h.services.Email.ReplaceConfirmationEmail(id)
 			return
 		}
 	}()

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"grates/internal/service"
@@ -69,24 +68,21 @@ func (h *Handler) resendEmail(c *gin.Context) {
 		return
 	}
 
-	user, err := h.services.GetUserById(id)
+	err = h.services.Email.ReplaceConfirmationEmail(id)
+	if errors.Is(err, service.UserNotFoundError) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if errors.Is(err, service.AlreadyConfirmedErr) {
+		newResponse(c, http.StatusConflict, err.Error())
+		return
+	}
 	if err != nil {
-		newResponse(c, http.StatusNotFound, fmt.Sprintf("user with id %d not found", id))
+		newResponse(c, http.StatusInternalServerError, "internal error sending email")
 		return
 	}
 
-	if user.IsConfirmed {
-		newResponse(c, http.StatusBadRequest, "email already confirmed")
-		return
-	}
-
-	err = h.services.Email.ReplaceConfirmationEmail(id, user.Email, user.Name)
-	if err != nil {
-		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("error sending email: %s", err.Error()))
-		return
-	}
-
-	logrus.Infof("confirmation email was sent to %s", user.Email)
+	logrus.Infof("confirmation email was sent to %d", id)
 
 	c.JSON(http.StatusOK, statusResponse{Status: "ok"})
 }

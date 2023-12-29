@@ -59,7 +59,7 @@ type Comment interface {
 }
 
 type Email interface {
-	ReplaceConfirmationEmail(userId int, to, name string) error
+	ReplaceConfirmationEmail(userId int) error
 	ConfirmEmail(hash string) error
 	SendAuthEmail(to, name, hash string) error
 }
@@ -113,7 +113,7 @@ func NewService(repos *repository.Repository, deps Deps) *Service {
 		Comment: NewCommentService(repos.Comment),
 		Like:    NewLikeService(repos.Like),
 		// TODO: fix (pointer)
-		Email:  NewEmailService(*repos.Email, deps.EmailDeps),
+		Email:  NewEmailService(*repos.Email, *repos.User, deps.EmailDeps),
 		Friend: NewFriendService(repos.Friend),
 	}
 }
