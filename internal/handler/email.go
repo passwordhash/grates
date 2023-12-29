@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"grates/internal/repository"
 	"grates/internal/service"
 	"net/http"
 	"strconv"
@@ -25,18 +24,22 @@ func (h *Handler) confirmEmail(c *gin.Context) {
 	// TODO: при уже подверждееном email возвращать ошибку
 	// TODO: может стоит в запросе передавать еще id пользователя ?
 	hash := c.Query("hash")
+	if hash == "" {
+		newResponse(c, http.StatusBadRequest, "invalid input body")
+		return
+	}
 
 	err := h.services.Email.ConfirmEmail(hash)
 	if errors.Is(err, service.AlreadyConfirmedErr) {
-		newResponse(c, http.StatusConflict, fmt.Sprint("email already confirmed"))
+		newResponse(c, http.StatusConflict, "email already confirmed")
 		return
 	}
-	if errors.Is(err, repository.NoChangesErr) {
-		newResponse(c, http.StatusBadRequest, fmt.Sprintf("invalid hash: %s", hash))
+	if errors.Is(err, service.HashNotFoundErr) {
+		newResponse(c, http.StatusBadRequest, "hash not found")
 		return
 	}
 	if err != nil {
-		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("error confirming email: %s", err.Error()))
+		newResponse(c, http.StatusInternalServerError, "internal error confirming email")
 		return
 	}
 

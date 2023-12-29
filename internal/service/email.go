@@ -2,6 +2,7 @@ package service
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 	gomail "gopkg.in/mail.v2"
 	"grates/internal/repository"
@@ -9,6 +10,7 @@ import (
 )
 
 var AlreadyConfirmedErr = fmt.Errorf("email already confirmed")
+var HashNotFoundErr = fmt.Errorf("hash not found")
 
 type EmailService struct {
 	D    EmailDeps
@@ -39,7 +41,12 @@ func (e *EmailService) ConfirmEmail(hash string) error {
 		return AlreadyConfirmedErr
 	}
 
-	return e.repo.ConfirmEmail(hash)
+	err := e.repo.ConfirmEmail(hash)
+	if errors.Is(err, repository.NoChangesErr) {
+		return HashNotFoundErr
+	}
+
+	return err
 }
 
 // sendAuthEmail отправляет письмо на почту, интергируя в него name, hash
