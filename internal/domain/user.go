@@ -71,8 +71,6 @@ type UserSignUpInput struct {
 // SignInInput представляет собой данные, необходимые для аутентификации пользователя.
 type SignInInput struct {
 	Email    string `json:"email" binding:"required"`
-	Name     string `json:"name" binding:"required"`
-	Surname  string `json:"surname"`
 	Password string `json:"password" binding:"required"`
 }
 
@@ -97,6 +95,10 @@ func (p *ProfileUpdateInput) DBifyFields() map[string]string {
 	}
 }
 
+func (u *User) IsNil() bool {
+	return *u == User{}
+}
+
 // IsEmtpty	пользователь пустой, если у него нет id или email
 func (u *User) IsEmtpty() bool {
 	return u.Id == 0 || u.Email == ""
@@ -115,4 +117,9 @@ type AuthEmail struct {
 	Id      int    `db:"id"`
 	UsersId int    `db:"users_id"`
 	Hash    string `db:"hash"`
+}
+
+type RefreshTokenInput struct {
+	RefreshToken string `json:"refreshToken" binding:"required"`
+	//RefreshToken string `json:"refreshToken" `
 }

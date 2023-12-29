@@ -13,6 +13,7 @@ import (
 
 var UserWithEmailExistsError = errors.New("user with this email already exists")
 var UserNotFoundError = errors.New("user not found")
+var RefreshTokenNotFoundError = errors.New("refresh token not found")
 
 var GenerateTokensError = errors.New("error generating tokens")
 
@@ -41,7 +42,7 @@ func NewUserService(repo repository.User, emailRepo repository.Email, sigingKey,
 // Возвращает int id созданного пользователя и ошибку.
 func (s *UserService) CreateUser(user domain.UserSignUpInput) (int, error) {
 	potUser, _ := s.repo.GetUserByEmail(user.Email)
-	if potUser.IsEmtpty() {
+	if !potUser.IsNil() {
 		return 0, UserWithEmailExistsError
 	}
 
@@ -129,7 +130,7 @@ func (s *UserService) GenerateTokens(user domain.User) (Tokens, error) {
 func (s *UserService) RefreshTokens(refreshToken string) (Tokens, error) {
 	userId, err := s.repo.GetUserIdByToken(refreshToken)
 	if err != nil {
-		return Tokens{}, err
+		return Tokens{}, RefreshTokenNotFoundError
 	}
 
 	user, err := s.repo.GetUserById(userId)

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"grates/internal/domain"
 	"grates/internal/service"
@@ -96,12 +97,12 @@ func TestHandler_signUp(t *testing.T) {
 }
 
 func TestHandler_signIn(t *testing.T) {
-	type mockBehavior func(r *mock_service.MockUser, input domain.UserSignUpInput)
+	type mockBehavior func(r *mock_service.MockUser, input domain.SignInInput)
 
 	tests := []struct {
 		name                 string
 		inputBody            string
-		inputUser            domain.UserSignUpInput
+		inputUser            domain.SignInInput
 		mockBehavior         mockBehavior
 		expectedStatusCode   int
 		expectedResponseBody string
@@ -109,11 +110,11 @@ func TestHandler_signIn(t *testing.T) {
 		{
 			name:      "Valid",
 			inputBody: `{"email": "test@user.ru" , "password": "passwordhash"}`,
-			inputUser: domain.UserSignUpInput{
+			inputUser: domain.SignInInput{
 				Email:    "test@user.ru",
 				Password: "passwordhash",
 			},
-			mockBehavior: func(r *mock_service.MockUser, input domain.UserSignUpInput) {
+			mockBehavior: func(r *mock_service.MockUser, input domain.SignInInput) {
 				r.EXPECT().AuthenticateUser(input.Email, input.Password).Return(service.Tokens{
 					Access:  "access",
 					Refresh: "refresh",
@@ -125,8 +126,8 @@ func TestHandler_signIn(t *testing.T) {
 		{
 			name:                 "Invalid Input",
 			inputBody:            `{"email": "testemail.ru", "pword": "qwerty}`,
-			inputUser:            domain.UserSignUpInput{},
-			mockBehavior:         func(r *mock_service.MockUser, input domain.UserSignUpInput) {},
+			inputUser:            domain.SignInInput{},
+			mockBehavior:         func(r *mock_service.MockUser, input domain.SignInInput) {},
 			expectedStatusCode:   400,
 			expectedResponseBody: `{"message":"invalid input body"}`,
 		},
@@ -134,11 +135,11 @@ func TestHandler_signIn(t *testing.T) {
 			name: "User Not Found",
 			inputBody: `{"email": "notexists@email.ru",
 						 "password": "passwordhash"}`,
-			inputUser: domain.UserSignUpInput{
+			inputUser: domain.SignInInput{
 				Email:    "notexists@email.ru",
 				Password: "passwordhash",
 			},
-			mockBehavior: func(r *mock_service.MockUser, input domain.UserSignUpInput) {
+			mockBehavior: func(r *mock_service.MockUser, input domain.SignInInput) {
 				r.EXPECT().AuthenticateUser(input.Email, input.Password).Return(service.Tokens{}, service.UserNotFoundError).AnyTimes()
 			},
 			expectedStatusCode:   401,
@@ -146,17 +147,17 @@ func TestHandler_signIn(t *testing.T) {
 		},
 		{
 			name: "Generate Tokens Error",
-			inputBody: `{"email": "test@user.ru""
+			inputBody: `{"email": "test@user.ru",
 						 "password": "passwordhash"}`,
-			inputUser: domain.UserSignUpInput{
+			inputUser: domain.SignInInput{
 				Email:    "test@user.ru",
 				Password: "passwordhash",
 			},
-			mockBehavior: func(r *mock_service.MockUser, input domain.UserSignUpInput) {
+			mockBehavior: func(r *mock_service.MockUser, input domain.SignInInput) {
 				r.EXPECT().AuthenticateUser(input.Email, input.Password).Return(service.Tokens{}, service.GenerateTokensError).AnyTimes()
 			},
 			expectedStatusCode:   500,
-			expectedResponseBody: `{"message":"internal error: can't generate tokens"}`,
+			expectedResponseBody: `{"message":"error generating tokens"}`,
 		},
 	}
 
@@ -166,7 +167,6 @@ func TestHandler_signIn(t *testing.T) {
 			defer c.Finish()
 
 			userRepo := mock_service.NewMockUser(c)
-			test.mockBehavior(userRepo, test.inputUser)
 
 			services := &service.Service{
 				User: userRepo,
@@ -175,6 +175,8 @@ func TestHandler_signIn(t *testing.T) {
 
 			r := gin.New()
 			r.POST("/sign-in", handler.signIn)
+
+			logrus.Info("test.inputBody: ", test.inputBody)
 
 			// Create Request
 			w := httptest.NewRecorder()
@@ -185,6 +187,77 @@ func TestHandler_signIn(t *testing.T) {
 			r.ServeHTTP(w, req)
 
 			// Assert
+			assert.Equal(t, test.expectedStatusCode, w.Code)
+			assert.Equal(t, test.expectedResponseBody, w.Body.String())
+		})
+	}
+}
+
+func TestHandler_refresh(t *testing.T) {
+	type mockBehavior func(r *mock_service.MockUser, input string)
+
+	tests := []struct {
+		name                 string
+		inputBody            string
+		inputToken           string
+		mockBehavior         mockBehavior
+		expectedStatusCode   int
+		expectedResponseBody string
+	}{
+		{
+			name:       "Valid",
+			inputBody:  "{\"refreshToken\": \"refreshT\"}",
+			inputToken: "refreshT",
+			mockBehavior: func(r *mock_service.MockUser, input string) {
+				r.EXPECT().RefreshTokens(input).Return(service.Tokens{
+					Access:  "accessT",
+					Refresh: "refreshT",
+				}, nil).AnyTimes()
+			},
+			expectedStatusCode:   200,
+			expectedResponseBody: `{"accessToken":"accessT","refreshToken":"refreshT"}`,
+		},
+		{
+			name:                 "Invalid input body",
+			inputBody:            "",
+			inputToken:           "",
+			mockBehavior:         func(r *mock_service.MockUser, input string) {},
+			expectedStatusCode:   400,
+			expectedResponseBody: `{"message":"ivalid input body"}`,
+		},
+		{
+			name:       "Token not found",
+			inputBody:  "{\"refreshToken\": \"sometokennotindb\"}",
+			inputToken: "sometokennotindb",
+			mockBehavior: func(r *mock_service.MockUser, input string) {
+				r.EXPECT().RefreshTokens(input).Return(service.Tokens{}, service.RefreshTokenNotFoundError)
+			},
+			expectedStatusCode:   400,
+			expectedResponseBody: `{"message":"refresh token not found"}`,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			userRepo := mock_service.NewMockUser(c)
+			test.mockBehavior(userRepo, test.inputToken)
+
+			services := &service.Service{
+				User: userRepo,
+			}
+			handler := NewHandler(services)
+
+			r := gin.New()
+			r.POST("/refresh", handler.refreshTokens)
+
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest("POST", "/refresh", bytes.NewBufferString(test.inputBody))
+
+			r.ServeHTTP(w, req)
+
 			assert.Equal(t, test.expectedStatusCode, w.Code)
 			assert.Equal(t, test.expectedResponseBody, w.Body.String())
 		})

@@ -56,11 +56,6 @@ func (h *Handler) signUp(c *gin.Context) {
 	})
 }
 
-type signInInput struct {
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"password" binding:"required"`
-}
-
 type signInResponse struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
@@ -72,12 +67,12 @@ type signInResponse struct {
 // @ID login-account
 // @Accept       json
 // @Produce      json
-// @Param input body signInInput true "account credentials"
+// @Param input body SignInInput true "account credentials"
 // @Success      200  {object} signInResponse "tokens"
-// @Failure      400,401  {object}  errorResponse
+// @Failure      400,401,500  {object}  errorResponse
 // @Router       /auth/sign-in [post]
 func (h *Handler) signIn(c *gin.Context) {
-	var input signInInput
+	var input domain.SignInInput
 	var tokens service.Tokens
 
 	if err := c.BindJSON(&input); err != nil {
@@ -105,28 +100,29 @@ func (h *Handler) signIn(c *gin.Context) {
 	})
 }
 
-type refreshInput struct {
-	RefreshToken string `json:"refreshToken" binding:"required"`
-}
-
 // @Summary RefreshTokens
 // @Tags auth
 // @Description refresh access and refresh tokens
 // @ID refresh-tokens
 // @Accept       json
 // @Produce      json
-// @Param input body refreshInput true "refresh token"
+// @Param input body RefreshTokenInput true "refresh token"
 // @Success      200  {object} signInResponse "tokens"
 // @Failure      400,401  {object}  errorResponse
 // @Router       /auth/refresh [post]
 func (h *Handler) refreshTokens(c *gin.Context) {
-	var input refreshInput
-	if err := c.Bind(&input); err != nil {
+	var input domain.RefreshTokenInput
+	if err := c.BindJSON(&input); err != nil {
+		logrus.Errorf("error binding input: %s", err.Error())
 		newResponse(c, http.StatusBadRequest, "ivalid input body")
 		return
 	}
 
 	tokens, err := h.services.RefreshTokens(input.RefreshToken)
+	if errors.Is(err, service.RefreshTokenNotFoundError) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 	if errors.Is(err, service.GenerateTokensError) {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return

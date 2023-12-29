@@ -21,6 +21,7 @@ require (
 )
 
 require (
+	github.com/GoAdminGroup/go-admin v1.2.24 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/bytedance/sonic v1.10.2 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
