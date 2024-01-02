@@ -16,6 +16,11 @@ type Post struct {
 	LikesCount int       `json:"likes-count" db:"likes_count"`
 }
 
+type PostCreateInput struct {
+	Title   string `json:"title" binding:"required"`
+	Content string `json:"content" binding:"required"`
+}
+
 type PostUpdateInput struct {
 	Title                string `json:"title,omitempty"`
 	Content              string `json:"content,omitempty"`

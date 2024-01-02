@@ -22,7 +22,6 @@ func NewPostService(postRepo repository.Post, commentRepo repository.Comment, li
 	}
 }
 
-// Create создает пост.
 func (s *PostService) Create(post domain.Post) (int, error) {
 	return s.postRepo.Create(post)
 }

@@ -18,7 +18,7 @@ const (
 
 type createPostInput struct {
 	Title   string `json:"title"`
-	Content string `json:"content"`
+	Content string `json:"content" binding:"required"`
 }
 
 // @Summary CreatePost
@@ -41,7 +41,7 @@ func (h *Handler) createPost(c *gin.Context) {
 	userId = c.MustGet(userCtx).(domain.User).Id
 
 	if err := c.BindJSON(&input); err != nil {
-		newResponse(c, http.StatusBadRequest, "invalid input")
+		newResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
@@ -52,8 +52,9 @@ func (h *Handler) createPost(c *gin.Context) {
 	}
 
 	postId, err := h.services.Post.Create(post)
+	logrus.Infof("user %d created post %d", userId, postId)
 	if err != nil {
-		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("create post error: %s", err.Error()))
+		newResponse(c, http.StatusInternalServerError, "internal creating post error")
 		return
 	}
 
