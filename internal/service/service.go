@@ -43,7 +43,7 @@ type User interface {
 
 type Post interface {
 	Create(post domain.Post) (int, error)
-	GetWithAdditions(postId int) (domain.Post, error)
+	Get(postId int) (domain.Post, error)
 	GetUsersPosts(userId int) ([]domain.Post, error)
 	GetFriendsPosts(userId, limit, offset int) ([]domain.Post, error)
 	Update(id int, newPost domain.PostUpdateInput) error

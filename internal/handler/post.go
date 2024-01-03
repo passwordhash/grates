@@ -66,7 +66,7 @@ func (h *Handler) createPost(c *gin.Context) {
 // @Summary GetPost
 // @Security ApiKeyAuth
 // @Tags posts
-// @Description GetWithAdditions post by id
+// @Description Get a post by its id with all comments
 // @ID get-post
 // @Accept json
 // @Produce json
@@ -83,13 +83,13 @@ func (h *Handler) getPost(c *gin.Context) {
 		return
 	}
 
-	post, err = h.services.Post.GetWithAdditions(postId)
-	if errors.As(err, &service.NotFoundErr{}) {
+	post, err = h.services.Post.Get(postId)
+	if errors.Is(err, service.PostNotFoundErr) {
 		newResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	if err != nil {
-		newResponse(c, http.StatusInternalServerError, err.Error())
+		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("internal error: %s", err.Error()))
 		return
 	}
 
@@ -104,7 +104,7 @@ type postsResponse struct {
 // @Summary UsersPosts
 // @Security ApiKeyAuth
 // @Tags posts
-// @Description GetWithAdditions user's posts
+// @Description Get user's posts
 // @ID users-posts
 // @Accept json
 // @Produce json
@@ -141,7 +141,7 @@ func (h *Handler) getUsersPosts(c *gin.Context) {
 // @Summary FriendsPosts
 // @Security ApiKeyAuth
 // @Tags posts
-// @Description GetWithAdditions friends' posts
+// @Description Get friends' posts
 // @ID friends-posts
 // @Accept json
 // @Produce json
@@ -301,7 +301,7 @@ type postsCommentsResponse struct {
 // @Summary GetPostsComments
 // @Security ApiKeyAuth
 // @Tags comments
-// @Description GetWithAdditions post's comments
+// @Description Get post's comments
 // @ID posts-comments
 // @Accept json
 // @Produce json

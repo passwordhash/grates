@@ -33,7 +33,15 @@ func (p *PostRepository) Create(post domain.Post) (int, error) {
 func (p *PostRepository) Get(postId int) (domain.Post, error) {
 	var post domain.Post
 
-	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1;", PostsTable)
+	query := `
+SELECT *, (
+    SELECT count(*) from likes_posts where posts_id=$1
+    ) as likes_count,
+    (
+        SELECT count(*) from comments where posts_id=$1
+        ) as comments_count
+from posts where id=$1
+`
 	err := p.db.Get(&post, query, postId)
 
 	return post, err

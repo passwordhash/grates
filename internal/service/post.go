@@ -1,10 +1,14 @@
 package service
 
 import (
+	"errors"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"grates/internal/domain"
 	"grates/internal/repository"
 )
+
+var PostNotFoundErr = errors.New("post not found")
 
 type PostService struct {
 	postRepo    repository.Post
@@ -26,24 +30,16 @@ func (s *PostService) Create(post domain.Post) (int, error) {
 	return s.postRepo.Create(post)
 }
 
-// GetWithAdditions возвращает пост с добавленной информацией.
-func (s *PostService) GetWithAdditions(postId int) (domain.Post, error) {
+func (s *PostService) Get(postId int) (domain.Post, error) {
 	post, err := s.postRepo.Get(postId)
 	if err != nil {
-		return post, NotFoundErr{subject: fmt.Sprintf("post with id %d", postId)}
+		return domain.Post{}, PostNotFoundErr
 	}
 
-	post.Comments, err = s.commentRepo.GetPostComments(postId)
-	if err != nil {
-		return post, err
-	}
+	post.Comments, _ = s.commentRepo.GetPostComments(postId)
+	logrus.Info(post.Comments)
 
-	post.LikesCount, err = s.likeRepo.GetPostLikesCount(postId)
-	if err != nil {
-		return post, err
-	}
-
-	return post, nil
+	return post, err
 }
 
 // GetUsersPosts возвращает посты пользователя.
@@ -109,7 +105,7 @@ func (s *PostService) IsPostBelongsToUser(userId, postId int) (bool, error) {
 // fillPostsWithAdditions заполняет посты дополнительной информацией.
 func (s *PostService) fillPostsWithAdditions(posts *[]domain.Post) error {
 	for i, post := range *posts {
-		p, err := s.GetWithAdditions(post.Id)
+		p, err := s.Get(post.Id)
 		if err != nil {
 			return err
 		}

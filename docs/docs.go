@@ -452,7 +452,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "GetWithAdditions user's posts",
+                "description": "Get user's posts",
                 "consumes": [
                     "application/json"
                 ],
@@ -502,7 +502,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "GetWithAdditions friends' posts",
+                "description": "Get friends' posts",
                 "consumes": [
                     "application/json"
                 ],
@@ -564,7 +564,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "GetWithAdditions post by id",
+                "description": "Get post by id",
                 "consumes": [
                     "application/json"
                 ],
@@ -719,7 +719,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "GetWithAdditions post's comments",
+                "description": "Get post's comments",
                 "consumes": [
                     "application/json"
                 ],

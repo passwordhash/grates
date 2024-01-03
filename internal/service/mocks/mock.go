@@ -221,6 +221,21 @@ func (mr *MockPostMockRecorder) Delete(id interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockPost)(nil).Delete), id)
 }
 
+// Get mocks base method.
+func (m *MockPost) Get(postId int) (domain.Post, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", postId)
+	ret0, _ := ret[0].(domain.Post)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockPostMockRecorder) Get(postId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockPost)(nil).Get), postId)
+}
+
 // GetFriendsPosts mocks base method.
 func (m *MockPost) GetFriendsPosts(userId, limit, offset int) ([]domain.Post, error) {
 	m.ctrl.T.Helper()
@@ -249,21 +264,6 @@ func (m *MockPost) GetUsersPosts(userId int) ([]domain.Post, error) {
 func (mr *MockPostMockRecorder) GetUsersPosts(userId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsersPosts", reflect.TypeOf((*MockPost)(nil).GetUsersPosts), userId)
-}
-
-// GetWithAdditions mocks base method.
-func (m *MockPost) GetWithAdditions(postId int) (domain.Post, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetWithAdditions", postId)
-	ret0, _ := ret[0].(domain.Post)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetWithAdditions indicates an expected call of GetWithAdditions.
-func (mr *MockPostMockRecorder) GetWithAdditions(postId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWithAdditions", reflect.TypeOf((*MockPost)(nil).GetWithAdditions), postId)
 }
 
 // IsPostBelongsToUser mocks base method.
