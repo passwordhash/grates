@@ -42,6 +42,11 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	api := router.Group("/api", h.userIdentity)
 	{
+		user := api.Group("/user/:userId")
+		{
+			user.GET("/posts", h.getUsersPosts)
+		}
+
 		profile := api.Group("/profile")
 		{
 			profile.GET("/:userId", h.getProfile)
@@ -62,10 +67,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		posts := api.Group("/posts")
 		{
 			posts.POST("/", h.createPost)
-			// TODO
 			posts.GET("/:postId", h.getPost)
-			// TODO
-			posts.GET("/", h.getUsersPosts)
 			// TODO измнить
 			posts.GET("/friends/:userId", h.friendsPosts)
 			posts.PATCH("/:postId", h.postAffiliation, h.updatePost)

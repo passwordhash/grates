@@ -104,31 +104,31 @@ type postsResponse struct {
 // @Summary UsersPosts
 // @Security ApiKeyAuth
 // @Tags posts
-// @Description Get user's posts
+// @Description Get user's posts. Field "comments" is empty.
 // @ID users-posts
 // @Accept json
 // @Produce json
-// @Param userId query int true "user's id"
+// @Param userId path int true "user's id"
 // @Success 200 {object} postsResponse "post info"
 // @Failure 400,500 {object} errorResponse
-// @Router /api/posts/ [get]
+// @Router /api/user/{userId}/posts [get]
 func (h *Handler) getUsersPosts(c *gin.Context) {
 	var posts []domain.Post
 	var userId int
 
-	userId, err := strconv.Atoi(c.Query(userIdQuery))
+	userId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
-		newResponse(c, http.StatusBadRequest, "invalid query value of user's id")
+		newResponse(c, http.StatusBadRequest, "invalid path variable value")
 		return
 	}
 
 	posts, err = h.services.GetUsersPosts(userId)
-	if errors.As(err, &service.NotFoundErr{}) {
+	if errors.Is(err, service.UserNotFoundError) {
 		newResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	if err != nil {
-		newResponse(c, http.StatusInternalServerError, err.Error())
+		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("internal error: %s", err.Error()))
 		return
 	}
 

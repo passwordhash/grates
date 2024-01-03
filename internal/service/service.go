@@ -109,7 +109,7 @@ type EmailDeps struct {
 func NewService(repos *repository.Repository, deps Deps) *Service {
 	return &Service{
 		User:    NewUserService(repos.User, repos.Email, deps.SigingKey, deps.PasswordSalt, deps.AccessTokenTTL, deps.RefreshTokenTTL),
-		Post:    NewPostService(repos.Post, repos.Comment, repos.Like, repos.Friend),
+		Post:    NewPostService(repos.Post, repos.Comment, repos.Like, repos.Friend, repos.User),
 		Comment: NewCommentService(repos.Comment),
 		Like:    NewLikeService(repos.Like),
 		// TODO: fix (pointer)

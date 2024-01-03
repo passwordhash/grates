@@ -194,61 +194,17 @@ func TestHandler_getUsersPosts(t *testing.T) {
 
 	tests := []struct {
 		name                 string
-		queryParam           string
+		pathParam            string
+		userId               int
 		posts                []domain.Post
 		mockBehavior         mockBehavior
 		expectedStatusCode   int
 		expectedResponseBody string
 	}{
 		{
-			name:       "Valid",
-			queryParam: "userId=1",
-			posts: []domain.Post{
-				{
-					Id:      1,
-					Title:   "title",
-					Content: "content",
-					UsersId: 1,
-				},
-			},
-			mockBehavior: func(r *mock_service.MockPost, userId int, posts []domain.Post) {
-				r.EXPECT().GetUsersPosts(userId).Return(posts, nil).AnyTimes()
-			},
-			expectedStatusCode:   200,
-			expectedResponseBody: `{"posts":[{"id":1,"title":"title","content":"content","users-id":1,"date":"0001-01-01T00:00:00Z","comments":null,"likes-count":0}],"count":1}`,
-		},
-		{
-			name: "Valid: 3 posts",
-			posts: []domain.Post{
-				{
-					Id:      1,
-					Title:   "title",
-					Content: "content",
-					UsersId: 1,
-				},
-				{
-					Id:      2,
-					Title:   "title",
-					Content: "content",
-					UsersId: 1,
-				},
-				{
-					Id:      3,
-					Title:   "title",
-					Content: "content",
-					UsersId: 1,
-				},
-			},
-			queryParam: "userId=1",
-			mockBehavior: func(r *mock_service.MockPost, userId int, posts []domain.Post) {
-				r.EXPECT().GetUsersPosts(userId).Return(posts, nil).AnyTimes()
-			},
-			expectedStatusCode:   200,
-			expectedResponseBody: `{"posts":[{"id":1,"title":"title","content":"content","users-id":1,"date":"0001-01-01T00:00:00Z","comments":null,"likes-count":0},{"id":2,"title":"title","content":"content","users-id":1,"date":"0001-01-01T00:00:00Z","comments":null,"likes-count":0},{"id":3,"title":"title","content":"content","users-id":1,"date":"0001-01-01T00:00:00Z","comments":null,"likes-count":0}],"count":3}`,
-		},
-		{
-			name:       "Valid: post with additionals",
-			queryParam: "userId=1",
+			name:      "Valid",
+			pathParam: "1",
+			userId:    1,
 			posts: []domain.Post{
 				{
 					Id:      1,
@@ -259,12 +215,59 @@ func TestHandler_getUsersPosts(t *testing.T) {
 						{
 							Id:      1,
 							Content: "content",
-							UsersId: 2,
-							PostsId: 1,
 						},
 					},
+					LikesCount:    2,
+					CommentsCount: 1,
 				},
 			},
+			mockBehavior: func(r *mock_service.MockPost, userId int, posts []domain.Post) {
+				r.EXPECT().GetUsersPosts(userId).Return(posts, nil).AnyTimes()
+			},
+			expectedStatusCode:   200,
+			expectedResponseBody: `{"posts":[{"id":1,"title":"title","content":"content","users-id":1,"date":"0001-01-01T00:00:00Z","comments":[{"id":1,"content":"content","users-id":0,"posts-id":0,"date":"0001-01-01T00:00:00Z"}],"comments-count":1,"likes-count":2}],"count":1}`,
+		},
+		{
+			name:                 "Invalid path param",
+			pathParam:            "abc",
+			userId:               0,
+			posts:                nil,
+			mockBehavior:         func(r *mock_service.MockPost, userId int, posts []domain.Post) {},
+			expectedStatusCode:   400,
+			expectedResponseBody: `{"message":"invalid path variable value"}`,
+		},
+		{
+			name:      "User not found",
+			pathParam: "1",
+			userId:    1,
+			posts:     nil,
+			mockBehavior: func(r *mock_service.MockPost, userId int, posts []domain.Post) {
+				r.EXPECT().GetUsersPosts(userId).Return(nil, service.UserNotFoundError).AnyTimes()
+			},
+			expectedStatusCode:   400,
+			expectedResponseBody: `{"message":"user not found"}`,
+		},
+		{
+			name:      "User has no posts",
+			pathParam: "1",
+			userId:    1,
+			posts:     nil,
+			mockBehavior: func(r *mock_service.MockPost, userId int, posts []domain.Post) {
+				r.EXPECT().GetUsersPosts(userId).Return(nil, nil).AnyTimes()
+			},
+			expectedStatusCode:   200,
+			expectedResponseBody: `{"posts":null,"count":0}`,
+		},
+		{
+			name:      "Interanl error",
+			pathParam: "1",
+			userId:    1,
+			posts:     nil,
+			mockBehavior: func(r *mock_service.MockPost, userId int, posts []domain.Post) {
+				r.EXPECT().GetUsersPosts(userId).Return(nil, errors.New("error")).AnyTimes()
+			},
+			expectedStatusCode:   500,
+			expectedResponseBody: `{"message":"internal error: error"}`,
 		},
 	}
 
@@ -274,7 +277,7 @@ func TestHandler_getUsersPosts(t *testing.T) {
 			defer c.Finish()
 
 			repo := mock_service.NewMockPost(c)
-			test.mockBehavior(repo, 1, test.posts)
+			test.mockBehavior(repo, test.userId, test.posts)
 
 			services := &service.Service{
 				Post: repo,
@@ -282,12 +285,12 @@ func TestHandler_getUsersPosts(t *testing.T) {
 			handler := NewHandler(services)
 
 			r := gin.New()
-			r.GET("/posts", func(c *gin.Context) {
+			r.GET("/user/:userId/posts", func(c *gin.Context) {
 				c.Set(userCtx, domain.User{Id: 1})
 			}, handler.getUsersPosts)
 
 			w := httptest.NewRecorder()
-			req := httptest.NewRequest("GET", "/posts?"+test.queryParam, nil)
+			req := httptest.NewRequest("GET", "/user/"+test.pathParam+"/posts", nil)
 
 			r.ServeHTTP(w, req)
 

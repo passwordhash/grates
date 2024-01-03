@@ -14,15 +14,17 @@ type PostService struct {
 	postRepo    repository.Post
 	commentRepo repository.Comment
 	likeRepo    repository.Like
-	frienRepo   repository.Friend
+	friendRepo  repository.Friend
+	userRepo    repository.User
 }
 
-func NewPostService(postRepo repository.Post, commentRepo repository.Comment, like repository.Like, friend repository.Friend) *PostService {
+func NewPostService(postRepo repository.Post, commentRepo repository.Comment, like repository.Like, friend repository.Friend, user repository.User) *PostService {
 	return &PostService{
 		postRepo:    postRepo,
 		commentRepo: commentRepo,
 		likeRepo:    like,
-		frienRepo:   friend,
+		friendRepo:  friend,
+		userRepo:    user,
 	}
 }
 
@@ -42,20 +44,13 @@ func (s *PostService) Get(postId int) (domain.Post, error) {
 	return post, err
 }
 
-// GetUsersPosts возвращает посты пользователя.
 func (s *PostService) GetUsersPosts(userId int) ([]domain.Post, error) {
-
-	posts, err := s.postRepo.UsersPosts(userId)
+	_, err := s.userRepo.GetUserById(userId)
 	if err != nil {
-		return nil, NotFoundErr{subject: fmt.Sprintf("posts of user with id %d", userId)}
+		return nil, UserNotFoundError
 	}
 
-	err = s.fillPostsWithAdditions(&posts)
-	if err != nil {
-		return nil, fmt.Errorf("fillPostsWithAdditions: %w", err)
-	}
-
-	return posts, nil
+	return s.postRepo.UsersPosts(userId)
 }
 
 // GetFriendsPosts возвращает посты друзей пользователя.
@@ -64,7 +59,7 @@ func (s *PostService) GetUsersPosts(userId int) ([]domain.Post, error) {
 func (s *PostService) GetFriendsPosts(userId, limit, offset int) ([]domain.Post, error) {
 	var posts []domain.Post
 
-	friendsIds, err := s.frienRepo.FriendUsersIds(userId)
+	friendsIds, err := s.friendRepo.FriendUsersIds(userId)
 	if err != nil {
 		return nil, err
 	}

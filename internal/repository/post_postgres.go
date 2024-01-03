@@ -50,7 +50,12 @@ from posts where id=$1
 func (p *PostRepository) UsersPosts(userId int) ([]domain.Post, error) {
 	var posts []domain.Post
 
-	query := fmt.Sprintf(`SELECT * FROM %s WHERE users_id=$1`, PostsTable)
+	query := `
+SELECT *,
+       (SELECT count(*) FROM likes_posts  WHERE posts_id=posts.id) as likes_count,
+       (SELECT count(*) FROM comments WHERE posts_id=posts.id) as comments_count
+FROM posts WHERE users_id=$1;
+`
 	err := p.db.Select(&posts, query, userId)
 	if err != nil {
 		return nil, err
