@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"math/rand"
+	"regexp"
 	"time"
 )
 
@@ -44,4 +45,10 @@ func RandStringBytesRmndr(n int) string {
 		b[i] = letterBytes[rand.Int63()%int64(len(letterBytes))]
 	}
 	return string(b)
+}
+
+func IsPassword(s, specialSigns string) bool {
+	pattern := fmt.Sprintf("^[a-zA-Z0-9%s]+$", specialSigns)
+	match, _ := regexp.Match(pattern, []byte(s))
+	return match
 }

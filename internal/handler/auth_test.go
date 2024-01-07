@@ -3,12 +3,15 @@ package handler
 import (
 	"bytes"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"grates/internal/domain"
 	"grates/internal/service"
 	mock_service "grates/internal/service/mocks"
+	"grates/pkg/utils"
 	"net/http/httptest"
 	"testing"
 )
@@ -61,6 +64,22 @@ func TestHandler_signUp(t *testing.T) {
 			expectedStatusCode:   409,
 			expectedResponseBody: `{"message":"user with this email already exists"}`,
 		},
+		// TODO invalid email
+		// TODO isPassword tests in pkg
+		{
+			name:      "Invalid password",
+			inputBody: `{"email": "test@test.ru", "name":"Test", "password": "фывафывафыва"}`,
+			inputUser: domain.UserSignUpInput{
+				Name:     "Test",
+				Email:    "test@test.ru",
+				Password: "фывафывафыва",
+			},
+			mockBehavior: func(userR *mock_service.MockUser, emailR *mock_service.MockEmail, user domain.UserSignUpInput) {
+				userR.EXPECT().CreateUser(user).Return(1, nil).AnyTimes()
+			},
+			expectedStatusCode:   400,
+			expectedResponseBody: `{"message":"invalid input body"}`,
+		},
 	}
 
 	for _, test := range tests {
@@ -79,6 +98,13 @@ func TestHandler_signUp(t *testing.T) {
 			handler := NewHandler(services)
 
 			r := gin.New()
+
+			if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+				v.RegisterValidation("password", func(fl validator.FieldLevel) bool {
+					return utils.IsPassword(fl.Field().String())
+				})
+			}
+
 			r.POST("/sign-up", handler.signUp)
 
 			// Create Request

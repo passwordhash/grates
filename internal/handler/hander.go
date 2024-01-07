@@ -3,12 +3,18 @@ package handler
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 	_ "grates/docs"
 	"grates/internal/service"
+	"grates/pkg/utils"
 	"net/http"
 )
+
+// TODO move to config
+const SpecailSings = "@#$%^&*!"
 
 type Handler struct {
 	services *service.Service
@@ -20,6 +26,13 @@ func NewHandler(services *service.Service) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
+
+	// Регистрация кастомного валидатора
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("password", func(fl validator.FieldLevel) bool {
+			return utils.IsPassword(fl.Field().String(), SpecailSings)
+		})
+	}
 
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.GET("/swagger/*any", func(c *gin.Context) {
