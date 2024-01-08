@@ -55,6 +55,10 @@ func IsPassword(s, specialSigns string) bool {
 	return match
 }
 
+func IsOneWord(s string) bool {
+	return len(strings.Split(s, " ")) == 1
+}
+
 func IsLetter(s string) bool {
 	for _, r := range s {
 		if !unicode.IsLetter(r) {

@@ -33,6 +33,29 @@ func TestIsPassword(t *testing.T) {
 	}
 }
 
+func TestIsOneWord(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"Test", true},
+		{"Test Test", false},
+		{"Test123", true},
+		{"", true}, // Пустая строка.
+		{"!@#$", true},
+	}
+
+	for _, test := range tests {
+		t.Run(test.input, func(t *testing.T) {
+			got := IsOneWord(test.input)
+			if got != test.expected {
+				t.Errorf("got %v, expected %v", got, test.expected)
+				assert.Equal(t, test.expected, got)
+			}
+		})
+	}
+}
+
 func TestIsLetter(t *testing.T) {
 	tests := []struct {
 		input    string
