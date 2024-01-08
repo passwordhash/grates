@@ -62,8 +62,8 @@ func (u *User) ToResponse() UserResponse {
 
 // UserSignUpInput представляет собой данные, необходимые для регистрации пользователя.
 type UserSignUpInput struct {
-	Name     string `json:"name" binding:"required"`
-	Surname  string `json:"surname"`
+	Name     string `json:"name" binding:"required,letterword"`
+	Surname  string `json:"surname" binding:"letterword"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,password"`
 }

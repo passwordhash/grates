@@ -3,15 +3,12 @@ package handler
 import (
 	"bytes"
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"grates/internal/domain"
 	"grates/internal/service"
 	mock_service "grates/internal/service/mocks"
-	"grates/pkg/utils"
 	"net/http/httptest"
 	"testing"
 )
@@ -29,11 +26,27 @@ func TestHandler_signUp(t *testing.T) {
 	}{
 		{
 			name:      "Valid",
-			inputBody: `{"email": "test@email.ru", "name":"Test", "password": "qwerty"}`,
+			inputBody: `{"email": "test@email.ru", "name":"Test", "password": "qwe@rty"}`,
 			inputUser: domain.UserSignUpInput{
 				Name:     "Test",
 				Email:    "test@email.ru",
-				Password: "qwerty",
+				Password: "qwe@rty",
+			},
+			mockBehavior: func(userR *mock_service.MockUser, emailR *mock_service.MockEmail, user domain.UserSignUpInput) {
+				userR.EXPECT().CreateUser(user).Return(1417, nil).AnyTimes()
+				emailR.EXPECT().ReplaceConfirmationEmail(1417).Return(nil).AnyTimes()
+			},
+			expectedStatusCode:   200,
+			expectedResponseBody: `{"id":1417}`,
+		},
+		{
+			name:      "Valid: name with cyrillic",
+			inputBody: `{"email": "test@email.ru", "name":"Ярослав", "surname":"Молодцов", "password": "qwe@rty"}`,
+			inputUser: domain.UserSignUpInput{
+				Name:     "Ярослав",
+				Surname:  "Молодцов",
+				Email:    "test@email.ru",
+				Password: "qwe@rty",
 			},
 			mockBehavior: func(userR *mock_service.MockUser, emailR *mock_service.MockEmail, user domain.UserSignUpInput) {
 				userR.EXPECT().CreateUser(user).Return(1417, nil).AnyTimes()
@@ -64,8 +77,6 @@ func TestHandler_signUp(t *testing.T) {
 			expectedStatusCode:   409,
 			expectedResponseBody: `{"message":"user with this email already exists"}`,
 		},
-		// TODO invalid email
-		// TODO isPassword tests in pkg
 		{
 			name:      "Invalid password",
 			inputBody: `{"email": "test@test.ru", "name":"Test", "password": "фывафывафыва"}`,
@@ -77,6 +88,56 @@ func TestHandler_signUp(t *testing.T) {
 			mockBehavior: func(userR *mock_service.MockUser, emailR *mock_service.MockEmail, user domain.UserSignUpInput) {
 				userR.EXPECT().CreateUser(user).Return(1, nil).AnyTimes()
 			},
+			expectedStatusCode:   400,
+			expectedResponseBody: `{"message":"invalid input body"}`,
+		},
+		{
+			name:                 "Name with special symbols",
+			inputBody:            `{"email": "test@test.ru", "name":"Test!@#%^&*", "password": "qwerty"}`,
+			mockBehavior:         func(userR *mock_service.MockUser, emailR *mock_service.MockEmail, user domain.UserSignUpInput) {},
+			expectedStatusCode:   400,
+			expectedResponseBody: `{"message":"invalid input body"}`,
+		},
+		{
+			name:                 "Name with numbers",
+			inputBody:            `{"email": "test@test.ru", "name":"Test123", "password": "qwerty"}`,
+			mockBehavior:         func(userR *mock_service.MockUser, emailR *mock_service.MockEmail, user domain.UserSignUpInput) {},
+			expectedStatusCode:   400,
+			expectedResponseBody: `{"message":"invalid input body"}`,
+		},
+		{
+			name:                 "Name with spaces",
+			inputBody:            `{"email": "test@test.ru", "name":"Yaroslav Molodcov Alexandrovic", "password": "qwerty"}`,
+			mockBehavior:         func(userR *mock_service.MockUser, emailR *mock_service.MockEmail, user domain.UserSignUpInput) {},
+			expectedStatusCode:   400,
+			expectedResponseBody: `{"message":"invalid input body"}`,
+		},
+
+		{
+			name:                 "Invalid surname",
+			inputBody:            `{"email": "test@test.ru", "name" :"Test", "surname":"Mol 1odcov", "password": "qwerty"}`,
+			mockBehavior:         func(userR *mock_service.MockUser, emailR *mock_service.MockEmail, user domain.UserSignUpInput) {},
+			expectedStatusCode:   400,
+			expectedResponseBody: `{"message":"invalid input body"}`,
+		},
+		{
+			name:                 "Invalid email",
+			inputBody:            `{"email": "testemail.ru", "name":"Test", "password": "qwerty"}`,
+			mockBehavior:         func(userR *mock_service.MockUser, emailR *mock_service.MockEmail, user domain.UserSignUpInput) {},
+			expectedStatusCode:   400,
+			expectedResponseBody: `{"message":"invalid input body"}`,
+		},
+		{
+			name:                 "Invalid password",
+			inputBody:            `{"email": "test@test.ru", "name":"Test", "password": "qwer ty"}`,
+			mockBehavior:         func(userR *mock_service.MockUser, emailR *mock_service.MockEmail, user domain.UserSignUpInput) {},
+			expectedStatusCode:   400,
+			expectedResponseBody: `{"message":"invalid input body"}`,
+		},
+		{
+			name:                 "Invalid password 2",
+			inputBody:            `{"email": "test@test.ru", "name":"Test", "password": "qwer| ty"}`,
+			mockBehavior:         func(userR *mock_service.MockUser, emailR *mock_service.MockEmail, user domain.UserSignUpInput) {},
 			expectedStatusCode:   400,
 			expectedResponseBody: `{"message":"invalid input body"}`,
 		},
@@ -99,11 +160,7 @@ func TestHandler_signUp(t *testing.T) {
 
 			r := gin.New()
 
-			if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-				v.RegisterValidation("password", func(fl validator.FieldLevel) bool {
-					return utils.IsPassword(fl.Field().String())
-				})
-			}
+			handler.RegisterNewBindings("")
 
 			r.POST("/sign-up", handler.signUp)
 

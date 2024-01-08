@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -13,8 +14,12 @@ import (
 	"net/http"
 )
 
-// TODO move to config
-const SpecailSings = "@#$%^&*!"
+type CustomBinding string
+
+const (
+	PasswordBinding   CustomBinding = "password"
+	LetterWordBinding CustomBinding = "letterword"
+)
 
 type Handler struct {
 	services *service.Service
@@ -24,15 +29,8 @@ func NewHandler(services *service.Service) *Handler {
 	return &Handler{services: services}
 }
 
-func (h *Handler) InitRoutes() *gin.Engine {
+func (h *Handler) InitRoutes(specialSymbols string) *gin.Engine {
 	router := gin.New()
-
-	// Регистрация кастомного валидатора
-	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("password", func(fl validator.FieldLevel) bool {
-			return utils.IsPassword(fl.Field().String(), SpecailSings)
-		})
-	}
 
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.GET("/swagger/*any", func(c *gin.Context) {
@@ -104,7 +102,37 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		}
 	}
 
+	if err := h.RegisterNewBindings(specialSymbols); err != nil {
+		panic(err)
+	}
+
 	return router
+}
+
+func (h *Handler) RegisterNewBindings(specialSymbols string) error {
+	var isPassword = func(fl validator.FieldLevel) bool {
+		if specialSymbols == "" {
+			specialSymbols = "!@#$%^&*"
+		}
+		return utils.IsPassword(fl.Field().String(), specialSymbols)
+	}
+	var isWord = func(fl validator.FieldLevel) bool {
+		return utils.IsOneWordLetter(fl.Field().String())
+	}
+
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		if err := v.RegisterValidation(string(PasswordBinding), isPassword); err != nil {
+			return err
+		}
+
+		if err := v.RegisterValidation(string(LetterWordBinding), isWord); err != nil {
+			return err
+		}
+	} else {
+		return errors.New("binding.Validator.Engine() is not *validator.Validate")
+	}
+
+	return nil
 }
 
 func corsMiddleware() gin.HandlerFunc {

@@ -123,7 +123,8 @@ func main() {
 	handlers := handler.NewHandler(services)
 
 	srv := new(server.Server)
-	if err := srv.Run(config.ServerPort, handlers.InitRoutes()); err != nil {
+	if err := srv.Run(config.ServerPort, handlers.InitRoutes(
+		viper.GetString("auth.passwordSpecialSymbols"))); err != nil {
 		logrus.Fatalf("error occured while running http server: %s", err.Error())
 	}
 

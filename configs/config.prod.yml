@@ -19,6 +19,7 @@ rdb:
   addr: "rdb:6379"
 
 auth:
+  passwordSpecialSymbols: "@#$%^&*!"
   accessTokenTTL: 120m
   refreshTokenTTL: 240m
 
