@@ -45,4 +45,13 @@ CREATE TABLE auth_emails
     id serial not null unique,
     users_id int references users (id) on delete cascade,
     hash varchar(255)
-)
+);
+
+CREATE TABLE friend_requests 
+(
+    id serial not null unique,
+    from_id int references users (id) on delete cascade,
+    to_id int references users (id) on delete cascade,
+    send_at timestamp default CURRENT_TIMESTAMP,
+    is_confirmed boolean default FALSE
+);

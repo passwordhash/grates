@@ -1,5 +1,12 @@
-host: "mgtu.tech"
-port: "8000"
+host: "grates.mgtu.tech"
+port: ""
+
+server:
+  port: "8000"
+
+swagger:
+  host: "grates.mgtu.tech"
+  port: ""
 
 db:
   username: "postgres"
@@ -12,6 +19,7 @@ rdb:
   addr: "rdb:6379"
 
 auth:
+  passwordSpecialSymbols: "@#$%^&*!"
   accessTokenTTL: 120m
   refreshTokenTTL: 240m
 

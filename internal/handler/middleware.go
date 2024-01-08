@@ -45,6 +45,7 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		return
 	}
 
+	// TODO move to another middleware
 	// Проверка на подтверждение почты
 	if !user.IsConfirmed {
 		newResponse(c, http.StatusUnauthorized, "email is not confirmed")
@@ -70,7 +71,7 @@ func (h *Handler) postAffiliation(c *gin.Context) {
 	}
 
 	if !isBelongs {
-		newResponse(c, http.StatusForbidden, fmt.Sprintf("post %s does not belong to the user"))
+		newResponse(c, http.StatusForbidden, fmt.Sprintf("post %x does not belong to the user", postId))
 		return
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/sirupsen/logrus"
 	"grates/internal/domain"
 	"grates/internal/repository"
 	"grates/pkg/auth"
@@ -12,8 +11,15 @@ import (
 	"time"
 )
 
+var UserWithEmailExistsError = errors.New("user with this email already exists")
+var UserNotFoundError = errors.New("user not found")
+var RefreshTokenNotFoundError = errors.New("refresh token not found")
+
+var GenerateTokensError = errors.New("error generating tokens")
+
 type UserService struct {
 	repo         repository.User
+	emailRepo    repository.Email
 	sigingKey    string
 	passwordSalt string
 
@@ -21,9 +27,10 @@ type UserService struct {
 	refreshTokenTTL time.Duration
 }
 
-func NewUserService(repo repository.User, sigingKey, pswrdSalt string, accessTokenTTL, refreshTokenTTL time.Duration) *UserService {
+func NewUserService(repo repository.User, emailRepo repository.Email, sigingKey, pswrdSalt string, accessTokenTTL, refreshTokenTTL time.Duration) *UserService {
 	return &UserService{
 		repo:            repo,
+		emailRepo:       emailRepo,
 		sigingKey:       sigingKey,
 		passwordSalt:    pswrdSalt,
 		accessTokenTTL:  accessTokenTTL,
@@ -34,8 +41,30 @@ func NewUserService(repo repository.User, sigingKey, pswrdSalt string, accessTok
 // CreateUser генерирует хэш пароля, сохраняет пользователя в БД.
 // Возвращает int id созданного пользователя и ошибку.
 func (s *UserService) CreateUser(user domain.UserSignUpInput) (int, error) {
+	potUser, _ := s.repo.GetUserByEmail(user.Email)
+	if !potUser.IsNil() {
+		return 0, UserWithEmailExistsError
+	}
+
 	user.Password = auth.GeneratePasswordHash(user.Password, s.passwordSalt)
-	return s.repo.CreateUser(user)
+	userId, err := s.repo.CreateUser(user)
+	if err != nil {
+		return 0, err
+	}
+
+	return userId, nil
+
+	//go func() {
+	//	_, err := s.Ema.ReplaceConfirmationEmail(id, input.Email, input.Name)
+	//	if err != nil {
+	//		logrus.Errorf("error sending email: %s", err.Error())
+	//		TODO: подумать над тем, чтобы отправлять письмо повторно
+	//time.Sleep(5 * time.Second)
+	//h.services.Email.ReplaceConfirmationEmail(id, input.Email, input.Name)
+	//return
+	//}
+	//logrus.Infof("confirmation email sent to %s", input.Email)
+	//}()
 }
 
 func (s *UserService) GetUserById(id int) (domain.User, error) {
@@ -49,16 +78,16 @@ type Tokens struct {
 }
 
 // AuthenticateUser получает пользователя из БД по заданным параметрам,
-// возвращает сгенерированную пару токенов Tokens/
+// возвращает сгенерированную пару токенов Tokens.
 func (s *UserService) AuthenticateUser(email, password string) (Tokens, error) {
 	var (
 		tokens Tokens
 		err    error
 	)
+
 	user, err := s.repo.GetUser(email, auth.GeneratePasswordHash(password, s.passwordSalt))
-	logrus.Info(user)
 	if err != nil {
-		return tokens, err
+		return tokens, UserNotFoundError
 	}
 
 	return s.GenerateTokens(user)
@@ -67,6 +96,7 @@ func (s *UserService) AuthenticateUser(email, password string) (Tokens, error) {
 // GenerateTokens , получая в качестве параметра domain.User, создает access и
 // refresh токены, записывает соответствующий пользователю refresh token в БД.
 // Возвращает пару access и refresh токеном Tokens.
+// Если полностью не получилось сгенерировать токены, возвращает GenerateTokensError.
 func (s *UserService) GenerateTokens(user domain.User) (Tokens, error) {
 	var (
 		tokens Tokens
@@ -75,12 +105,12 @@ func (s *UserService) GenerateTokens(user domain.User) (Tokens, error) {
 
 	tokens.Access, err = s.newAccessToken(user)
 	if err != nil {
-		return tokens, err
+		return tokens, GenerateTokensError
 	}
 
 	tokens.Refresh, err = s.newRefreshToken()
 	if err != nil {
-		return tokens, nil
+		return tokens, GenerateTokensError
 	}
 
 	err = s.repo.SaveRefreshToken(user.Id, domain.Session{
@@ -89,10 +119,10 @@ func (s *UserService) GenerateTokens(user domain.User) (Tokens, error) {
 		TTL: s.refreshTokenTTL,
 	})
 	if err != nil {
-		return Tokens{}, err
+		return Tokens{}, GenerateTokensError
 	}
 
-	return tokens, err
+	return tokens, nil
 }
 
 // RefreshTokens ищет id пользователя по refresh токену, находит самого пользователя,
@@ -100,12 +130,12 @@ func (s *UserService) GenerateTokens(user domain.User) (Tokens, error) {
 func (s *UserService) RefreshTokens(refreshToken string) (Tokens, error) {
 	userId, err := s.repo.GetUserIdByToken(refreshToken)
 	if err != nil {
-		return Tokens{}, err
+		return Tokens{}, RefreshTokenNotFoundError
 	}
 
 	user, err := s.repo.GetUserById(userId)
 	if err != nil {
-		return Tokens{}, err
+		return Tokens{}, UserNotFoundError
 	}
 
 	return s.GenerateTokens(user)

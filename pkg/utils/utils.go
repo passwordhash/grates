@@ -3,7 +3,10 @@ package utils
 import (
 	"fmt"
 	"math/rand"
+	"regexp"
+	"strings"
 	"time"
+	"unicode"
 )
 
 type Date struct {
@@ -44,4 +47,42 @@ func RandStringBytesRmndr(n int) string {
 		b[i] = letterBytes[rand.Int63()%int64(len(letterBytes))]
 	}
 	return string(b)
+}
+
+func IsPassword(s, specialSigns string) bool {
+	pattern := fmt.Sprintf("^[a-zA-Z0-9%s]+$", specialSigns)
+	match, _ := regexp.Match(pattern, []byte(s))
+	return match
+}
+
+func IsOneWord(s string) bool {
+	return len(strings.Split(s, " ")) == 1
+}
+
+func IsLetter(s string) bool {
+	for _, r := range s {
+		if !unicode.IsLetter(r) {
+			return false
+		}
+	}
+	return len(s) > 0
+}
+
+// IsOneWordLetter проверяет, состоит ли строка из одного слова, состоящего только из букв.
+// Поддерживает не-ASCII символы. !!!Для пустой строки вернет true.
+func IsOneWordLetter(s string) bool {
+	if len(s) == 0 {
+		return true
+	}
+
+	if len(strings.Split(s, " ")) > 1 {
+		return false
+	}
+
+	for _, r := range s {
+		if !unicode.IsLetter(r) {
+			return false
+		}
+	}
+	return true
 }

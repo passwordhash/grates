@@ -40,15 +40,31 @@ func (e *EmailRepository) ConfirmEmail(hash string) error {
 	FROM %s
 	WHERE users.id = auth_emails.users_id
 	AND auth_emails.hash = $1
+	AND users.is_confirmed = FALSE
 `, UsersTable, AuthEmailsTable)
 	res, err := e.db.Exec(query, hash)
+	if err != nil {
+		return err
+	}
 	changes, _ := res.RowsAffected()
-
 	if changes == 0 {
-		return fmt.Errorf("no changes in db")
+		return NoChangesErr
 	}
 
 	return err
+}
+
+func (e *EmailRepository) IsConfirmed(hash string) (bool, error) {
+	var isConfirmed bool
+	query := fmt.Sprintf(`
+	SELECT is_confirmed FROM %s
+	INNER JOIN %s ON %s.id = %s.users_id
+	WHERE %s.hash=$1
+	`, UsersTable, AuthEmailsTable, UsersTable, AuthEmailsTable, AuthEmailsTable)
+
+	err := e.db.Get(&isConfirmed, query, hash)
+
+	return isConfirmed, err
 }
 
 func NewEmailRepository(db *sqlx.DB) *EmailRepository {

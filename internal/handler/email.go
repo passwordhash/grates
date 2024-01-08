@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"grates/internal/service"
 	"net/http"
 	"strconv"
 )
@@ -16,21 +18,64 @@ import (
 // @Produce  json
 // @Param hash query string true "hash"
 // @Success 200 {object} statusResponse
-// @Failure 500 {object} errorResponse
+// @Failure 400,409,500 {object} errorResponse
 // @Router /auth/confirm/ [get]
 func (h *Handler) confirmEmail(c *gin.Context) {
+	// TODO: при уже подверждееном email возвращать ошибку
 	// TODO: может стоит в запросе передавать еще id пользователя ?
 	hash := c.Query("hash")
+	if hash == "" {
+		newResponse(c, http.StatusBadRequest, "invalid input body")
+		return
+	}
 
 	err := h.services.Email.ConfirmEmail(hash)
+	if errors.Is(err, service.AlreadyConfirmedErr) {
+		newResponse(c, http.StatusConflict, "email already confirmed")
+		return
+	}
+	if errors.Is(err, service.HashNotFoundErr) {
+		newResponse(c, http.StatusBadRequest, "hash not found")
+		return
+	}
 	if err != nil {
-		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("error confirming email: %s", err.Error()))
+		newResponse(c, http.StatusInternalServerError, "internal error confirming email")
 		return
 	}
 
 	logrus.Infof("email confirmed: %s", hash)
 
 	c.JSON(http.StatusOK, statusResponse{Status: "ok"})
+}
+
+type checkEmailResponse struct {
+	IsConfirmed bool `json:"is_confirmed" example:"true"`
+}
+
+// @Summary CheckEmail
+// @Tags auth
+// @Description check if user was confirmed by his email
+// @ID check-email
+// @Accept  json
+// @Produce  json
+// @Param email path string true "email"
+// @Success 200 {object} checkEmailResponse
+// @Failure 400 {object} errorResponse
+// @Router /auth/check/{email} [get]
+func (h *Handler) checkEmail(c *gin.Context) {
+	email := c.Param("email")
+
+	user, err := h.services.GetUserByEmail(email)
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, fmt.Sprintf("user with email %s not found", email))
+		return
+	}
+
+	c.JSON(http.StatusOK, checkEmailResponse{IsConfirmed: user.IsConfirmed})
+}
+
+type resendEmailResponse struct {
+	Hash string `json:"hash"`
 }
 
 // @Summary Resend email
@@ -50,24 +95,21 @@ func (h *Handler) resendEmail(c *gin.Context) {
 		return
 	}
 
-	user, err := h.services.GetUserById(id)
+	err = h.services.Email.ReplaceConfirmationEmail(id)
+	if errors.Is(err, service.UserNotFoundError) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if errors.Is(err, service.AlreadyConfirmedErr) {
+		newResponse(c, http.StatusConflict, err.Error())
+		return
+	}
 	if err != nil {
-		newResponse(c, http.StatusNotFound, fmt.Sprintf("user with id %d not found", id))
+		newResponse(c, http.StatusInternalServerError, "internal error sending email")
 		return
 	}
 
-	if user.IsConfirmed {
-		newResponse(c, http.StatusBadRequest, "email already confirmed")
-		return
-	}
-
-	err = h.services.Email.ReplaceConfirmationEmail(id, user.Email, user.Name)
-	if err != nil {
-		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("error sending email: %s", err.Error()))
-		return
-	}
-
-	logrus.Infof("confirmation email was sent to %s", user.Email)
+	logrus.Infof("confirmation email was sent to %d", id)
 
 	c.JSON(http.StatusOK, statusResponse{Status: "ok"})
 }

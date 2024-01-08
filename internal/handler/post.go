@@ -4,20 +4,21 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"grates/internal/domain"
+	"grates/internal/service"
 	"net/http"
 	"strconv"
 )
 
 const (
-	userIdQuery         = "userId"
-	commentsLimitQuery  = "commentsLimit"
-	commentLimitDefault = 5
+	userIdQuery      = "userId"
+	postLimitDefault = 3
 )
 
 type createPostInput struct {
 	Title   string `json:"title"`
-	Content string `json:"content"`
+	Content string `json:"content" binding:"required"`
 }
 
 // @Summary CreatePost
@@ -32,34 +33,32 @@ type createPostInput struct {
 // @Failure 400,401,500 {object} errorResponse
 // @Router /api/posts [post]
 func (h *Handler) createPost(c *gin.Context) {
-	var user domain.User
+	var userId int
 	var post domain.Post
 
 	var input createPostInput
 
-	v, exists := c.Get(userCtx)
-	user, ok := v.(domain.User)
-	if !ok || !exists {
-		newResponse(c, http.StatusUnauthorized, "user unauthorized")
-		return
-	}
+	userId = c.MustGet(userCtx).(domain.User).Id
 
 	if err := c.BindJSON(&input); err != nil {
-		newResponse(c, http.StatusBadRequest, "invalid input")
+		newResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
 	post = domain.Post{
 		Title:   input.Title,
 		Content: input.Content,
-		UsersId: user.Id,
+		UsersId: userId,
 	}
 
 	postId, err := h.services.Post.Create(post)
+	logrus.Infof("user %d created post %d", userId, postId)
 	if err != nil {
-		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("create post error: %s", err.Error()))
+		newResponse(c, http.StatusInternalServerError, "internal creating post error")
 		return
 	}
+
+	logrus.Infof("user %d created post %d", userId, postId)
 
 	c.JSON(http.StatusOK, idResponse{Id: postId})
 }
@@ -67,7 +66,7 @@ func (h *Handler) createPost(c *gin.Context) {
 // @Summary GetPost
 // @Security ApiKeyAuth
 // @Tags posts
-// @Description GetWithAdditions post by id
+// @Description Get a post by its id with all comments
 // @ID get-post
 // @Accept json
 // @Produce json
@@ -84,48 +83,100 @@ func (h *Handler) getPost(c *gin.Context) {
 		return
 	}
 
-	post, err = h.services.Post.GetWithAdditions(postId)
+	post, err = h.services.Post.Get(postId)
+	if errors.Is(err, service.PostNotFoundErr) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 	if err != nil {
-		newResponse(c, http.StatusInternalServerError, err.Error())
+		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("internal error: %s", err.Error()))
 		return
 	}
 
 	c.JSON(http.StatusOK, post)
 }
 
-type usersPostsResponse struct {
+type postsResponse struct {
 	Posts []domain.Post `json:"posts"`
 	Count int           `json:"count"`
 }
 
-// @Summary GetUsersPosts
+// @Summary UsersPosts
 // @Security ApiKeyAuth
 // @Tags posts
-// @Description GetWithAdditions user's posts
+// @Description Get user's posts. Field "comments" is empty.
 // @ID users-posts
 // @Accept json
 // @Produce json
-// @Param userId query int true "user's id"
-// @Success 200 {object} usersPostsResponse "post info"
+// @Param userId path int true "user's id"
+// @Success 200 {object} postsResponse "post info"
 // @Failure 400,500 {object} errorResponse
-// @Router /api/posts/ [get]
+// @Router /api/user/{userId}/posts [get]
 func (h *Handler) getUsersPosts(c *gin.Context) {
 	var posts []domain.Post
 	var userId int
 
-	userId, err := strconv.Atoi(c.Query(userIdQuery))
+	userId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
-		newResponse(c, http.StatusBadRequest, "invalid query value of user's id")
+		newResponse(c, http.StatusBadRequest, "invalid path variable value")
 		return
 	}
 
 	posts, err = h.services.GetUsersPosts(userId)
+	if errors.Is(err, service.UserNotFoundError) {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, fmt.Sprintf("internal error: %s", err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, postsResponse{
+		posts,
+		len(posts),
+	})
+}
+
+// @Summary FriendsPosts
+// @Security ApiKeyAuth
+// @Tags posts
+// @Description Get friends' posts
+// @ID friends-posts
+// @Accept json
+// @Produce json
+// @Param userId path int true "user's id"
+// @Param limit query int false "limit of posts"
+// @Param offset query int false "offset of posts"
+// @Success 200 {object} postsResponse "post info"
+// @Failure 403,500 {object} errorResponse
+// @Router /api/posts/friends/{userId} [get]
+func (h *Handler) friendsPosts(c *gin.Context) {
+	var userId int
+	var limit int
+	var offset int
+
+	userId, err := strconv.Atoi(c.Param("userId"))
+
+	if userId != c.MustGet(userCtx).(domain.User).Id {
+		newResponse(c, http.StatusForbidden, "you can't get other user's posts")
+		return
+	}
+
+	limit, errLimit := strconv.Atoi(c.DefaultQuery("limit", strconv.Itoa(postLimitDefault)))
+	offset, errOffset := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	if errLimit != nil || errOffset != nil {
+		newResponse(c, http.StatusBadRequest, "invalid query value of limit or offset")
+		return
+	}
+
+	posts, err := h.services.Post.GetFriendsPosts(userId, limit, offset)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, usersPostsResponse{
+	c.JSON(http.StatusOK, postsResponse{
 		posts,
 		len(posts),
 	})
@@ -173,7 +224,7 @@ func (h *Handler) updatePost(c *gin.Context) {
 // @ID delete-post
 // @Accept json
 // @Produce json
-// @Param userId path int true "post id"
+// @Param postId path int true "post id"
 // @Success 200 {object} statusResponse
 // @Failure 400,500 {object} errorResponse
 // @Router /api/posts/{postId} [delete]
@@ -250,7 +301,7 @@ type postsCommentsResponse struct {
 // @Summary GetPostsComments
 // @Security ApiKeyAuth
 // @Tags comments
-// @Description GetWithAdditions post's comments
+// @Description Get post's comments
 // @ID posts-comments
 // @Accept json
 // @Produce json

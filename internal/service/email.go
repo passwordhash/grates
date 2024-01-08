@@ -2,23 +2,36 @@ package service
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 	gomail "gopkg.in/mail.v2"
 	"grates/internal/repository"
 	"grates/pkg/utils"
 )
 
+var AlreadyConfirmedErr = fmt.Errorf("email already confirmed")
+var HashNotFoundErr = fmt.Errorf("hash not found")
+
 type EmailService struct {
-	D    EmailDeps
-	repo repository.EmailRepository
+	D        EmailDeps
+	repo     repository.EmailRepository
+	userRepo repository.UserRepository
 }
 
-func NewEmailService(repo repository.EmailRepository, d EmailDeps) *EmailService {
-	return &EmailService{D: d, repo: repo}
+func NewEmailService(repo repository.EmailRepository, userRepo repository.UserRepository, d EmailDeps) *EmailService {
+	return &EmailService{D: d, repo: repo, userRepo: userRepo}
 }
 
 // ReplaceConfirmationEmail если письмо уже существует, удаляет его, создает новое и отправляет
-func (e *EmailService) ReplaceConfirmationEmail(userId int, to, name string) error {
+func (e *EmailService) ReplaceConfirmationEmail(userId int) error {
+	user, err := e.userRepo.GetUserById(userId)
+	if err != nil || user.IsNil() {
+		return UserNotFoundError
+	}
+	if user.IsConfirmed {
+		return AlreadyConfirmedErr
+	}
+
 	hash, err := utils.GenerateHash(32)
 	if err != nil {
 		hash = utils.RandStringBytesRmndr(32)
@@ -28,16 +41,25 @@ func (e *EmailService) ReplaceConfirmationEmail(userId int, to, name string) err
 		return err
 	}
 
-	return e.sendAuthEmail(to, name, hash)
+	return e.SendAuthEmail(user.Email, user.Name, hash)
 }
 
 // ConfirmEmail по переданному hash'у подтверждает аккаунт
 func (e *EmailService) ConfirmEmail(hash string) error {
-	return e.repo.ConfirmEmail(hash)
+	if isConirmed, _ := e.repo.IsConfirmed(hash); isConirmed {
+		return AlreadyConfirmedErr
+	}
+
+	err := e.repo.ConfirmEmail(hash)
+	if errors.Is(err, repository.NoChangesErr) {
+		return HashNotFoundErr
+	}
+
+	return err
 }
 
 // sendAuthEmail отправляет письмо на почту, интергируя в него name, hash
-func (e *EmailService) sendAuthEmail(to, name, hash string) error {
+func (e *EmailService) SendAuthEmail(to, name, hash string) error {
 	m := gomail.NewMessage()
 	m.SetHeader("From", e.D.From)
 	m.SetHeader("To", to)

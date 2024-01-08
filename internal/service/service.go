@@ -1,10 +1,31 @@
 package service
 
 import (
+	"fmt"
 	"grates/internal/domain"
 	"grates/internal/repository"
 	"time"
 )
+
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
+
+type InternalErr struct {
+	error
+	msg string
+}
+
+func (i InternalErr) Error() string {
+	return fmt.Sprintf("internal error: %s", i.msg)
+}
+
+type NotFoundErr struct {
+	error
+	subject string
+}
+
+func (n NotFoundErr) Error() string {
+	return fmt.Sprintf("can't find %s", n.subject)
+}
 
 type User interface {
 	CreateUser(user domain.UserSignUpInput) (int, error)
@@ -22,8 +43,9 @@ type User interface {
 
 type Post interface {
 	Create(post domain.Post) (int, error)
-	GetWithAdditions(postId int) (domain.Post, error)
+	Get(postId int) (domain.Post, error)
 	GetUsersPosts(userId int) ([]domain.Post, error)
+	GetFriendsPosts(userId, limit, offset int) ([]domain.Post, error)
 	Update(id int, newPost domain.PostUpdateInput) error
 	Delete(id int) error
 	IsPostBelongsToUser(userId, postId int) (bool, error)
@@ -37,14 +59,22 @@ type Comment interface {
 }
 
 type Email interface {
-	ReplaceConfirmationEmail(userId int, to, name string) error
+	ReplaceConfirmationEmail(userId int) error
 	ConfirmEmail(hash string) error
-	sendAuthEmail(to, name, hash string) error
+	SendAuthEmail(to, name, hash string) error
 }
 
 type Like interface {
 	LikePost(userId, postId int) error
 	UnlikePost(userId, postId int) error
+}
+
+type Friend interface {
+	GetFriends(userId int) ([]domain.User, error)
+	FriendRequests(userId int) ([]domain.User, error)
+	SendFriendRequest(fromId, toId int) error
+	AcceptFriendRequest(fromId, toId int) error
+	Unfriend(userId, friendId int) error
 }
 
 type Service struct {
@@ -53,6 +83,7 @@ type Service struct {
 	Comment
 	Like
 	Email
+	Friend
 }
 
 type Deps struct {
@@ -77,11 +108,12 @@ type EmailDeps struct {
 
 func NewService(repos *repository.Repository, deps Deps) *Service {
 	return &Service{
-		User:    NewUserService(repos.User, deps.SigingKey, deps.PasswordSalt, deps.AccessTokenTTL, deps.RefreshTokenTTL),
-		Post:    NewPostService(repos.Post, repos.Comment, repos.Like),
+		User:    NewUserService(repos.User, repos.Email, deps.SigingKey, deps.PasswordSalt, deps.AccessTokenTTL, deps.RefreshTokenTTL),
+		Post:    NewPostService(repos.Post, repos.Comment, repos.Like, repos.Friend, repos.User),
 		Comment: NewCommentService(repos.Comment),
 		Like:    NewLikeService(repos.Like),
 		// TODO: fix (pointer)
-		Email: NewEmailService(*repos.Email, deps.EmailDeps),
+		Email:  NewEmailService(*repos.Email, *repos.User, deps.EmailDeps),
+		Friend: NewFriendService(repos.Friend),
 	}
 }

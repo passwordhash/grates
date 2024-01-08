@@ -38,6 +38,8 @@ const (
 func main() {
 	//logrus.SetFormatter(new(logrus.JSONFormatter))
 
+	var config Config
+
 	envFileName := defaultEnvFileName
 	configFileName := defaultConfigName
 
@@ -70,9 +72,16 @@ func main() {
 	logrus.Infof("%s env file was loaded", envFileName)
 	logrus.Infof("%s config file was loaded", configFileName)
 
-	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%s", viper.GetString("host"), viper.GetString("port"))
+	config = Config{
+		Host:       viper.GetString("host"),
+		Port:       viper.GetString("port"),
+		ServerPort: viper.GetString("server.port"),
+	}
 
-	logrus.Info(viper.GetString("host"))
+	//docs.SwaggerInfo.Host = fmt.Sprintf("%s:%s", config.Host, config.Port)
+	docs.SwaggerInfo.Host = fmt.Sprintf("%s%s", config.Host, config.Port)
+
+	logrus.Info(config.Host)
 
 	// PosgtgreSQL connect
 	db, err := repoConf.NewPostgresDB(repoConf.PSQLConfig{
@@ -108,15 +117,22 @@ func main() {
 			SmtpPort: viper.GetInt("email.smtpPort"),
 			From:     viper.GetString("email.from"),
 			Password: os.Getenv("SMTP_PASSWORD"),
-			BaseUrl:  viper.GetString("host") + ":" + viper.GetString("port"),
+			BaseUrl:  config.Host + config.Port,
 		},
 	})
 	handlers := handler.NewHandler(services)
 
 	srv := new(server.Server)
-	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+	if err := srv.Run(config.ServerPort, handlers.InitRoutes(
+		viper.GetString("auth.passwordSpecialSymbols"))); err != nil {
 		logrus.Fatalf("error occured while running http server: %s", err.Error())
 	}
 
 	logrus.Info("Grates Server Started")
+}
+
+type Config struct {
+	Host       string
+	Port       string
+	ServerPort string
 }

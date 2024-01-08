@@ -1,5 +1,12 @@
 host: "localhost"
-port: "8000"
+port: ":8000"
+
+server:
+  port: "8000"
+
+swagger:
+  host: "localhost"
+  port: ":8000"
 
 db:
   username: "postgres"
@@ -12,6 +19,7 @@ rdb:
   addr: "localhost:63790"
 
 auth:
+  passwordSpecialSymbols: "@#$%^&*!"
   accessTokenTTL: 120m
   refreshTokenTTL: 240m
 
