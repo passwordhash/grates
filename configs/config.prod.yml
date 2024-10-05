@@ -1,5 +1,5 @@
 host: "grates.mgtu.tech"
-port: ""
+port: "9090"
 
 server:
   port: "9090"
