@@ -2,10 +2,10 @@ host: "grates.mgtu.tech"
 port: ""
 
 server:
-  port: "8000"
+  port: "9090"
 
 swagger:
-  host: "grates.mgtu.tech"
+  host: "161.35.161.217"
   port: ""
 
 db:
