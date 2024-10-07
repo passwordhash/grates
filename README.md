@@ -5,7 +5,7 @@
 <a href="https://golang.com"><img src="./assets/made-with-go.svg" alt="drawing" /></a>
 <a href="https://docker.com"><img src="./assets/deploys-on-docker.svg" alt="drawing" /></a>
 <a href="https://whimsical.com/grates-project-EnBuE56FNcQ6aXyadKx6GY"><img src="./assets/dashboard-click.svg" alt="drawing" /></a>
-<a href="http://161.35.161.217/grates/docs/index.html"><img src="./assets/api-docs-swagger.svg" alt="drawing" /></a>
+<a href="http://grates.passwordhash.tech/docs/index.html"><img src="./assets/api-docs-swagger.svg" alt="drawing" /></a>
 
 # Grates server
 
@@ -53,7 +53,7 @@ go run ./cmd/http/main.go
 
 ## 📄 Документация
 
-- [**Swagger документация**](http://161.35.161.217/grates/docs/index.html)
+- [**Swagger документация**](http://grates.passwordhash.tech/docs/index.html)
 
 - **Dashboard** проекта в [whimsical](https://whimsical.com/grates-project-EnBuE56FNcQ6aXyadKx6GY)
 
