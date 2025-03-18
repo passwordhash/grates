@@ -1,8 +1,8 @@
 host: "grates.passwordhash.tech"
-port: "9090"
+port: "8000"
 
 server:
-  port: "9090"
+  port: "8000"
 
 swagger:
   host: "147.45.72.209"
