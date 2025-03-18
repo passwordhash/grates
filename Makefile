@@ -21,13 +21,13 @@ docker-build-dev:
 	docker compose build db rdb migrate
 
 docker-build-prod:
-	ENV_FILE_NAME=.prod.env docker compose build
+	CONFIG_FILE_NAME=config.prod docker compose build
 
 docker-up-dev:
 	docker compose up -d db rdb migrate
 
 docker-up-prod:
-	ENV_FILE_NAME=.prod.env docker compose up -d
+	CONFIG_FILE_NAME=config.prod docker compose up -d
 
 
 
