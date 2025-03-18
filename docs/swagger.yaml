@@ -1,0 +1,1080 @@
+basePath: /
+definitions:
+  domain.Comment:
+    properties:
+      content:
+        type: string
+      date:
+        type: string
+      id:
+        type: integer
+      posts-id:
+        type: integer
+      users-id:
+        type: integer
+    required:
+    - content
+    - date
+    - id
+    - posts-id
+    - users-id
+    type: object
+  domain.CommentCreateInput:
+    properties:
+      content:
+        type: string
+    type: object
+  domain.CommentUpdateInput:
+    properties:
+      content:
+        type: string
+    type: object
+  domain.Gnd:
+    enum:
+    - M
+    type: string
+    x-enum-varnames:
+    - Male
+  domain.Post:
+    properties:
+      comments:
+        items:
+          $ref: '#/definitions/domain.Comment'
+        type: array
+      comments-count:
+        type: integer
+      content:
+        example: Occaecat quis officia pariatur non aliquip culpa id elit amet sit
+          occaecat ex sunt ullamco duis reprehenderit in esse. Culpa minim nulla pariatur
+          voluptate ea proident dolor velit eu do labore ut.
+        type: string
+      date:
+        example: "2021-01-01T00:00:00Z"
+        type: string
+      id:
+        example: 732436
+        type: integer
+      likes-count:
+        type: integer
+      title:
+        example: Post title
+        type: string
+      users-id:
+        example: 6296
+        type: integer
+    required:
+    - content
+    - date
+    - id
+    - users-id
+    type: object
+  domain.PostUpdateInput:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+    type: object
+  domain.ProfileUpdateInput:
+    properties:
+      birth_date:
+        example: "2006-01-02"
+        type: string
+      gender:
+        allOf:
+        - $ref: '#/definitions/domain.Gnd'
+        default: M
+      name:
+        type: string
+      status:
+        type: string
+      surname:
+        type: string
+    type: object
+  domain.RefreshTokenInput:
+    properties:
+      refreshToken:
+        type: string
+    required:
+    - refreshToken
+    type: object
+  domain.SignInInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  domain.UserResponse:
+    properties:
+      birth_date:
+        example: "2006-01-02"
+        type: string
+      email:
+        type: string
+      gender:
+        allOf:
+        - $ref: '#/definitions/domain.Gnd'
+        default: "N"
+      id:
+        type: integer
+      is_confirmed:
+        type: boolean
+      is_deleted:
+        type: boolean
+      name:
+        type: string
+      status:
+        type: string
+      surname:
+        type: string
+    type: object
+  domain.UserSignUpInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      surname:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  handler.checkEmailResponse:
+    properties:
+      is_confirmed:
+        example: true
+        type: boolean
+    type: object
+  handler.createPostInput:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+    required:
+    - content
+    type: object
+  handler.errorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  handler.firiendRequestResponse:
+    properties:
+      count:
+        type: integer
+      requests:
+        items:
+          $ref: '#/definitions/domain.UserResponse'
+        type: array
+    type: object
+  handler.friendResponse:
+    properties:
+      count:
+        type: integer
+      friends:
+        items:
+          $ref: '#/definitions/domain.UserResponse'
+        type: array
+    type: object
+  handler.idResponse:
+    properties:
+      id:
+        type: integer
+    type: object
+  handler.postsCommentsResponse:
+    properties:
+      comments:
+        items:
+          $ref: '#/definitions/domain.Comment'
+        type: array
+      count:
+        type: integer
+    type: object
+  handler.postsResponse:
+    properties:
+      count:
+        type: integer
+      posts:
+        items:
+          $ref: '#/definitions/domain.Post'
+        type: array
+    type: object
+  handler.profileResponse:
+    properties:
+      profile:
+        $ref: '#/definitions/domain.UserResponse'
+    type: object
+  handler.signInResponse:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+    type: object
+  handler.statusResponse:
+    properties:
+      status:
+        type: string
+    type: object
+info:
+  contact:
+    email: iam@it-yaroslav.ru
+    name: Yaroslav Molodcov
+  description: API Server for Grates social network app
+  title: Grates API
+  version: "1.0"
+paths:
+  /api/comment/{commentId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete comment by id
+      operationId: delete-comment
+      parameters:
+      - description: comment id
+        in: path
+        name: commentId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: DeleteComment
+      tags:
+      - comments
+    patch:
+      consumes:
+      - application/json
+      description: Update comment body
+      operationId: update-comment
+      parameters:
+      - description: new comment data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CommentUpdateInput'
+      - description: comment id
+        in: path
+        name: commentId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: UpdateComment
+      tags:
+      - comments
+  /api/friends/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: getting user's friends by his id
+      operationId: get-friends
+      parameters:
+      - description: id of user to get friends
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.friendResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: GetFriends
+      tags:
+      - friends
+  /api/friends/{userId}/accept:
+    patch:
+      consumes:
+      - application/json
+      description: accept friend request
+      operationId: accept-friend-request
+      parameters:
+      - description: user id to accept request
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: AcceptFriendRequest
+      tags:
+      - friends
+  /api/friends/{userId}/requests:
+    get:
+      consumes:
+      - application/json
+      description: getting user's friend requests by his id
+      operationId: get-friend-requests
+      parameters:
+      - description: id of user to get friend requests
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.firiendRequestResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: GetFriendRequests
+      tags:
+      - friends
+  /api/friends/{userId}/send-request:
+    post:
+      consumes:
+      - application/json
+      description: send friend request
+      operationId: send-friend-request
+      parameters:
+      - description: user id to send request
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: SendFriendRequest
+      tags:
+      - friends
+  /api/friends/{userId}/unfriend/:
+    patch:
+      consumes:
+      - application/json
+      description: unfriend user by his id
+      operationId: unfriend
+      parameters:
+      - description: user id to unfriend
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Unfriend
+      tags:
+      - friends
+  /api/posts:
+    post:
+      consumes:
+      - application/json
+      description: Create new post
+      operationId: create-post
+      parameters:
+      - description: post info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handler.createPostInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.idResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: CreatePost
+      tags:
+      - posts
+  /api/posts/{postId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete post by id
+      operationId: delete-post
+      parameters:
+      - description: post id
+        in: path
+        name: postId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: DeletePost
+      tags:
+      - posts
+    get:
+      consumes:
+      - application/json
+      description: Get a post by its id with all comments
+      operationId: get-post
+      parameters:
+      - description: post id
+        in: path
+        name: postId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: post info
+          schema:
+            $ref: '#/definitions/domain.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: GetPost
+      tags:
+      - posts
+    patch:
+      consumes:
+      - application/json
+      description: Update post body
+      operationId: update-post
+      parameters:
+      - description: new post data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.PostUpdateInput'
+      - description: post id
+        in: path
+        name: postId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: UpdatePost
+      tags:
+      - posts
+  /api/posts/{postId}/comments:
+    get:
+      consumes:
+      - application/json
+      description: Get post's comments
+      operationId: posts-comments
+      parameters:
+      - description: post id
+        in: path
+        name: postId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: comments info
+          schema:
+            $ref: '#/definitions/handler.postsCommentsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: GetPostsComments
+      tags:
+      - comments
+    post:
+      consumes:
+      - application/json
+      description: Create new comment
+      operationId: create-comment
+      parameters:
+      - description: comment info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CommentCreateInput'
+      - description: post id
+        in: path
+        name: postId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.idResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: CreateComment
+      tags:
+      - comments
+  /api/posts/{postId}/dislike:
+    delete:
+      consumes:
+      - application/json
+      description: Dislike post
+      operationId: dislike-post
+      parameters:
+      - description: post id
+        in: path
+        name: postId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: DislikePost
+      tags:
+      - likes
+  /api/posts/{postId}/like:
+    post:
+      consumes:
+      - application/json
+      description: Like post
+      operationId: like-post
+      parameters:
+      - description: post id
+        in: path
+        name: postId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: LikePost
+      tags:
+      - likes
+  /api/posts/friends/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: Get friends' posts
+      operationId: friends-posts
+      parameters:
+      - description: user's id
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: limit of posts
+        in: query
+        name: limit
+        type: integer
+      - description: offset of posts
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: post info
+          schema:
+            $ref: '#/definitions/handler.postsResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: FriendsPosts
+      tags:
+      - posts
+  /api/profile:
+    patch:
+      consumes:
+      - application/json
+      description: update user profile
+      operationId: update-profile
+      parameters:
+      - description: profile update info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.ProfileUpdateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: UpdateProfile
+      tags:
+      - profile
+  /api/profile/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: get user profile
+      operationId: get-profile
+      parameters:
+      - description: user id
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.profileResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: GetProfile
+      tags:
+      - profile
+  /api/profile/{userId}/posts:
+    get:
+      consumes:
+      - application/json
+      description: Get user's posts. Field "comments" is empty.
+      operationId: users-posts
+      parameters:
+      - description: user's id
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: post info
+          schema:
+            $ref: '#/definitions/handler.postsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: UsersPosts
+      tags:
+      - posts
+  /auth/check/{email}:
+    get:
+      consumes:
+      - application/json
+      description: check if user was confirmed by his email
+      operationId: check-email
+      parameters:
+      - description: email
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.checkEmailResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: CheckEmail
+      tags:
+      - auth
+  /auth/confirm/:
+    get:
+      consumes:
+      - application/json
+      description: confirm email
+      operationId: sign-up
+      parameters:
+      - description: hash
+        in: query
+        name: hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: ConfirmEmail
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: refresh access and refresh tokens
+      operationId: refresh-tokens
+      parameters:
+      - description: refresh token
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RefreshTokenInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: tokens
+          schema:
+            $ref: '#/definitions/handler.signInResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: RefreshTokens
+      tags:
+      - auth
+  /auth/resend/{userId}:
+    post:
+      consumes:
+      - application/json
+      description: resend confirmation email
+      operationId: resend-email
+      parameters:
+      - description: user's id
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Resend email
+      tags:
+      - auth
+  /auth/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: authenticate account
+      operationId: login-account
+      parameters:
+      - description: account credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.SignInInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: tokens
+          schema:
+            $ref: '#/definitions/handler.signInResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: SignIn
+      tags:
+      - auth
+  /auth/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: create account
+      operationId: create-account
+      parameters:
+      - description: account info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserSignUpInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.idResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: SignUp
+      tags:
+      - auth
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
