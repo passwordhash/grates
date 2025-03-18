@@ -5,6 +5,7 @@ RUN apk add --no-cache bash
 RUN mkdir /app
 
 ADD . /app
+ADD .env /app
 
 WORKDIR /app
 
@@ -19,6 +20,4 @@ RUN chmod +x wait-for-it.sh
 
 ENTRYPOINT [ "/bin/bash", "-c" ]
 
-#CMD ["./wait-for-it.sh" , "db:5432", "--timeout=300" , "--" , "/app/main"]
-#CMD ["sleep", "4"]
 CMD ["/app/main"]

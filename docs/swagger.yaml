@@ -41,6 +41,8 @@ definitions:
         items:
           $ref: '#/definitions/domain.Comment'
         type: array
+      comments-count:
+        type: integer
       content:
         example: Occaecat quis officia pariatur non aliquip culpa id elit amet sit
           occaecat ex sunt ullamco duis reprehenderit in esse. Culpa minim nulla pariatur
@@ -89,6 +91,23 @@ definitions:
       surname:
         type: string
     type: object
+  domain.RefreshTokenInput:
+    properties:
+      refreshToken:
+        type: string
+    required:
+    - refreshToken
+    type: object
+  domain.SignInInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
   domain.UserResponse:
     properties:
       birth_date:
@@ -113,6 +132,21 @@ definitions:
       surname:
         type: string
     type: object
+  domain.UserSignUpInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      surname:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
   handler.checkEmailResponse:
     properties:
       is_confirmed:
@@ -125,6 +159,8 @@ definitions:
         type: string
       title:
         type: string
+    required:
+    - content
     type: object
   handler.errorResponse:
     properties:
@@ -177,49 +213,12 @@ definitions:
       profile:
         $ref: '#/definitions/domain.UserResponse'
     type: object
-  handler.refreshInput:
-    properties:
-      refreshToken:
-        type: string
-    required:
-    - refreshToken
-    type: object
-  handler.resendEmailResponse:
-    properties:
-      hash:
-        type: string
-    type: object
-  handler.signInInput:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-    required:
-    - email
-    - password
-    type: object
   handler.signInResponse:
     properties:
       accessToken:
         type: string
       refreshToken:
         type: string
-    type: object
-  handler.signUpInput:
-    properties:
-      email:
-        type: string
-      name:
-        type: string
-      password:
-        type: string
-      surname:
-        type: string
-    required:
-    - email
-    - name
-    - password
     type: object
   handler.statusResponse:
     properties:
@@ -508,38 +507,6 @@ paths:
       summary: CreatePost
       tags:
       - posts
-  /api/posts/:
-    get:
-      consumes:
-      - application/json
-      description: GetWithAdditions user's posts
-      operationId: users-posts
-      parameters:
-      - description: user's id
-        in: query
-        name: userId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: post info
-          schema:
-            $ref: '#/definitions/handler.postsResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/handler.errorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/handler.errorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: UsersPosts
-      tags:
-      - posts
   /api/posts/{postId}:
     delete:
       consumes:
@@ -575,7 +542,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: GetWithAdditions post by id
+      description: Get a post by its id with all comments
       operationId: get-post
       parameters:
       - description: post id
@@ -644,7 +611,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: GetWithAdditions post's comments
+      description: Get post's comments
       operationId: posts-comments
       parameters:
       - description: post id
@@ -781,7 +748,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: GetWithAdditions friends' posts
+      description: Get friends' posts
       operationId: friends-posts
       parameters:
       - description: user's id
@@ -878,6 +845,38 @@ paths:
       summary: GetProfile
       tags:
       - profile
+  /api/profile/{userId}/posts:
+    get:
+      consumes:
+      - application/json
+      description: Get user's posts. Field "comments" is empty.
+      operationId: users-posts
+      parameters:
+      - description: user's id
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: post info
+          schema:
+            $ref: '#/definitions/handler.postsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: UsersPosts
+      tags:
+      - posts
   /auth/check/{email}:
     get:
       consumes:
@@ -950,7 +949,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/handler.refreshInput'
+          $ref: '#/definitions/domain.RefreshTokenInput'
       produces:
       - application/json
       responses:
@@ -987,7 +986,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.resendEmailResponse'
+            $ref: '#/definitions/handler.statusResponse'
         "400":
           description: Bad Request
           schema:
@@ -1015,7 +1014,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/handler.signInInput'
+          $ref: '#/definitions/domain.SignInInput'
       produces:
       - application/json
       responses:
@@ -1029,6 +1028,10 @@ paths:
             $ref: '#/definitions/handler.errorResponse'
         "401":
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/handler.errorResponse'
       summary: SignIn
@@ -1046,7 +1049,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/handler.signUpInput'
+          $ref: '#/definitions/domain.UserSignUpInput'
       produces:
       - application/json
       responses:

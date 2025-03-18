@@ -445,56 +445,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/posts/": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get user's posts",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "posts"
-                ],
-                "summary": "UsersPosts",
-                "operationId": "users-posts",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "user's id",
-                        "name": "userId",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "post info",
-                        "schema": {
-                            "$ref": "#/definitions/handler.postsResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/api/posts/friends/{userId}": {
             "get": {
                 "security": [
@@ -564,7 +514,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get post by id",
+                "description": "Get a post by its id with all comments",
                 "consumes": [
                     "application/json"
                 ],
@@ -1021,6 +971,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/profile/{userId}/posts": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get user's posts. Field \"comments\" is empty.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "UsersPosts",
+                "operationId": "users-posts",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "user's id",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "post info",
+                        "schema": {
+                            "$ref": "#/definitions/handler.postsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/check/{email}": {
             "get": {
                 "description": "check if user was confirmed by his email",
@@ -1132,7 +1132,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.refreshInput"
+                            "$ref": "#/definitions/domain.RefreshTokenInput"
                         }
                     }
                 ],
@@ -1185,7 +1185,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.resendEmailResponse"
+                            "$ref": "#/definitions/handler.statusResponse"
                         }
                     },
                     "400": {
@@ -1230,7 +1230,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.signInInput"
+                            "$ref": "#/definitions/domain.SignInInput"
                         }
                     }
                 ],
@@ -1249,6 +1249,12 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/handler.errorResponse"
                         }
@@ -1277,7 +1283,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.signUpInput"
+                            "$ref": "#/definitions/domain.UserSignUpInput"
                         }
                     }
                 ],
@@ -1378,6 +1384,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/domain.Comment"
                     }
                 },
+                "comments-count": {
+                    "type": "integer"
+                },
                 "content": {
                     "type": "string",
                     "example": "Occaecat quis officia pariatur non aliquip culpa id elit amet sit occaecat ex sunt ullamco duis reprehenderit in esse. Culpa minim nulla pariatur voluptate ea proident dolor velit eu do labore ut."
@@ -1440,6 +1449,32 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.RefreshTokenInput": {
+            "type": "object",
+            "required": [
+                "refreshToken"
+            ],
+            "properties": {
+                "refreshToken": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.SignInInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.UserResponse": {
             "type": "object",
             "properties": {
@@ -1478,6 +1513,28 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.UserSignUpInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                }
+            }
+        },
         "handler.checkEmailResponse": {
             "type": "object",
             "properties": {
@@ -1489,6 +1546,9 @@ const docTemplate = `{
         },
         "handler.createPostInput": {
             "type": "object",
+            "required": [
+                "content"
+            ],
             "properties": {
                 "content": {
                     "type": "string"
@@ -1578,40 +1638,6 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.refreshInput": {
-            "type": "object",
-            "required": [
-                "refreshToken"
-            ],
-            "properties": {
-                "refreshToken": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.resendEmailResponse": {
-            "type": "object",
-            "properties": {
-                "hash": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.signInInput": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
         "handler.signInResponse": {
             "type": "object",
             "properties": {
@@ -1619,28 +1645,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "refreshToken": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.signUpInput": {
-            "type": "object",
-            "required": [
-                "email",
-                "name",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "surname": {
                     "type": "string"
                 }
             }

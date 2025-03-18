@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
@@ -43,11 +42,6 @@ func main() {
 	envFileName := defaultEnvFileName
 	configFileName := defaultConfigName
 
-	envFile := os.Getenv("ENV_FILE")
-	if len(envFile) != 0 {
-		envFileName = envFile
-	}
-
 	if err := godotenv.Load(envFileName); err != nil {
 		logrus.Errorf("cannot load env file %s: %s\ntrying lo load .env", envFileName, err.Error())
 		envFileName = defaultEnvFileName
@@ -79,7 +73,7 @@ func main() {
 	}
 
 	//docs.SwaggerInfo.Host = fmt.Sprintf("%s:%s", config.Host, config.Port)
-	docs.SwaggerInfo.Host = fmt.Sprintf("%s%s", config.Host, config.Port)
+	docs.SwaggerInfo.Host = config.Host
 
 	logrus.Info(config.Host)
 

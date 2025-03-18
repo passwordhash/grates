@@ -4,8 +4,6 @@ services:
   db:
     image: postgres
     restart: always
-# TODO
-#    env_file: .env https://medium.com/@krishnaregmi/wait-for-it-docker-compose-f0bac30f3357
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
@@ -32,6 +30,7 @@ services:
       - db
 
   app:
+    container_name: grates
     build: .
     ports:
       - "8001:8001"
@@ -41,10 +40,7 @@ services:
       - rdb
     environment:
       - DATABASE_URL=db
-      - ENV_FILE=${ENV_FILE_NAME}
+      - CONFIG_FILE_NAME=${CONFIG_FILE_NAME}
 
 volumes:
   pgdata:
-
-#https://stacktuts:
-#  com/how-to-pass-arguments-within-docker-compose:
