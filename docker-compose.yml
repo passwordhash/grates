@@ -33,7 +33,7 @@ services:
     container_name: grates
     build: .
     ports:
-      - "8000:8000"
+      - "8001:8001"
     entrypoint: "./wait-for-it.sh db:5432 -- /app/main"
     depends_on:
       - db
