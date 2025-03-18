@@ -5,7 +5,7 @@
 <a href="https://golang.com"><img src="./assets/made-with-go.svg" alt="drawing" /></a>
 <a href="https://docker.com"><img src="./assets/deploys-on-docker.svg" alt="drawing" /></a>
 <a href="https://whimsical.com/grates-project-HUPjJLnDj5TiGTHt15ZHzm"><img src="./assets/dashboard-click.svg" alt="drawing" /></a>
-<a href="https://grates.mgtu.tech/docs/index.html"><img src="./assets/api-docs-swagger.svg" alt="drawing" /></a>
+<a href="http://grates.passwordhash.tech/docs/index.html#/"><img src="./assets/api-docs-swagger.svg" alt="drawing" /></a>
 
 # Grates server
 
