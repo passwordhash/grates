@@ -111,7 +111,7 @@ type postsResponse struct {
 // @Param userId path int true "user's id"
 // @Success 200 {object} postsResponse "post info"
 // @Failure 400,500 {object} errorResponse
-// @Router /api/user/{userId}/posts [get]
+// @Router /api/profile/{userId}/posts [get]
 func (h *Handler) getUsersPosts(c *gin.Context) {
 	var posts []domain.Post
 	var userId int

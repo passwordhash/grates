@@ -53,16 +53,12 @@ func (h *Handler) InitRoutes(specialSymbols string) *gin.Engine {
 
 	api := router.Group("/api", h.userIdentity)
 	{
-		user := api.Group("/user/:userId")
-		{
-			user.GET("/posts", h.getUsersPosts)
-		}
-
 		profile := api.Group("/profile")
 		{
 			profile.GET("/:userId", h.getProfile)
 			// PROFILE INFO
 			profile.PATCH("/", h.updateProfile)
+			profile.GET("/:userId/posts", h.getUsersPosts)
 		}
 
 		// FRIENDS
