@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
@@ -74,7 +73,7 @@ func main() {
 	}
 
 	//docs.SwaggerInfo.Host = fmt.Sprintf("%s:%s", config.Host, config.Port)
-	docs.SwaggerInfo.Host = fmt.Sprintf("%s%s", config.Host, config.Port)
+	docs.SwaggerInfo.Host = config.Host
 
 	logrus.Info(config.Host)
 
