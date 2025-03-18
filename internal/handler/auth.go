@@ -18,7 +18,7 @@ import (
 // @ID create-account
 // @Accept  json
 // @Produce  json
-// @Param input body SignInInput true "account info"
+// @Param input body domain.UserSignUpInput  true "account info"
 // @Success 200 {object} idResponse
 // @Failure 400,409,500 {object} errorResponse
 // @Router /auth/sign-up [post]
@@ -67,7 +67,7 @@ type signInResponse struct {
 // @ID login-account
 // @Accept       json
 // @Produce      json
-// @Param input body SignInInput true "account credentials"
+// @Param input body domain.SignInInput true "account credentials"
 // @Success      200  {object} signInResponse "tokens"
 // @Failure      400,401,500  {object}  errorResponse
 // @Router       /auth/sign-in [post]
@@ -106,7 +106,7 @@ func (h *Handler) signIn(c *gin.Context) {
 // @ID refresh-tokens
 // @Accept       json
 // @Produce      json
-// @Param input body RefreshTokenInput true "refresh token"
+// @Param input body domain.RefreshTokenInput true "refresh token"
 // @Success      200  {object} signInResponse "tokens"
 // @Failure      400,401  {object}  errorResponse
 // @Router       /auth/refresh [post]

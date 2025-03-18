@@ -40,3 +40,6 @@ db-up:
 
 db-down:
 	migrate -path ./schema -database 'postgres://postgres:root@localhost:54320/postgres?sslmode=disable' down
+
+generate-docs:
+	swag init --output ./docs --generalInfo ./cmd/http/main.go
