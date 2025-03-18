@@ -1,0 +1,8 @@
+.vscode
+.gitignore
+.git
+Dockerfile
+docker-compose.yml
+.example.env
+.idea
+.DS_Store

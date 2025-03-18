@@ -1,11 +1,11 @@
-host: "grates.mgtu.tech"
+host: "grates.passwordhash.tech"
 port: "9090"
 
 server:
   port: "9090"
 
 swagger:
-  host: "161.35.161.217"
+  host: "147.45.72.209"
   port: ""
 
 db:

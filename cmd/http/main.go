@@ -43,11 +43,6 @@ func main() {
 	envFileName := defaultEnvFileName
 	configFileName := defaultConfigName
 
-	envFile := os.Getenv("ENV_FILE")
-	if len(envFile) != 0 {
-		envFileName = envFile
-	}
-
 	if err := godotenv.Load(envFileName); err != nil {
 		logrus.Errorf("cannot load env file %s: %s\ntrying lo load .env", envFileName, err.Error())
 		envFileName = defaultEnvFileName
